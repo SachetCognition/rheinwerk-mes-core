@@ -57,7 +57,17 @@ fixtures = [
 	},
 ]
 
-after_install = "rheinwerk_mes.install.after_install"
+after_install = [
+	"rheinwerk_mes.install.after_install",
+	# W1-4: recipe governance (URS-W1-014 … URS-W1-017).
+	"rheinwerk_mes.setup.w1_recipe_gov.setup_w1_recipe_gov",
+]
+
+# Client-side additions to anchor forms; W1-4 renders the recipe's `gov_state` pill on the
+# anchor BOM without forking it.
+doctype_js = {
+	"BOM": "recipe_isa88/bom_gov_state.js",
+}
 
 doc_events = {
 	# W0-2: item-level UoM conversion invariants (URS-W0-004).
@@ -70,6 +80,13 @@ doc_events = {
 		"before_insert": "rheinwerk_mes.manufacturing_core.exec_state.set_default_exec_state",
 		"validate": "rheinwerk_mes.manufacturing_core.exec_state.validate_exec_state_change",
 		"before_update_after_submit": "rheinwerk_mes.manufacturing_core.exec_state.validate_exec_state_change",
+	},
+	# W1-4: Accepted recipes are immutable and in-use recipes are locked
+	# (URS-W1-016, URS-W1-017); changes need a new BOM version.
+	"BOM": {
+		"validate": "rheinwerk_mes.recipe_isa88.governance.enforce_recipe_change_control",
+		"before_update_after_submit": "rheinwerk_mes.recipe_isa88.governance.enforce_recipe_change_control",
+		"before_cancel": "rheinwerk_mes.recipe_isa88.governance.enforce_recipe_change_control",
 	},
 }
 

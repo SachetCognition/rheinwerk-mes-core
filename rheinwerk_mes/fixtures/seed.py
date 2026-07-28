@@ -10,7 +10,7 @@ from the same data:
 * warehouses "RM Lager Nord" (FEFO) and "FG Lager Süd" (FIFO)
 * plant-area divisions and production line LINE-1
 * work centres LINE-1/MIX-01 and LINE-1/FILL-01
-* routing RT-COMPOUND-01 and BOM-RW-CHM-0003-001
+* routing RT-COMPOUND-01 and BOM-RW-CHM-0003-001, governed and Accepted (W1-4)
 * production orders PO-2026-0001 (500 kg RW-CHM-0003 on LINE-1) and PO-2026-0002 (200 kg)
 * `legacy_refs` source-identifier examples incl. the Qcadoo trigger number 000123/2025
 * personas T. Schmid, P. Krüger, W. Braun, Q. Fischer, O. Weber, B. Vogel
@@ -484,6 +484,29 @@ def seed_bom() -> str:
 	return doc.name
 
 
+def seed_recipe_governance(bom_no: str) -> str | None:
+	"""W1-4 fixture: the compound recipe governed and Accepted (URS-W1-014, TC-W1-015).
+
+	The record walks the real lifecycle Draft → Checked → Accepted, so the seeded state is
+	produced by the same validators and transition rules the technologist uses. Skipped when
+	the `Recipe Governance` DocType is not installed yet.
+	"""
+	if not frappe.db.exists("DocType", "Recipe Governance"):
+		return None
+	from rheinwerk_mes.recipe_isa88.governance import ACCEPTED, CHECKED, transition
+
+	name = frappe.db.get_value("Recipe Governance", {"bom": bom_no}, "name")
+	if not name:
+		doc = frappe.get_doc({"doctype": "Recipe Governance", "bom": bom_no, "routing": ROUTING}).insert(
+			ignore_permissions=True
+		)
+		name = doc.name
+	if frappe.db.get_value("Recipe Governance", name, "gov_state") not in (ACCEPTED, "Outdated", "Declined"):
+		transition(name, CHECKED)
+		transition(name, ACCEPTED)
+	return name
+
+
 def seed_production_order(bom_no: str) -> str:
 	"""Anchor `Work Order` PO-2026-0001 with the CDM-02 extension fields populated."""
 	if frappe.db.exists("Work Order", PRODUCTION_ORDER["name"]):
@@ -602,6 +625,7 @@ def seed_all() -> dict:
 	summary["operations"] = seed_operations()
 	summary["routing"] = seed_routing()
 	summary["bom"] = seed_bom()
+	summary["recipe_governance"] = seed_recipe_governance(summary["bom"])
 	summary["production_order"] = seed_production_order(summary["bom"])
 	summary["second_production_order"] = seed_second_production_order(summary["bom"])
 	summary["legacy_refs"] = seed_legacy_refs()
