@@ -21,9 +21,23 @@ ERP-boundary capabilities (finance, buying, selling) are **not** in scope: this 
 
 ## Repository status
 
-🚧 **Design complete, pre-implementation.** Stages 1–4 of the programme are committed: the reverse-engineering dossier, target capability model, canonical data model with ADRs, HLD/LLD and the wave-based implementation plan. Implementation lands wave by wave (see `docs/waves/`). Every module README states its disposition, source lineage and wave assignment — the traceability spine of the programme:
+🚧 **Requirements complete, pre-implementation.** Stages 1–5 of the programme are committed: the reverse-engineering dossier, target capability model, canonical data model with ADRs, HLD/LLD, the wave-based implementation plan, and the per-wave User Requirements Specifications and Test & Verification documents. Implementation lands wave by wave (see `docs/waves/`). Every module README states its disposition, source lineage and wave assignment — the traceability spine of the programme:
 
-> dossier finding → register entry → disposition record → wave backlog item → code/test → evidence pack
+> dossier finding → register entry → disposition record → wave backlog item → URS requirement → acceptance criteria → test case → code/test → evidence pack
+
+### Delivery tracking (Jira)
+
+The wave requirements are mirrored on the Jira board **Sach_Sales_MES** (project key **SSM**), labelled `rheinwerk-mes`:
+
+| Wave | Jira issue | Requirements | Test cases |
+|---|---|---|---|
+| W0 — Foundation | SSM-2 | 18 (`docs/urs/URS-W0-foundation.md`) | 21 (`docs/test/TST-W0-foundation.md`) |
+| W1 — Production Core | SSM-3 | 35 (`docs/urs/URS-W1-production-core.md`) | 39 (`docs/test/TST-W1-production-core.md`) |
+| W2 — Traceability & Quality | SSM-4 | 36 (`docs/urs/URS-W2-traceability-quality.md`) | 50 (`docs/test/TST-W2-traceability-quality.md`) |
+| W3 — Planning & Boundary | SSM-5 | 23 (`docs/urs/URS-W3-planning-boundary.md`) | 27 (`docs/test/TST-W3-planning-boundary.md`) |
+| W4 — Cutover & Decommission | SSM-6 | 14 (`docs/urs/URS-W4-cutover-decommission.md`) | 18 (`docs/test/TST-W4-cutover-decommission.md`) |
+
+Each wave is a wave-level Jira issue (type *Workstream* — the project scheme's Epic level) with one child *Task* per URS requirement carrying the requirement statement, lineage and acceptance criteria verbatim. The URS documents are the record copy; Jira is the working copy. Test cases live only in the TST documents and are referenced from the Jira issues, and the TST wave acceptance checklist is what closes each wave issue.
 
 ## Programme artefacts
 
