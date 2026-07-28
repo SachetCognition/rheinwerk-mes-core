@@ -67,6 +67,8 @@ if [ ! -e "apps/rheinwerk_mes" ]; then
 	ln -s "$APP_SRC" apps/rheinwerk_mes
 	./env/bin/python -m pip install --quiet -e apps/rheinwerk_mes
 fi
+# the site-backed suites run under the bench interpreter, which needs pytest
+./env/bin/python -m pip install --quiet pytest
 if ! grep -qx "rheinwerk_mes" sites/apps.txt; then
 	# `bench get-app` leaves apps.txt without a trailing newline, so a naive
 	# append would concatenate onto the previous app name.
