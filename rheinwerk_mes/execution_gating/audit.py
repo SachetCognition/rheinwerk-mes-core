@@ -73,7 +73,9 @@ def _survive_rollback(entry: dict[str, Any]) -> None:
 			_insert(dict(entry))
 			frappe.db.commit()
 		except Exception:  # never let the audit path mask the refusal itself
-			frappe.log_error(title=_("Protokolleintrag des Ausführungs-Gates konnte nicht geschrieben werden"))
+			frappe.log_error(
+				title=_("Protokolleintrag des Ausführungs-Gates konnte nicht geschrieben werden")
+			)
 
 	frappe.db.after_rollback.add(rewrite)
 
