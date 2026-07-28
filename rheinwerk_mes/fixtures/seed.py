@@ -769,6 +769,334 @@ def seed_personas() -> list[str]:
 	return seeded
 
 
+# --------------------------------------------------------------------------------------
+# W2-1/2/3 genealogy fixture (TST-W2-traceability-quality §1)
+# --------------------------------------------------------------------------------------
+
+#: Supplier lot of Additiv K7 feeding the intermediate batch — the upstream end of the
+#: multi-level trace (URS-W2-002).
+SUPPLIER_BATCH = {
+	"batch_id": "SUP-K7-0001",
+	"item": "RW-CHM-0002",
+	"expiry_date": "2026-11-30",
+	"manufacturing_date": "2026-02-01",
+	"warehouse": "RM Lager Nord",
+	"storage_location": "NORD-A-01-01",
+	# Fully consumed by the chain, so the supplier lot adds no stock to the W1 warehouse
+	# fixtures the gating suites assert on.
+	"qty": 20.0,
+	"supplier_batch_no": "K7-4711-2026",
+}
+
+#: Quarantine location on the W1 storage-location tree (URS-W2-012).
+QUARANTINE_LOCATION = {"storage_location_name": "NORD-Q-01", "warehouse": "RM Lager Nord"}
+
+#: Batches released at seed time; everything else stays in the entry state Quarantined so
+#: the fixture carries both dispositions (TC-W2-009, TC-W2-014).
+RELEASED_BATCHES = (
+	"BATCH-A-0001",
+	"BATCH-A-0002",
+	"BATCH-B-0001",
+	"BATCH-C-1001",
+	"BATCH-C-1002",
+	"SUP-K7-0001",
+)
+
+#: (work order key, consumed rows, produced batch, produced qty, posting date). Posting
+#: dates sit before the fixture expiries so the W1 expiry hard stop is not tripped while
+#: seeding history (URS-W1-013).
+GENEALOGY_CHAIN = (
+	{
+		"order": "second",
+		"consume": (("RW-CHM-0002", "SUP-K7-0001", 20.0, "RM Lager Nord"),),
+		"produce": ("RW-CHM-0001", "BATCH-A-0002", 20.0, "RM Lager Nord"),
+		"posting_date": "2026-03-20",
+	},
+	{
+		"order": "first",
+		"consume": (
+			("RW-CHM-0001", "BATCH-A-0001", 480.0, "RM Lager Nord"),
+			("RW-CHM-0001", "BATCH-A-0002", 20.0, "RM Lager Nord"),
+		),
+		"produce": ("RW-CHM-0003", "BATCH-C-1001", 500.0, "FG Lager Süd"),
+		"posting_date": "2026-04-01",
+	},
+	{
+		"order": "third",
+		"consume": (("RW-CHM-0001", "BATCH-A-0002", 10.0, "RM Lager Nord"),),
+		"produce": ("RW-CHM-0003", "BATCH-C-1002", 10.0, "FG Lager Süd"),
+		"posting_date": "2026-04-15",
+	},
+)
+
+
+def seed_supplier_batch() -> str | None:
+	"""Supplier lot SUP-K7-0001 incl. its supplier batch number (URS-W2-005)."""
+	if not _has_field("Batch", "qa_state"):
+		return None
+	from rheinwerk_mes.warehouse.availability import ledger_balance
+
+	spec = SUPPLIER_BATCH
+	warehouse = f"{spec['warehouse']} - {COMPANY_ABBR}"
+	if not frappe.db.exists("Batch", spec["batch_id"]):
+		batch = frappe.get_doc(
+			{
+				"doctype": "Batch",
+				"batch_id": spec["batch_id"],
+				"item": spec["item"],
+				"expiry_date": spec["expiry_date"],
+				"manufacturing_date": spec["manufacturing_date"],
+				"supplier_batch_no": spec["supplier_batch_no"],
+				"qty_original": spec["qty"],
+			}
+		)
+		if _has_field("Batch", "storage_location"):
+			batch.storage_location = spec["storage_location"]
+		batch.insert(ignore_permissions=True)
+	if ledger_balance(spec["item"], warehouse, spec["batch_id"], consider_expired=True) <= 0:
+		se = frappe.get_doc(
+			{
+				"doctype": "Stock Entry",
+				"stock_entry_type": "Material Receipt",
+				"company": COMPANY,
+				"set_posting_time": 1,
+				"posting_date": spec["manufacturing_date"],
+				"posting_time": "06:00:00",
+				"items": [
+					{
+						"item_code": spec["item"],
+						"qty": spec["qty"],
+						"t_warehouse": warehouse,
+						"uom": frappe.db.get_value("Item", spec["item"], "stock_uom"),
+						"basic_rate": 3.0,
+						"use_serial_batch_fields": 1,
+						"batch_no": spec["batch_id"],
+					}
+				],
+			}
+		)
+		se.insert(ignore_permissions=True)
+		se.submit()
+	return spec["batch_id"]
+
+
+def seed_quarantine_location() -> str | None:
+	"""Quarantine storage location NORD-Q-01 (URS-W2-012 AC-1)."""
+	if not _has_field("Storage Location", "is_quarantine_location"):
+		return None
+	warehouse = f"{QUARANTINE_LOCATION['warehouse']} - {COMPANY_ABBR}"
+	if not frappe.db.exists("Warehouse", warehouse):
+		return None
+	name = QUARANTINE_LOCATION["storage_location_name"]
+	if not frappe.db.exists("Storage Location", name):
+		frappe.get_doc(
+			{
+				"doctype": "Storage Location",
+				"storage_location_name": name,
+				"warehouse": warehouse,
+				"is_group": 0,
+				"company": COMPANY,
+				"is_quarantine_location": 1,
+			}
+		).insert(ignore_permissions=True)
+	elif not frappe.db.get_value("Storage Location", name, "is_quarantine_location"):
+		frappe.db.set_value("Storage Location", name, "is_quarantine_location", 1)
+	return name
+
+
+def seed_third_production_order(bom_no: str) -> str | None:
+	"""Work order PO-2026-0003 — the second consumer of BATCH-A-0002 (URS-W2-002 AC-2)."""
+	name = "PO-2026-0003"
+	if frappe.db.exists("Work Order", name):
+		return name
+	doc = frappe.get_doc(
+		{
+			"doctype": "Work Order",
+			"naming_series": WORK_ORDER_SERIES,
+			"company": COMPANY,
+			"production_item": SECOND_PRODUCTION_ORDER["production_item"],
+			"bom_no": bom_no,
+			"qty": 10.0,
+			"stock_uom": frappe.db.get_value("Item", SECOND_PRODUCTION_ORDER["production_item"], "stock_uom"),
+			"wip_warehouse": f"{SECOND_PRODUCTION_ORDER['wip_warehouse']} - {COMPANY_ABBR}",
+			"fg_warehouse": f"{SECOND_PRODUCTION_ORDER['fg_warehouse']} - {COMPANY_ABBR}",
+			"planned_start_date": SECOND_PRODUCTION_ORDER["planned_start_date"],
+			"planned_end_date": SECOND_PRODUCTION_ORDER["planned_end_date"],
+		}
+	)
+	if _has_field("Work Order", "production_line"):
+		doc.production_line = SECOND_PRODUCTION_ORDER["production_line"]
+	doc.insert(ignore_permissions=True)
+	return doc.name
+
+
+def seed_qa_states() -> dict[str, str]:
+	"""Put the raw-material fixtures into `Released` (TC-W2-009 preconditions)."""
+	if not _has_field("Batch", "qa_state"):
+		return {}
+	from rheinwerk_mes.genealogy.qa_state import QUARANTINED, RELEASED, transition
+
+	states: dict[str, str] = {}
+	for batch in RELEASED_BATCHES:
+		if not frappe.db.exists("Batch", batch):
+			continue
+		if frappe.db.get_value("Batch", batch, "qa_state") == QUARANTINED:
+			transition(batch, RELEASED, reason="Eingangsprüfung bestanden (Fixture)")
+		states[batch] = frappe.db.get_value("Batch", batch, "qa_state")
+	return states
+
+
+def _posted_chain_entry(work_order: str) -> bool:
+	return bool(frappe.db.exists("Stock Entry", {"work_order": work_order, "docstatus": 1}))
+
+
+#: The chain is stock-neutral: what it will consume is pre-stocked *before* its first
+#: posting, what it produces is issued again afterwards. Both dates sit inside the fixture
+#: shelf lives, and the pre-stock date is early enough that no backdated test posting ever
+#: sees a negative batch balance.
+CHAIN_PRESTOCK_DATE = "2026-03-01"
+CHAIN_REBALANCE_DATE = "2026-04-16"
+
+
+def _chain_movements() -> tuple[dict[tuple[str, str, str], float], dict[tuple[str, str, str], float]]:
+	"""Consumed and produced quantities of the chain, keyed by (item, batch, warehouse)."""
+	consumed: dict[tuple[str, str, str], float] = {}
+	produced: dict[tuple[str, str, str], float] = {}
+	for step in GENEALOGY_CHAIN:
+		for item, batch, qty, warehouse in step["consume"]:
+			key = (item, batch, f"{warehouse} - {COMPANY_ABBR}")
+			consumed[key] = consumed.get(key, 0.0) + qty
+		item, batch, qty, warehouse = step["produce"]
+		key = (item, batch, f"{warehouse} - {COMPANY_ABBR}")
+		produced[key] = produced.get(key, 0.0) + qty
+	return consumed, produced
+
+
+def _balancing_entry(stock_entry_type: str, posting_date: str, rows: list[dict]) -> None:
+	if not rows:
+		return
+	doc = frappe.get_doc(
+		{
+			"doctype": "Stock Entry",
+			"stock_entry_type": stock_entry_type,
+			"company": COMPANY,
+			"set_posting_time": 1,
+			"posting_date": posting_date,
+			"posting_time": "06:00:00",
+			"items": rows,
+		}
+	)
+	doc.insert(ignore_permissions=True)
+	doc.submit()
+
+
+def _balancing_row(key: tuple[str, str, str], qty: float, inbound: bool) -> dict:
+	item, batch, warehouse = key
+	row = {
+		"item_code": item,
+		"qty": qty,
+		"uom": frappe.db.get_value("Item", item, "stock_uom"),
+		"use_serial_batch_fields": 1,
+		"batch_no": batch,
+	}
+	row.update({"t_warehouse": warehouse, "basic_rate": 5.0} if inbound else {"s_warehouse": warehouse})
+	return row
+
+
+def prestock_for_chain() -> None:
+	"""Pre-stock what the genealogy chain consumes, so it shifts no W1 warehouse fixture.
+
+	The supplier lot is excluded: it is received by `seed_supplier_batch` and consumed in
+	full, which is exactly the stock-neutral behaviour wanted.
+	"""
+	consumed, _produced = _chain_movements()
+	rows = [
+		_balancing_row(key, qty, inbound=True)
+		for key, qty in consumed.items()
+		if key[1] != SUPPLIER_BATCH["batch_id"]
+	]
+	_balancing_entry("Material Receipt", CHAIN_PRESTOCK_DATE, rows)
+
+
+def _rebalance_after_chain() -> None:
+	"""Issue what the chain produced, restoring the pre-chain quantities."""
+	_consumed, produced = _chain_movements()
+	rows = [
+		_balancing_row(key, qty, inbound=False)
+		for key, qty in produced.items()
+		if key[1] != SUPPLIER_BATCH["batch_id"]
+	]
+	_balancing_entry("Material Issue", CHAIN_REBALANCE_DATE, rows)
+
+
+def seed_genealogy_fixture(orders: dict[str, str]) -> list[str]:
+	"""Post the genealogy chain: SUP-K7-0001 → BATCH-A-0002 → BATCH-C-1001/1002.
+
+	The links are written by the `Stock Entry` hooks, not by this seeder, so the fixture
+	exercises the same write path production uses (URS-W2-001).
+	"""
+	if not _has_field("Batch", "genealogy_links"):
+		return []
+	pending = [
+		step
+		for step in GENEALOGY_CHAIN
+		if orders.get(step["order"]) and not _posted_chain_entry(orders[step["order"]])
+	]
+	if pending:
+		prestock_for_chain()
+	posted = False
+	produced: list[str] = []
+	for step in GENEALOGY_CHAIN:
+		work_order = orders.get(step["order"])
+		if not work_order or _posted_chain_entry(work_order):
+			produced.append(step["produce"][1])
+			continue
+		issue_rows = [
+			{
+				"item_code": item,
+				"qty": qty,
+				"s_warehouse": f"{warehouse} - {COMPANY_ABBR}",
+				"uom": frappe.db.get_value("Item", item, "stock_uom"),
+				"use_serial_batch_fields": 1,
+				"batch_no": batch,
+			}
+			for item, batch, qty, warehouse in step["consume"]
+		]
+		item, batch, qty, warehouse = step["produce"]
+		receipt_row = {
+			"item_code": item,
+			"qty": qty,
+			"t_warehouse": f"{warehouse} - {COMPANY_ABBR}",
+			"uom": frappe.db.get_value("Item", item, "stock_uom"),
+			"basic_rate": 5.0,
+			"use_serial_batch_fields": 1,
+			"batch_no": batch,
+		}
+		for stock_entry_type, rows in (
+			("Material Issue", issue_rows),
+			("Material Receipt", [receipt_row]),
+		):
+			doc = frappe.get_doc(
+				{
+					"doctype": "Stock Entry",
+					"stock_entry_type": stock_entry_type,
+					"company": COMPANY,
+					"work_order": work_order,
+					"set_posting_time": 1,
+					"posting_date": step["posting_date"],
+					"posting_time": "08:00:00",
+					"items": rows,
+				}
+			)
+			doc.insert(ignore_permissions=True)
+			doc.submit()
+		posted = True
+		produced.append(batch)
+	if posted:
+		_rebalance_after_chain()
+	return produced
+
+
 def seed_all() -> dict:
 	"""Seed every programme fixture; safe to re-run."""
 	summary = {
@@ -790,6 +1118,18 @@ def seed_all() -> dict:
 	summary["recipe_governance"] = seed_recipe_governance(summary["bom"])
 	summary["production_order"] = seed_production_order(summary["bom"])
 	summary["second_production_order"] = seed_second_production_order(summary["bom"])
+	# W2-1/2/3: canonical-batch dispositions, quarantine place and the genealogy chain.
+	summary["supplier_batch"] = seed_supplier_batch()
+	summary["quarantine_location"] = seed_quarantine_location()
+	summary["third_production_order"] = seed_third_production_order(summary["bom"])
+	summary["qa_states"] = seed_qa_states()
+	summary["genealogy"] = seed_genealogy_fixture(
+		{
+			"first": summary["production_order"],
+			"second": summary["second_production_order"],
+			"third": summary["third_production_order"],
+		}
+	)
 	summary["legacy_refs"] = seed_legacy_refs()
 	summary["personas"] = seed_personas()
 	# W1-8: the personas only exist now, so their transition roles are granted here as well

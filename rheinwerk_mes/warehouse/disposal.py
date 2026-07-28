@@ -56,8 +56,14 @@ def resources_for_warehouse(item: str, warehouse: str) -> list[dict]:
 		filters={"item": item},
 		fields=["name", "expiry_date"],
 	)
+	from rheinwerk_mes.genealogy.blocking import is_pickable
+
 	resources: list[dict] = []
 	for batch in batches:
+		# W2-3: Blocked and Quarantined stock never becomes a picking candidate
+		# (URS-W2-010); the predicate is owned by `rheinwerk_mes.genealogy.blocking`.
+		if not is_pickable(batch.name):
+			continue
 		balance = ledger_balance(item, warehouse, batch.name, consider_expired=True)
 		if balance <= 0:
 			continue

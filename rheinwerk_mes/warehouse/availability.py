@@ -71,5 +71,11 @@ def available_qty(item: str, warehouse: str) -> Decimal:
 
 	On-hand stays untouched by reservations; only *available* shrinks — exactly the
 	Qcadoo distinction between quantity and availableQuantity on a resource.
+
+	W2-3 subtracts the quantity held by Blocked and Quarantined batches as well, so such
+	stock is neither reservable nor counted as available (URS-W2-010 AC-2); the exclusion
+	itself is decided in one place, `rheinwerk_mes.genealogy.blocking`.
 	"""
-	return ledger_balance(item, warehouse) - reserved_qty(item, warehouse)
+	from rheinwerk_mes.genealogy.blocking import excluded_qty
+
+	return ledger_balance(item, warehouse) - reserved_qty(item, warehouse) - excluded_qty(item, warehouse)

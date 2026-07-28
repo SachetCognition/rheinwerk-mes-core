@@ -8,3 +8,4 @@ rheinwerk_mes.setup.w1_warehouse
 rheinwerk_mes.setup.w1_gating
 rheinwerk_mes.setup.w1_shopfloor
 rheinwerk_mes.setup.w1_roles
+rheinwerk_mes.setup.w2_genealogy
