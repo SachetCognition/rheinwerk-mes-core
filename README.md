@@ -38,6 +38,8 @@ ERP-boundary capabilities (finance, buying, selling) are **not** in scope: this 
 | 2.3 | Canonical-entity ADRs (sign-off gates before the waves that touch them) | `docs/adr/ADR-003…010` |
 | 3 | High-Level Design / Low-Level Design | `docs/design/HLD.md`, `docs/design/LLD.md` |
 | 4 | Consolidation implementation project plan (waves, milestones M0–M4, RAID) | `docs/plan/` (md + xlsx) |
+| 5 | Wave User Requirements Specifications URS-W0…W4 (126 requirements, full lineage) | `docs/urs/` |
+| 5 | Wave Test & Verification documents TST-W0…W4 (155 test cases, traceability matrices, wave acceptance checklists) | `docs/test/` |
 | — | Standalone styled HTML for all artefacts (start at `index.html`) | `docs/html/` (regenerate via `tools/htmlgen/`) |
 
 ## Layout
@@ -58,6 +60,8 @@ docs/target-model/        Stage 2 target capability model, disposition map, base
 docs/canonical-model/     Stage 2 canonical data model (CDM-01…08)
 docs/design/              Stage 3 HLD and LLD
 docs/plan/                Stage 4 implementation project plan (md + xlsx)
+docs/urs/                 Stage 5 wave User Requirements Specifications (URS-W0…W4)
+docs/test/                Stage 5 wave Test & Verification documents (TST-W0…W4)
 docs/html/                Standalone styled HTML for all artefacts
 docs/waves/               Forward-engineering wave plans (W0–W4)
 docs/evidence/            Evidence packs and source-lineage index
