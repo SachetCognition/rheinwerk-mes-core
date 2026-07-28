@@ -33,6 +33,10 @@ DONE_QUANTITY_MUST_BE_GREATER_THAN_ZERO = "orders.order.orderStates.doneQuantity
 #: (`OrderStateService.checkOrderDates`, OrderStateService.java:47-59).
 DATES_ORDER_OVERDUE = "orders.validate.global.error.datesOrder.overdue"
 
+#: Message key raised when an expired batch is issued — the estate's own key: Plant A has
+#: none, because it never refuses (URS-W1-030 divergence).
+BATCH_EXPIRED = "rheinwerk.warehouse.issue.batchExpired"
+
 #: `validationOnAccepted` required references, in declaration order (:44-47).
 ACCEPTANCE_REQUIRED_FIELDS: tuple[str, ...] = ("date_to", "date_from", "production_line", "technology")
 
@@ -113,3 +117,23 @@ def _comparable(value: Any) -> Any:
 		day, month, year = (int(part) for part in text.split(" ")[0].split("."))
 		return datetime(year, month, day)
 	return datetime.fromisoformat(text)
+
+
+def evaluate_expired_issue(issue: Mapping[str, Any]) -> Verdict:
+	"""Expiry policy on issuing stock — the estate refuses an expired batch (URS-W1-030).
+
+	This is the pure-function form of the policy the site enforces in `expiry.py` (posting)
+	and `allocation.py` (automatic allocation), exposed as the `expired_issue` contract
+	entrypoint so the divergence from Plant A is measured rather than asserted in prose:
+	`CHAR-EXPIRY-ISSUE-01` pins the legacy verdict (expired stock issuable) and this
+	function refuses it, which the harness classifies as the signed-off divergence recorded
+	in `docs/decisions/DEC-W1-030-expiry-policy.md`.
+
+	`issue` carries `batch`, `expiration_date` and `posting_date` (both DD.MM.YYYY) and
+	`quantity`.
+	"""
+	expiry = _comparable(issue["expiration_date"])
+	posting = _comparable(issue["posting_date"])
+	if expiry < posting:
+		return Verdict(allowed=False, errors=(BATCH_EXPIRED,))
+	return Verdict(allowed=True)

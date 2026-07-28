@@ -1,0 +1,39 @@
+{
+	"contract": "CHAR-EXPIRY-ISSUE-01",
+	"urs": ["URS-W1-030"],
+	"test_cases": ["TC-W1-033"],
+	"legacy_source": "mes-plugins/mes-plugins-material-flow-resources/src/main/java/com/qcadoo/mes/materialFlowResources/service/ResourceManagementServiceImpl.java:1015-1027 (FEFO ordering only); :236-330 (issue path performs no expiry comparison)",
+	"notes": "Plant A treats expiry as advisory: an expired resource is issuable. The consolidated estate refuses it (URS-W1-030 hard stop), so the case marked `diverges` is expected to FAIL against the target implementation — that failure is the recorded divergence, not parity drift. Quantities in kg, dates German-first (DD.MM.YYYY).",
+	"cases": [
+		{
+			"id": "EXPIRY-01-expired-resource-issuable",
+			"description": "URS-W1-030 baseline: BATCH-A-0002 expired 30.06.2026 is still issuable on 01.07.2026 at Plant A",
+			"diverges": true,
+			"issue": {
+				"batch": "BATCH-A-0002",
+				"expiration_date": "30.06.2026",
+				"posting_date": "01.07.2026",
+				"quantity": 40
+			},
+			"expected": {
+				"allowed": true,
+				"errors": []
+			}
+		},
+		{
+			"id": "EXPIRY-02-unexpired-resource-issuable",
+			"description": "Control case: an unexpired resource is issuable in both systems, so parity holds",
+			"diverges": false,
+			"issue": {
+				"batch": "BATCH-A-0001",
+				"expiration_date": "31.12.2026",
+				"posting_date": "01.07.2026",
+				"quantity": 400
+			},
+			"expected": {
+				"allowed": true,
+				"errors": []
+			}
+		}
+	]
+}

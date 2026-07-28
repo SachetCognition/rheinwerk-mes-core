@@ -24,6 +24,7 @@ ENTRYPOINTS: dict[str, str] = {
 	"order_completion": "rheinwerk_mes.execution_gating.contracts.evaluate_order_completion",
 	"picking_order": "rheinwerk_mes.warehouse.contracts.picking_order",
 	"technology_validation": "rheinwerk_mes.manufacturing_core.contracts.evaluate_technology",
+	"expired_issue": "rheinwerk_mes.execution_gating.contracts.evaluate_expired_issue",
 }
 
 

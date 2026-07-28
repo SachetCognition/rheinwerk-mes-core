@@ -20,6 +20,22 @@ Checker = Callable[[Resolution, Mapping[str, Any]], None]
 
 
 @dataclass(frozen=True)
+class Divergence:
+	"""A deliberate, signed-off departure from the legacy baseline.
+
+	A contract carrying a `Divergence` is *expected to fail* against the target for every
+	fixture case flagged `diverges`: the failure is the evidence that the target behaves
+	differently on purpose. `decision` names the URS item that decided it and `record` the
+	decision file the sign-off is read from — the W1-10 behaviour record refuses to generate
+	while that file carries no sign-off (URS-W1-031 AC-2).
+	"""
+
+	decision: str
+	record: str
+	summary: str
+
+
+@dataclass(frozen=True)
 class Contract:
 	"""One executable parity contract.
 
@@ -37,6 +53,7 @@ class Contract:
 	checker: Checker
 	urs_ids: tuple[str, ...]
 	tc_ids: tuple[str, ...]
+	divergence: Divergence | None = None
 
 	def cases(self) -> list[dict[str, Any]]:
 		return load_cases(self.fixture)

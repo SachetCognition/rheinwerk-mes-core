@@ -34,6 +34,17 @@ pytest tests/characterisation          # offline, no site required
 | `CHAR-ORDER-COMPLETE-01` | completion refused when doneQuantity = 0 | `OrderStateValidationService.java:54-63` | URS-W0-012 AC-2 / TC-W0-014 step 2 |
 | `CHAR-FEFO-PICK-01` | FEFO picks earliest expiry first (BATCH-A-0002 before BATCH-A-0001), FIFO/LIFO/LEFO orders and the unknown-algorithm fallback | `ResourceManagementServiceImpl.java:1015-1027`, `WarehouseAlgorithm.java:26-27` | URS-W0-012 AC-3 / TC-W0-014 step 3 |
 | `CHAR-TECH-VALIDATE-01` | technology structural validators: empty tree, unfilled input quantities, unit mismatches, technology used by an active order | `TechnologyValidationService.java:91-707` | URS-W0-012 / TC-W0-014 (fixtures encoded in W0, consumed by W1) |
+| `CHAR-EXPIRY-ISSUE-01` | expired resource issuable under Plant A's FEFO-advisory behaviour — **declared divergence** (W1 refuses it; see below) | `ResourceManagementServiceImpl.java:1015-1027` | URS-W1-030 / TC-W1-033 |
+
+### Declared divergences
+
+A contract may carry a `Divergence` (`registry.py`), which inverts the expectation for every
+fixture case flagged `diverges`: the case is expected to **fail** against the target, and
+`test_contracts.py` runs it as a strict xfail so the suite also fails if the divergence
+quietly disappears. Only one W1 contract does this — `CHAR-EXPIRY-ISSUE-01`, whose decision
+record (`docs/decisions/DEC-W1-030-expiry-policy.md`) carries the business sign-off that the
+per-gate behaviour record (`python -m tools.behaviour.generate`) refuses to generate
+without.
 
 ## Handover to W1 — implement these entrypoints
 
@@ -49,6 +60,7 @@ and any behavioural difference fails CI immediately.
 | `rheinwerk_mes.execution_gating.contracts.evaluate_order_completion` | `(order: Mapping[str, Any]) -> Verdict` | `legacy_rules.evaluate_order_completion` |
 | `rheinwerk_mes.warehouse.contracts.picking_order` | `(resources: Sequence[Mapping[str, Any]], algorithm: str) -> Sequence[str]` | `legacy_rules.picking_order` |
 | `rheinwerk_mes.manufacturing_core.contracts.evaluate_technology` | `(technology: Mapping[str, Any]) -> Verdict` | `legacy_rules.evaluate_technology` |
+| `rheinwerk_mes.execution_gating.contracts.evaluate_expired_issue` | `(issue: Mapping[str, Any]) -> Verdict` | `legacy_rules.evaluate_expired_issue` |
 
 Contract details for the implementer:
 

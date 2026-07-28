@@ -2,6 +2,6 @@
 
 from __future__ import annotations
 
-from . import order_gating, technology, warehouse_picking  # noqa: F401
+from . import expiry, order_gating, technology, warehouse_picking  # noqa: F401
 
-__all__ = ["order_gating", "technology", "warehouse_picking"]
+__all__ = ["expiry", "order_gating", "technology", "warehouse_picking"]

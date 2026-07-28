@@ -34,6 +34,10 @@ UNITS_NOT_MATCH = "technologies.operationDetails.validate.error.UnitsNotMatch"
 OUTPUT_UNITS_NOT_MATCH = "technologies.operationDetails.validate.error.OutputUnitsNotMatch"
 ORDER_IN_PROGRESS = "technologies.technology.state.error.orderInProgress"
 
+#: Message key the *target* raises when it refuses an expired issue. Plant A has no such
+#: key — its absence is the divergence `CHAR-EXPIRY-ISSUE-01` pins (URS-W1-030).
+BATCH_EXPIRED = "rheinwerk.warehouse.issue.batchExpired"
+
 #: Required-field lists, verbatim from the legacy `Arrays.asList(...)` declarations.
 ACCEPTANCE_REQUIRED_FIELDS = ("date_to", "date_from", "production_line", "technology")
 COMPLETION_REQUIRED_FIELDS = ("date_to", "date_from", "done_quantity")
@@ -214,3 +218,22 @@ def evaluate_technology(technology: Mapping[str, Any]) -> Verdict:
 		errors.append(ORDER_IN_PROGRESS)
 
 	return Verdict(allowed=not errors, errors=tuple(errors))
+
+
+def evaluate_expired_issue(issue: Mapping[str, Any]) -> Verdict:
+	"""Plant A's expiry behaviour on issuing stock — advisory only (URS-W1-030 baseline).
+
+	`getResourcesForWarehouseProductAndAlgorithm`
+	(`ResourceManagementServiceImpl.java:1015-1027`) sorts candidate resources by
+	`expirationDate` under FEFO/LEFO and by `time` under FIFO/LIFO, and the issuing path
+	(`updateResources`, `:236-330`) draws from that ordering without ever comparing the
+	expiry date to the posting date: no expiry check exists in the legacy issue path.
+	Expiry is therefore *advisory* at Plant A — an expired resource is issuable, which is
+	precisely the behaviour the consolidated estate deliberately abandons (URS-W1-030).
+
+	`issue` carries `batch`, `expiration_date` (DD.MM.YYYY), `posting_date` (DD.MM.YYYY)
+	and `quantity`; the legacy verdict allows every case.
+	"""
+	parse_de_date(str(issue["expiration_date"]))
+	parse_de_date(str(issue["posting_date"]))
+	return Verdict(allowed=True)

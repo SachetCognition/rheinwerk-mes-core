@@ -87,7 +87,12 @@ doc_events = {
 	# W1-3: consuming a batch past its expiry is refused (URS-W1-013, policy URS-W1-030) —
 	# the substrate skips its own expiry throw for Stock Entry vouchers.
 	"Stock Entry": {
-		"validate": "rheinwerk_mes.execution_gating.expiry.enforce_batch_expiry",
+		"validate": [
+			# Auto-allocation runs first so the expiry hard stop also sees the batches the
+			# policy itself chose (URS-W1-030).
+			"rheinwerk_mes.execution_gating.allocation.allocate_stock_entry_batches",
+			"rheinwerk_mes.execution_gating.expiry.enforce_batch_expiry",
+		],
 		"on_update": "rheinwerk_mes.warehouse.reservations.on_stock_entry_update",
 		"on_submit": "rheinwerk_mes.warehouse.reservations.on_stock_entry_submit",
 		"on_cancel": "rheinwerk_mes.warehouse.reservations.on_stock_entry_cancel",

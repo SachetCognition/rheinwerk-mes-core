@@ -7,6 +7,11 @@ resolving parametrisation ids:
 * step 1 — acceptance gate refusal (`OrderStateValidationService.java:44-47`)
 * step 2 — completion gate refusal (`OrderStateValidationService.java:54-63`)
 * step 3 — FEFO picking order (`ResourceManagementServiceImpl.java:1015-1027`)
+
+A contract that declares a `Divergence` (W1: the expiry policy, URS-W1-030) is expected to
+*fail* against the target for every fixture case flagged `diverges`: the case runs as a
+strict xfail, so the suite fails both if the divergence disappears (xpass) and if a case
+that should still hold breaks.
 """
 
 from __future__ import annotations
@@ -18,11 +23,23 @@ from .registry import all_contracts, get
 _CASES = [(contract, case) for contract in all_contracts() for case in contract.cases()]
 
 
-@pytest.mark.parametrize(
-	("contract", "case"),
-	_CASES,
-	ids=[f"{contract.id}::{case['id']}" for contract, case in _CASES],
-)
+def _params():
+	for contract, case in _CASES:
+		marks = []
+		if contract.divergence and case.get("diverges"):
+			marks.append(
+				pytest.mark.xfail(
+					strict=True,
+					reason=(
+						f"intentional divergence {contract.divergence.decision}: "
+						f"{contract.divergence.summary}"
+					),
+				)
+			)
+		yield pytest.param(contract, case, marks=marks, id=f"{contract.id}::{case['id']}")
+
+
+@pytest.mark.parametrize(("contract", "case"), list(_params()))
 def test_parity_contract(contract, case):
 	"""URS-W0-012 · TC-W0-014 — the registered contract still matches the legacy verdict."""
 	contract.check(case)
