@@ -38,3 +38,27 @@ jobs:
         run: pip install pytest
       - name: Run offline suites
         run: pytest tests -rs
+
+  contracts:
+    name: Characterisation contracts + evidence pack
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install test dependencies
+        run: pip install pytest
+      - name: Qcadoo parity contracts (regression floor — W0-6, URS-W0-012)
+        run: pytest tests/characterisation -rs
+      - name: Wave evidence pack — zero unlinked backlog items (W0-7, URS-W0-013)
+        # Regenerates the pack and fails when a backlog item has no URS→TC link.
+        # Evidence-incomplete items are reported, not fatal, while sibling waves are in
+        # flight; `--strict` (or `--check`) is the wave-exit gate, run by the orchestrator.
+        run: python -m tools.evidence.generate --wave W0
+      - name: Upload evidence pack
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: W0-evidence-pack
+          path: docs/evidence/W0-evidence-pack.md
