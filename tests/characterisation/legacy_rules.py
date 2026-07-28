@@ -237,3 +237,44 @@ def evaluate_expired_issue(issue: Mapping[str, Any]) -> Verdict:
 	parse_de_date(str(issue["expiration_date"]))
 	parse_de_date(str(issue["posting_date"]))
 	return Verdict(allowed=True)
+
+
+#: Qcadoo `BatchState.java:31-44` refusal of an illegal batch state change, and the
+#: estate's own key for the missing reason (Plant A validates the reason in the form layer).
+ILLEGAL_TRANSITION = "advancedGenealogy.batch.state.error.illegalTransition"
+REASON_REQUIRED = "rheinwerk.genealogy.batch.state.reasonRequired"
+
+#: Legacy state names mapped onto the canonical ones: Qcadoo knows TRACKED and BLOCKED only.
+LEGACY_BATCH_STATES = {"TRACKED": "Released", "BLOCKED": "Blocked"}
+
+
+def evaluate_batch_state_transition(transition: Mapping[str, Any]) -> Verdict:
+	"""Plant A's batch state machine — `BatchState.java:31-44` (URS-W2-006 baseline).
+
+	`BatchState` is the reversible pair TRACKED ⇄ BLOCKED: a tracked batch may be blocked
+	and a blocked batch tracked again, each change carrying a reason on the state-change
+	record. No other target exists, so any other requested state is refused.
+
+	`transition` carries `from_state`, `to_state` and `reason` in *canonical* names, so the
+	same fixture drives the legacy rule and the target. Cases naming `Quarantined` have no
+	legacy counterpart and are flagged `new_behaviour` in the fixture rather than compared.
+	"""
+	legacy_states = frozenset(LEGACY_BATCH_STATES.values())
+	from_state = transition.get("from_state") or "Released"
+	to_state = transition["to_state"]
+	errors: list[str] = []
+	if to_state not in legacy_states or to_state == from_state or from_state not in legacy_states:
+		errors.append(ILLEGAL_TRANSITION)
+	elif not str(transition.get("reason") or "").strip():
+		errors.append(REASON_REQUIRED)
+	return Verdict(allowed=not errors, errors=tuple(errors))
+
+
+def pickable_candidates(resources: Sequence[Mapping[str, Any]]) -> tuple[str, ...]:
+	"""Plant A's candidate filter — `ResourceCriteriaModifiers.java:59,70` (URS-W2-010).
+
+	Both criteria modifiers add `blockedForQualityControl = false` (and the blocked-batch
+	restriction) to the resource lookups, so resources of a blocked batch never reach a
+	candidate list. Quarantine has no legacy counterpart: quarantined stock is offered.
+	"""
+	return tuple(str(resource["batch"]) for resource in resources if resource.get("qa_state") != "Blocked")

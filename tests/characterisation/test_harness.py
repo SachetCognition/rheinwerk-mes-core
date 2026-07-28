@@ -26,6 +26,8 @@ def test_contracts_are_enumerable_and_fully_declared():
 	"""URS-W0-012 · TC-W0-014 — every contract is registered with fixtures and traceability."""
 	contracts = all_contracts()
 	assert {contract.id for contract in contracts} == {
+		"CHAR-BATCH-STATE-01",
+		"CHAR-BLOCKED-PICK-01",
 		"CHAR-EXPIRY-ISSUE-01",
 		"CHAR-FEFO-PICK-01",
 		"CHAR-ORDER-ACCEPT-01",

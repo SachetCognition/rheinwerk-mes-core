@@ -35,27 +35,21 @@ import frappe
 from frappe import _
 from frappe.utils import now_datetime
 
-QUARANTINED = "Quarantined"
-RELEASED = "Released"
-BLOCKED = "Blocked"
+from rheinwerk_mes.genealogy import contracts
+
+# The state graph itself lives in `contracts.py`, which is site-free so the parity contract
+# CHAR-BATCH-STATE-01 (TC-W2-038) can execute this very rule offline.
+QUARANTINED = contracts.QUARANTINED
+RELEASED = contracts.RELEASED
+BLOCKED = contracts.BLOCKED
 
 #: Every batch enters the estate quarantined (URS-W2-006 AC-1) unless its item is
 #: QC-exempt (`qc_exempt` Custom Field on the anchor Item).
-INITIAL_STATE = QUARANTINED
+INITIAL_STATE = contracts.INITIAL_STATE
 
-STATES: tuple[str, ...] = (QUARANTINED, RELEASED, BLOCKED)
-
-#: Qcadoo `BatchState.java:31-44` gives the reversible TRACKED ⇄ BLOCKED pair; the
-#: Quarantined entry state adds exactly two edges (release by inspection, block by QA).
-LEGAL_TRANSITIONS: dict[str, frozenset[str]] = {
-	QUARANTINED: frozenset({RELEASED, BLOCKED}),
-	RELEASED: frozenset({BLOCKED}),
-	BLOCKED: frozenset({RELEASED}),
-}
-
-#: A disposition that takes stock out of use, or puts it back, must name its reason
-#: (URS-W2-006 AC-3; Qcadoo carries the reason on the batch state change).
-REASON_REQUIRED_STATES: frozenset[str] = frozenset({BLOCKED, RELEASED})
+STATES: tuple[str, ...] = contracts.STATES
+LEGAL_TRANSITIONS: dict[str, frozenset[str]] = contracts.LEGAL_TRANSITIONS
+REASON_REQUIRED_STATES: frozenset[str] = contracts.REASON_REQUIRED_STATES
 
 GATE_HOOK = "rheinwerk_qa_state_gates"
 

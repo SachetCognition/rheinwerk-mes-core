@@ -33,7 +33,7 @@ from frappe import _
 from frappe.utils import now_datetime
 
 from rheinwerk_mes.execution_gating import audit
-from rheinwerk_mes.genealogy import links, qa_state, trace
+from rheinwerk_mes.genealogy import contracts, links, qa_state, trace
 
 ADVISORY_FIELD = "blocked_ancestors"
 
@@ -42,8 +42,10 @@ ADVISORY_FIELD = "blocked_ancestors"
 RULE_BLOCKED_CONSUMPTION = "blocked_batch_consumption"
 RULE_BLOCKED_PICKING = "blocked_batch_exclusion"
 
-#: States whose stock may not be picked, reserved or consumed (URS-W2-010).
-NON_PICKABLE_STATES: frozenset[str] = frozenset({qa_state.BLOCKED, qa_state.QUARANTINED})
+#: States whose stock may not be picked, reserved or consumed (URS-W2-010). Declared in
+#: `contracts.py` so `CHAR-BLOCKED-PICK-01` (TC-W2-039) replays the legacy candidate-list
+#: fixtures against this very set.
+NON_PICKABLE_STATES: frozenset[str] = contracts.NON_PICKABLE_STATES
 
 
 # --------------------------------------------------------------------------------------

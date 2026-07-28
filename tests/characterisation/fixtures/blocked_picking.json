@@ -1,0 +1,56 @@
+{
+	"contract": "CHAR-BLOCKED-PICK-01",
+	"urs": ["URS-W2-010"],
+	"test_cases": ["TC-W2-039"],
+	"legacy_source": "mes-plugins/mes-plugins-material-flow-resources/src/main/java/com/qcadoo/mes/materialFlowResources/criteriaModifiers/ResourceCriteriaModifiers.java:59,70",
+	"notes": "Candidate lists of RW-CHM-0001 in 'RM Lager Nord'; quantities in kg. The legacy criteria modifiers filter resources whose batch is blocked for quality control. Quarantine has no legacy counterpart: the case flagged `new_behaviour` carries the legacy verdict in `expected` and the Rheinwerk exclusion in `expected_target` (URS-W2-006/010).",
+	"cases": [
+		{
+			"id": "PICK-BLOCKED-01-blocked-lot-present",
+			"description": "TC-W2-039: the blocked lot is absent from the candidate list, the others keep their order",
+			"resources": [
+				{"batch": "BATCH-A-0001", "qa_state": "Released", "available_quantity": 500},
+				{"batch": "BATCH-A-0002", "qa_state": "Blocked", "available_quantity": 50},
+				{"batch": "BATCH-B-0001", "qa_state": "Released", "available_quantity": 120}
+			],
+			"expected": {"candidates": ["BATCH-A-0001", "BATCH-B-0001"]}
+		},
+		{
+			"id": "PICK-BLOCKED-02-no-blocked-lot",
+			"description": "TC-W2-039: with no blocked lot the candidate set is unchanged",
+			"resources": [
+				{"batch": "BATCH-A-0001", "qa_state": "Released", "available_quantity": 500},
+				{"batch": "BATCH-B-0001", "qa_state": "Released", "available_quantity": 120}
+			],
+			"expected": {"candidates": ["BATCH-A-0001", "BATCH-B-0001"]}
+		},
+		{
+			"id": "PICK-BLOCKED-03-every-lot-blocked",
+			"description": "an all-blocked warehouse offers nothing rather than falling back",
+			"resources": [
+				{"batch": "BATCH-A-0001", "qa_state": "Blocked", "available_quantity": 500},
+				{"batch": "BATCH-A-0002", "qa_state": "Blocked", "available_quantity": 50}
+			],
+			"expected": {"candidates": []}
+		},
+		{
+			"id": "PICK-BLOCKED-04-resource-without-disposition",
+			"description": "a resource carrying no disposition is offered by both estates",
+			"resources": [
+				{"batch": "BATCH-A-0001", "qa_state": null, "available_quantity": 500}
+			],
+			"expected": {"candidates": ["BATCH-A-0001"]}
+		},
+		{
+			"id": "PICK-BLOCKED-05-quarantined-lot-is-new-behaviour",
+			"new_behaviour": true,
+			"description": "quarantined stock is offered at Plant A and withheld by the estate (URS-W2-010)",
+			"resources": [
+				{"batch": "BATCH-A-0001", "qa_state": "Released", "available_quantity": 500},
+				{"batch": "BATCH-C-1001", "qa_state": "Quarantined", "available_quantity": 20}
+			],
+			"expected": {"candidates": ["BATCH-A-0001", "BATCH-C-1001"]},
+			"expected_target": {"candidates": ["BATCH-A-0001"]}
+		}
+	]
+}

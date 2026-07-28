@@ -34,7 +34,19 @@ pytest tests/characterisation          # offline, no site required
 | `CHAR-ORDER-COMPLETE-01` | completion refused when doneQuantity = 0 | `OrderStateValidationService.java:54-63` | URS-W0-012 AC-2 / TC-W0-014 step 2 |
 | `CHAR-FEFO-PICK-01` | FEFO picks earliest expiry first (BATCH-A-0002 before BATCH-A-0001), FIFO/LIFO/LEFO orders and the unknown-algorithm fallback | `ResourceManagementServiceImpl.java:1015-1027`, `WarehouseAlgorithm.java:26-27` | URS-W0-012 AC-3 / TC-W0-014 step 3 |
 | `CHAR-TECH-VALIDATE-01` | technology structural validators: empty tree, unfilled input quantities, unit mismatches, technology used by an active order | `TechnologyValidationService.java:91-707` | URS-W0-012 / TC-W0-014 (fixtures encoded in W0, consumed by W1) |
+| `CHAR-BATCH-STATE-01` | batch disposition machine: Released ⇄ Blocked reversible, reason mandatory, illegal edges refused; the Quarantined entry state asserted as **new behaviour** | `BatchState.java:31-44` | URS-W2-006 / TC-W2-038 |
+| `CHAR-BLOCKED-PICK-01` | resources of a quality-blocked batch never reach a candidate list; the Quarantined exclusion asserted as **new behaviour** | `ResourceCriteriaModifiers.java:59,70` | URS-W2-010 / TC-W2-039 |
 | `CHAR-EXPIRY-ISSUE-01` | expired resource issuable under Plant A's FEFO-advisory behaviour — **declared divergence** (W1 refuses it; see below) | `ResourceManagementServiceImpl.java:1015-1027` | URS-W1-030 / TC-W1-033 |
+
+### New behaviour without a legacy counterpart
+
+Where the estate adds a behaviour Plant A simply does not have — the `Quarantined` entry
+state and its exclusion from picking (URS-W2-006/010) — the fixture case is flagged
+`new_behaviour` and carries **two** expectations: `expected` is the legacy verdict, pinned
+while the contract runs against the fallback, and `expected_target` is the addition, asserted
+as soon as the target entrypoint resolves. Unlike a `Divergence` this is not a conflict
+between two readings of the same rule, so it needs no strict xfail and no business sign-off —
+but it is measured rather than described in prose.
 
 ### Declared divergences
 
@@ -61,6 +73,8 @@ and any behavioural difference fails CI immediately.
 | `rheinwerk_mes.warehouse.contracts.picking_order` | `(resources: Sequence[Mapping[str, Any]], algorithm: str) -> Sequence[str]` | `legacy_rules.picking_order` |
 | `rheinwerk_mes.manufacturing_core.contracts.evaluate_technology` | `(technology: Mapping[str, Any]) -> Verdict` | `legacy_rules.evaluate_technology` |
 | `rheinwerk_mes.execution_gating.contracts.evaluate_expired_issue` | `(issue: Mapping[str, Any]) -> Verdict` | `legacy_rules.evaluate_expired_issue` |
+| `rheinwerk_mes.genealogy.contracts.evaluate_batch_state_transition` | `(transition: Mapping[str, Any]) -> Verdict` | `legacy_rules.evaluate_batch_state_transition` |
+| `rheinwerk_mes.genealogy.contracts.pickable_candidates` | `(resources: Sequence[Mapping[str, Any]]) -> Sequence[str]` | `legacy_rules.pickable_candidates` |
 
 Contract details for the implementer:
 

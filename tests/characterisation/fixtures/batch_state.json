@@ -1,0 +1,61 @@
+{
+	"contract": "CHAR-BATCH-STATE-01",
+	"urs": ["URS-W2-006"],
+	"test_cases": ["TC-W2-038"],
+	"legacy_source": "mes-plugins/mes-plugins-advanced-genealogy/src/main/java/com/qcadoo/mes/advancedGenealogy/constants/BatchState.java:31-44",
+	"notes": "Qcadoo knows TRACKED (= canonical Released) and BLOCKED (= canonical Blocked) only, reversibly, each change carrying a reason. Cases naming Quarantined have no legacy counterpart and are flagged `new_behaviour`: `expected` is the legacy verdict, `expected_target` the signed-off Rheinwerk addition (URS-W2-006).",
+	"cases": [
+		{
+			"id": "STATE-01-released-to-blocked-with-reason",
+			"description": "TRACKED → BLOCKED with a reason is accepted",
+			"transition": {"from_state": "Released", "to_state": "Blocked", "reason": "Spezifikation nicht erfüllt"},
+			"expected": {"allowed": true, "errors": []}
+		},
+		{
+			"id": "STATE-02-blocked-to-released-is-reversible",
+			"description": "BLOCKED → TRACKED — the legacy pair is reversible",
+			"transition": {"from_state": "Blocked", "to_state": "Released", "reason": "Nachprüfung bestanden"},
+			"expected": {"allowed": true, "errors": []}
+		},
+		{
+			"id": "STATE-03-block-without-reason-refused",
+			"description": "the state change carries a reason; blocking without one is refused",
+			"transition": {"from_state": "Released", "to_state": "Blocked", "reason": ""},
+			"expected": {"allowed": false, "errors": ["rheinwerk.genealogy.batch.state.reasonRequired"]}
+		},
+		{
+			"id": "STATE-04-release-without-reason-refused",
+			"description": "unblocking is equally dispositive and equally needs its reason",
+			"transition": {"from_state": "Blocked", "to_state": "Released", "reason": "   "},
+			"expected": {"allowed": false, "errors": ["rheinwerk.genealogy.batch.state.reasonRequired"]}
+		},
+		{
+			"id": "STATE-05-no-op-transition-refused",
+			"description": "a batch already blocked cannot be blocked again",
+			"transition": {"from_state": "Blocked", "to_state": "Blocked", "reason": "doppelt"},
+			"expected": {"allowed": false, "errors": ["advancedGenealogy.batch.state.error.illegalTransition"]}
+		},
+		{
+			"id": "STATE-06-quarantined-entry-state-is-new-behaviour",
+			"new_behaviour": true,
+			"description": "Quarantined → Released has no legacy counterpart (URS-W2-006 AC-1)",
+			"transition": {"from_state": "Quarantined", "to_state": "Released", "reason": "Prüfung angenommen"},
+			"expected": {"allowed": false, "errors": ["advancedGenealogy.batch.state.error.illegalTransition"]},
+			"expected_target": {"allowed": true, "errors": []}
+		},
+		{
+			"id": "STATE-07-quarantined-to-blocked-is-new-behaviour",
+			"new_behaviour": true,
+			"description": "Quarantined → Blocked likewise: the legacy machine has no entry state",
+			"transition": {"from_state": "Quarantined", "to_state": "Blocked", "reason": "Prüfung abgelehnt"},
+			"expected": {"allowed": false, "errors": ["advancedGenealogy.batch.state.error.illegalTransition"]},
+			"expected_target": {"allowed": true, "errors": []}
+		},
+		{
+			"id": "STATE-08-released-back-to-quarantine-refused-everywhere",
+			"description": "neither estate allows re-quarantining released material",
+			"transition": {"from_state": "Released", "to_state": "Quarantined", "reason": "Rücknahme"},
+			"expected": {"allowed": false, "errors": ["advancedGenealogy.batch.state.error.illegalTransition"]}
+		}
+	]
+}

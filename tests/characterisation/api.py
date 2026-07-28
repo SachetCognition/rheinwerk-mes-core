@@ -25,6 +25,8 @@ ENTRYPOINTS: dict[str, str] = {
 	"picking_order": "rheinwerk_mes.warehouse.contracts.picking_order",
 	"technology_validation": "rheinwerk_mes.manufacturing_core.contracts.evaluate_technology",
 	"expired_issue": "rheinwerk_mes.execution_gating.contracts.evaluate_expired_issue",
+	"batch_state_transition": "rheinwerk_mes.genealogy.contracts.evaluate_batch_state_transition",
+	"pickable_candidates": "rheinwerk_mes.genealogy.contracts.pickable_candidates",
 }
 
 
