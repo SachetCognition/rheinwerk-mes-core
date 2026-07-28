@@ -693,7 +693,10 @@ def seed_batches() -> list[str]:
 	if not frappe.db.exists("DocType", "Storage Location"):
 		# W1 warehouse schema not installed yet; nothing to seed.
 		return []
-	from erpnext.stock.doctype.batch.batch import get_batch_qty
+	# The opening-balance guard reads the ledger directly rather than the anchor's
+	# `get_batch_qty`, which hides expired batches: an expired fixture batch would otherwise
+	# look empty on every re-seed and be received again, inflating its stock without bound.
+	from rheinwerk_mes.warehouse.availability import ledger_balance
 
 	frappe.db.set_single_value("Stock Settings", "enable_serial_and_batch_no_for_item", 1)
 	seeded = []
@@ -714,7 +717,7 @@ def seed_batches() -> list[str]:
 			if spec.get("storage_location") and _has_field("Batch", "storage_location"):
 				batch.storage_location = spec["storage_location"]
 			batch.insert(ignore_permissions=True)
-		if not get_batch_qty(batch_no=spec["batch_id"], warehouse=warehouse, item_code=spec["item"]):
+		if ledger_balance(spec["item"], warehouse, spec["batch_id"], consider_expired=True) <= 0:
 			row = {
 				"item_code": spec["item"],
 				"qty": spec["qty"],
