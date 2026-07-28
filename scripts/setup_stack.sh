@@ -28,20 +28,30 @@ log() { printf '\n=== %s\n' "$1"; }
 
 log "MariaDB + Redis"
 sudo service mariadb start >/dev/null 2>&1 || true
-sudo service redis-server start >/dev/null 2>&1 || true
-# The bench talks to its own cache/queue instances (ports 13000/11000, see
-# sites/common_site_config.json); the system service on 6379 is not one of them, and
-# bench commands outside `bench start` have no Procfile to bring them up.
-for conf in redis_cache redis_queue; do
-	conf_path="$BENCH_PATH/config/$conf.conf"
-	[ -f "$conf_path" ] || continue
-	port="$(awk '/^port /{print $2; exit}' "$conf_path")"
-	[ -n "$port" ] || continue
-	redis-cli -p "$port" ping >/dev/null 2>&1 && continue
-	( cd "$BENCH_PATH" && redis-server "config/$conf.conf" --daemonize yes ) || true
-done
 
 cd "$BENCH_PATH"
+
+# Frappe talks to the bench's own redis instances (ports from
+# sites/common_site_config.json, typically 11000/13000), not to the distro
+# redis-server on 6379 — bench install-app fails hard without them. They are
+# stopped again on exit, because `bench start` supervises its own copies and
+# aborts when the ports are already bound.
+STARTED_REDIS_PORTS=()
+stop_started_redis() {
+	for started in "${STARTED_REDIS_PORTS[@]:-}"; do
+		[ -n "$started" ] && redis-cli -p "$started" shutdown nosave >/dev/null 2>&1 || true
+	done
+}
+trap stop_started_redis EXIT
+
+for conf in config/redis_queue.conf config/redis_cache.conf; do
+	[ -f "$conf" ] || continue
+	port="$(awk '$1 == "port" { print $2 }' "$conf")"
+	if ! redis-cli -p "$port" ping >/dev/null 2>&1; then
+		redis-server "$conf" --daemonize yes
+		STARTED_REDIS_PORTS+=("$port")
+	fi
+done
 
 log "ERPNext substrate"
 if [ ! -d "apps/erpnext" ]; then
@@ -58,11 +68,9 @@ if [ ! -e "apps/rheinwerk_mes" ]; then
 	./env/bin/python -m pip install --quiet -e apps/rheinwerk_mes
 fi
 if ! grep -qx "rheinwerk_mes" sites/apps.txt; then
-	# bench writes apps.txt without a trailing newline, so a bare append would yield
-	# "erpnextrheinwerk_mes" and site creation would die on the phantom module
-	if [ -s sites/apps.txt ] && [ -n "$(tail -c1 sites/apps.txt)" ]; then
-		printf '\n' >> sites/apps.txt
-	fi
+	# `bench get-app` leaves apps.txt without a trailing newline, so a naive
+	# append would concatenate onto the previous app name.
+	[ -s sites/apps.txt ] && [ -n "$(tail -c1 sites/apps.txt)" ] && printf '\n' >> sites/apps.txt
 	printf 'rheinwerk_mes\n' >> sites/apps.txt
 fi
 
@@ -78,8 +86,13 @@ if [ ! -d "sites/$SITE" ]; then
 		--admin-password "$ADMIN_PASSWORD" \
 		--mariadb-user-host-login-scope='%'
 fi
-bench --site "$SITE" install-app erpnext || true
-bench --site "$SITE" install-app rheinwerk_mes || true
+# Install what is missing (installing twice exits non-zero) and always migrate, so
+# re-runs pick up new DocTypes, custom fields and patches from the working tree.
+installed="$(bench --site "$SITE" list-apps 2>/dev/null | awk 'NF { print $1 }')"
+for app in erpnext rheinwerk_mes; do
+	printf '%s\n' "$installed" | grep -qx "$app" || bench --site "$SITE" install-app "$app"
+done
+bench --site "$SITE" migrate
 
 log "assets"
 bench build
