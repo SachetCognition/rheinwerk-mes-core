@@ -65,6 +65,9 @@ after_install = [
 	"rheinwerk_mes.setup.w1_gating.setup_w1_gating",
 	# W2-1/2/3: canonical Batch, `qa_state` workflow, genealogy tables (URS-W2-005/006).
 	"rheinwerk_mes.setup.w2_genealogy.setup_w2_genealogy",
+	# W2-4/W2-5: Quality Inspection extensions, disposition fields and the CoA
+	# (URS-W2-013 … URS-W2-019).
+	"rheinwerk_mes.setup.w2_quality.setup_w2_quality",
 	# W1-8: role gating runs last so it can also stamp the governance workflow's
 	# transitions (URS-W1-029).
 	"rheinwerk_mes.setup.w1_roles.setup_w1_roles",
@@ -81,6 +84,8 @@ doctype_js = {
 app_include_css = [
 	"/assets/rheinwerk_mes/css/shopfloor.css",
 	"/assets/rheinwerk_mes/css/trace_ribbon.css",
+	# W2-4: the inspector's Work Queue → Detail screen.
+	"/assets/rheinwerk_mes/css/inspection_queue.css",
 ]
 
 doc_events = {
@@ -136,6 +141,11 @@ doc_events = {
 		"validate": "rheinwerk_mes.genealogy.qa_state.validate_qa_state_change",
 		"on_update": "rheinwerk_mes.genealogy.blocking.on_batch_update",
 	},
+	# W2-4: an Accepted inspection releases its batch through the genealogy API
+	# (URS-W2-014 AC-3).
+	"Quality Inspection": {
+		"on_submit": "rheinwerk_mes.quality.inspections.on_inspection_submit",
+	},
 	# W1-4: Accepted recipes are immutable and in-use recipes are locked
 	# (URS-W1-016, URS-W1-017); changes need a new BOM version.
 	"BOM": {
@@ -159,6 +169,9 @@ rheinwerk_exec_state_gates = [
 	"rheinwerk_mes.execution_gating.gates.recipe_accepted_gate",
 	"rheinwerk_mes.execution_gating.gates.completion_gate",
 	"rheinwerk_mes.execution_gating.gates.material_availability_gate",
+	# W2-4: completion needs an Accepted Quality Inspection per produced batch
+	# (URS-W2-014).
+	"rheinwerk_mes.quality.gates.quality_inspection_gate",
 ]
 
 # W2-2: ordered gate callbacks run by `rheinwerk_mes.genealogy.qa_state.transition` before
@@ -167,4 +180,7 @@ rheinwerk_exec_state_gates = [
 # `qa_state.TransitionContext` (see `docs/design/W2-genealogy.md`).
 rheinwerk_qa_state_gates = [
 	"rheinwerk_mes.genealogy.qa_state.reason_gate",
+	# W2-4: a Rejected inspection must be dispositioned before its batch can be released
+	# (URS-W2-016).
+	"rheinwerk_mes.quality.gates.rejected_inspection_gate",
 ]

@@ -1198,6 +1198,62 @@ def seed_genealogy_fixture(orders: dict[str, str]) -> list[str]:
 	return produced
 
 
+# --------------------------------------------------------------------------------------
+# W2-4/W2-5 quality fixture (TST-W2-traceability-quality §1)
+# --------------------------------------------------------------------------------------
+
+#: Inspection template of the compound with its three parameters and limits
+#: (URS-W2-013 AC-1). Units are carried on the parameter master (`rw_unit`) and rendered
+#: suffixed inside the reading inputs (URS-W2-015 AC-2).
+INSPECTION_TEMPLATE = "QIT-COMPOUND"
+
+INSPECTION_PARAMETERS = (
+	{"specification": "Viskosität", "unit": "mPa·s", "min_value": 1200.0, "max_value": 1400.0},
+	{"specification": "Dichte", "unit": "g/cm³", "min_value": 1.02, "max_value": 1.06},
+	{"specification": "Feuchte", "unit": "%", "min_value": 0.0, "max_value": 0.5},
+)
+
+
+def seed_inspection_template() -> str | None:
+	"""Template QIT-COMPOUND on RW-CHM-0003 (URS-W2-013 AC-1, TC-W2-018)."""
+	if not frappe.db.exists("DocType", "Quality Inspection Template"):
+		return None
+	has_unit = _has_field("Quality Inspection Parameter", "rw_unit")
+	for spec in INSPECTION_PARAMETERS:
+		if not frappe.db.exists("Quality Inspection Parameter", spec["specification"]):
+			frappe.get_doc(
+				{
+					"doctype": "Quality Inspection Parameter",
+					"parameter": spec["specification"],
+				}
+			).insert(ignore_permissions=True)
+		if has_unit:
+			frappe.db.set_value(
+				"Quality Inspection Parameter", spec["specification"], "rw_unit", spec["unit"]
+			)
+	if not frappe.db.exists("Quality Inspection Template", INSPECTION_TEMPLATE):
+		doc = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection Template",
+				"quality_inspection_template_name": INSPECTION_TEMPLATE,
+			}
+		)
+		for spec in INSPECTION_PARAMETERS:
+			doc.append(
+				"item_quality_inspection_parameter",
+				{
+					"specification": spec["specification"],
+					"numeric": 1,
+					"min_value": spec["min_value"],
+					"max_value": spec["max_value"],
+				},
+			)
+		doc.insert(ignore_permissions=True)
+	if not frappe.db.get_value("Item", "RW-CHM-0003", "quality_inspection_template"):
+		frappe.db.set_value("Item", "RW-CHM-0003", "quality_inspection_template", INSPECTION_TEMPLATE)
+	return INSPECTION_TEMPLATE
+
+
 def seed_all() -> dict:
 	"""Seed every programme fixture; safe to re-run."""
 	summary = {
@@ -1233,6 +1289,8 @@ def seed_all() -> dict:
 			"third": summary["third_production_order"],
 		}
 	)
+	# W2-4/W2-5: the inspection template the quality gates and the CoA work from.
+	summary["inspection_template"] = seed_inspection_template()
 	summary["legacy_refs"] = seed_legacy_refs()
 	summary["personas"] = seed_personas()
 	# W1-8: the personas only exist now, so their transition roles are granted here as well
