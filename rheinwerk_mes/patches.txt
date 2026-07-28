@@ -11,3 +11,4 @@ rheinwerk_mes.setup.w1_roles
 rheinwerk_mes.setup.w2_genealogy
 rheinwerk_mes.setup.w2_isa88
 rheinwerk_mes.setup.w2_quality
+rheinwerk_mes.setup.w2_warehouse
