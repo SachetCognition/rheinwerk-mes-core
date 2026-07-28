@@ -1,0 +1,32 @@
+{
+  "contract_version": "1.0",
+  "message_type": "gl-posting-out",
+  "message_id": "GL-SE-2026-0002-1",
+  "sender": "RHEINWERK-MES",
+  "posting_date": "2026-06-15",
+  "voucher": {
+    "doctype": "Stock Entry",
+    "name": "SE-2026-0002",
+    "stock_ledger_entry": "SLE-2026-000124"
+  },
+  "warehouse": "RM Lager Nord - RWC",
+  "item_code": "RW-CHM-0003",
+  "batch_no": "BATCH-A-0001",
+  "quantity": 200.0,
+  "uom": "Kg",
+  "currency": "EUR",
+  "lines": [
+    {
+      "account": "",
+      "debit": 840.0,
+      "credit": 0.0,
+      "description": "Bestandszugang Fertigware"
+    },
+    {
+      "account": "5900-BESTANDSVERAENDERUNG",
+      "debit": 0.0,
+      "credit": 840.0,
+      "description": "Bestandsveränderung"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "contract_version": "1.0",
+  "message_type": "orders-in",
+  "message_id": "ERP-IN-003",
+  "sender": "GROUP-ERP",
+  "issued_at": "2026-05-04T08:00:00",
+  "external_order_ref": "GRP-MO-88001",
+  "external_order_kind": "master-order",
+  "demand": {
+    "item_code": "RW-CHM-0003",
+    "quantity": 1200.0,
+    "uom": "Kg",
+    "warehouse": "FG Lager Süd - RWC",
+    "required_by": "2026-07-15",
+    "customer_ref": "KD-4711"
+  }
+}

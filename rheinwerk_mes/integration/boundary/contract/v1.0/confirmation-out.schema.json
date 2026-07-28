@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "rheinwerk-mes/boundary/v1.0/confirmation-out",
+  "title": "Fertigmeldung ausgehend (confirmations out) — Vertrag v1.0",
+  "description": "Fertigmeldung des MES an das Gruppen-ERP, ausgelöst durch den Übergang von exec_state nach Completed (URS-W3-011). Mengen in kg gemäß CDM-02.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "message_type",
+    "message_id",
+    "sender",
+    "completed_at",
+    "production_order",
+    "item_code",
+    "produced_quantity",
+    "uom",
+    "batches"
+  ],
+  "properties": {
+    "contract_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "message_type": {
+      "type": "string",
+      "const": "confirmation-out"
+    },
+    "message_id": {
+      "type": "string",
+      "pattern": "[A-Z0-9][A-Z0-9-]{2,63}"
+    },
+    "sender": {
+      "type": "string",
+      "minLength": 1
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "production_order": {
+      "type": "string",
+      "minLength": 1
+    },
+    "external_order_ref": {
+      "type": ["string", "null"],
+      "pattern": "[A-Z0-9][A-Z0-9-]{2,63}"
+    },
+    "item_code": {
+      "type": "string",
+      "minLength": 1
+    },
+    "produced_quantity": {
+      "type": "number",
+      "minimum": 0
+    },
+    "uom": {
+      "type": "string",
+      "minLength": 1
+    },
+    "batches": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "shortfall_reason": {
+      "type": ["string", "null"]
+    }
+  }
+}

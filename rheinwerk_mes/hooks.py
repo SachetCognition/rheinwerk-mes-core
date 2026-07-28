@@ -82,6 +82,12 @@ after_install = [
 	"rheinwerk_mes.setup.w3_esignature.setup_w3_esignature",
 	# W3-2: line-schedule governance workflow and work-centre capacity (URS-W3-005/008).
 	"rheinwerk_mes.setup.w3_scheduling.setup_w3_scheduling",
+	# W3-5: the SCADA/OPC-UA adapter's service account, adapter role and permissions
+	# (URS-W3-015 … URS-W3-017, URS-W3-021) — after the W0/W1 roles it grants against.
+	"rheinwerk_mes.setup.w3_scada.setup_w3_scada",
+	# W3-3/W3-4: the group-ERP boundary's roles, account map and health surface
+	# (URS-W3-010 … URS-W3-014) — a fresh install skips patches, so it is registered here too.
+	"rheinwerk_mes.setup.w3_boundary.setup_w3_boundary",
 ]
 
 # Client-side additions to anchor forms; W1-4 renders the recipe's `gov_state` pill on the
@@ -155,6 +161,9 @@ doc_events = {
 			"rheinwerk_mes.warehouse.reservations.on_stock_entry_submit",
 			# W2-1: genealogy links are written from the posting (URS-W2-001).
 			"rheinwerk_mes.genealogy.links.on_stock_entry_submit",
+			# W3-4: the posting's stock ledger entries become boundary GL postings, or are
+			# held when the warehouse has no group-ERP account map (URS-W3-012).
+			"rheinwerk_mes.integration.boundary.gl.on_stock_entry_submit",
 		],
 		"on_cancel": [
 			"rheinwerk_mes.warehouse.reservations.on_stock_entry_cancel",
@@ -169,8 +178,17 @@ doc_events = {
 		"before_update_after_submit": "rheinwerk_mes.manufacturing_core.exec_state.validate_exec_state_change",
 		# W1-2: post-transition side effects — reservations released on Declined/Abandoned
 		# (URS-W1-009) and the executed transition logged immutably (URS-W1-033).
-		"on_update": "rheinwerk_mes.execution_gating.side_effects.on_work_order_update",
-		"on_update_after_submit": "rheinwerk_mes.execution_gating.side_effects.on_work_order_update",
+		# W3-3: a completed order emits exactly one confirmation across the group-ERP
+		# boundary (URS-W3-011). The emitter is idempotent on the message store, so
+		# registering it at both hook points cannot duplicate a confirmation.
+		"on_update": [
+			"rheinwerk_mes.execution_gating.side_effects.on_work_order_update",
+			"rheinwerk_mes.integration.boundary.outbound.on_work_order_update",
+		],
+		"on_update_after_submit": [
+			"rheinwerk_mes.execution_gating.side_effects.on_work_order_update",
+			"rheinwerk_mes.integration.boundary.outbound.on_work_order_update",
+		],
 	},
 	# W1-7: the job card's own name is the barcode the terminal scans (URS-W1-028).
 	"Job Card": {
@@ -248,4 +266,12 @@ rheinwerk_qa_state_gates = [
 	# enforcement is switched on (DEC-W2-029 · URS-W2-029 AC-2). Registered last, so a
 	# transition that fails a cheaper gate is refused before anyone is asked to sign.
 	"rheinwerk_mes.compliance.gates.qa_state_signature_gate",
+]
+
+# W3-3: the group-ERP boundary transport (URS-W3-011). The group ERP does not exist in this
+# environment, so the default is the loopback transport that records what would have been
+# sent; W4 appends its own factory here and points the boundary at the real endpoint without
+# touching `integration/boundary/outbound.py`. Last entry wins.
+rheinwerk_boundary_transport = [
+	"rheinwerk_mes.integration.boundary.transport.LoopbackTransport",
 ]
