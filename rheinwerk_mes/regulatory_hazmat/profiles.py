@@ -33,6 +33,13 @@ PROFILE_FIELDS: tuple[str, ...] = (
 	"proper_shipping_name",
 	"storage_class",
 	"storage_class_designation",
+	# W3-6: ADR transport data — the shipping boundary reads the same profile (URS-W3-018).
+	"adr_class",
+	"adr_class_designation",
+	"adr_packing_group",
+	"adr_tunnel_code",
+	"adr_label_numbers",
+	"adr_dispatch_ready",
 	"water_hazard_class",
 	"signal_word",
 	"sds_reference",

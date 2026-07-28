@@ -70,6 +70,8 @@ after_install = [
 	"rheinwerk_mes.setup.w2_quality.setup_w2_quality",
 	# W2-7: hazmat / regulatory master data on Item and Batch (URS-W2-023/024).
 	"rheinwerk_mes.setup.w2_hazmat.setup_w2_hazmat",
+	# W3-6: ADR transport data on the hazmat profile at the shipping boundary (URS-W3-018).
+	"rheinwerk_mes.setup.w3_hazmat.setup_w3_hazmat",
 	# W1-8: role gating runs last so it can also stamp the governance workflow's
 	# transitions (URS-W1-029).
 	"rheinwerk_mes.setup.w1_roles.setup_w1_roles",
@@ -102,6 +104,8 @@ app_include_css = [
 	"/assets/rheinwerk_mes/css/hazmat.css",
 	# W3-2: the planner's virtualized schedule board (URS-W3-005, URS-W3-020).
 	"/assets/rheinwerk_mes/css/schedule_board.css",
+	# W3-6: the dispatch-station label preview (URS-W3-018).
+	"/assets/rheinwerk_mes/css/hazmat_dispatch.css",
 ]
 
 # W2-7: one hazmat chip component shared by the Item/Batch forms, stock views and the
@@ -142,6 +146,9 @@ doc_events = {
 			# quarantine location without the QA/clerk role (URS-W2-011, URS-W2-012).
 			"rheinwerk_mes.genealogy.blocking.enforce_blocked_batch_consumption",
 			"rheinwerk_mes.genealogy.quarantine.enforce_quarantine_exit",
+			# W3-6: a hazmat batch may not be dispatched while its ADR transport data is
+			# incomplete (URS-W3-018 AC-2) — outward dispatch purposes only.
+			"rheinwerk_mes.regulatory_hazmat.dispatch.enforce_adr_completeness",
 		],
 		"on_update": "rheinwerk_mes.warehouse.reservations.on_stock_entry_update",
 		"on_submit": [
@@ -182,6 +189,10 @@ doc_events = {
 		"before_insert": "rheinwerk_mes.genealogy.qa_state.set_default_qa_state",
 		"validate": "rheinwerk_mes.genealogy.qa_state.validate_qa_state_change",
 		"on_update": "rheinwerk_mes.genealogy.blocking.on_batch_update",
+	},
+	# W3-6: the delivery half of the dispatch boundary — the same one rule (URS-W3-018 AC-2).
+	"Delivery Note": {
+		"validate": "rheinwerk_mes.regulatory_hazmat.dispatch.enforce_adr_completeness",
 	},
 	# W2-4: an Accepted inspection releases its batch through the genealogy API
 	# (URS-W2-014 AC-3).
