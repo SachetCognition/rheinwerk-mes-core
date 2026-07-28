@@ -14,6 +14,8 @@ from the same data:
 * production orders PO-2026-0001 (500 kg RW-CHM-0003 on LINE-1) and PO-2026-0002 (200 kg)
 * `legacy_refs` source-identifier examples incl. the Qcadoo trigger number 000123/2025
 * personas T. Schmid, P. Krüger, W. Braun, Q. Fischer, O. Weber, B. Vogel
+* group-ERP account map for FG Lager Süd (RM Lager Nord stays unmapped on purpose) and
+  the inbound demand GRP-SO-77001 / GRP-MO-88001 from the committed contract fixtures
 
 Run with::
 
@@ -1593,6 +1595,55 @@ def seed_scada_tag_mappings() -> list[str]:
 	return seeded
 
 
+# ---------------------------------------------------------------------------------------
+# W3-3/W3-4: group-ERP boundary fixtures (URS-W3-010, URS-W3-012).
+# ---------------------------------------------------------------------------------------
+
+
+def seed_group_erp_account_map() -> list[str]:
+	"""Map the finished-goods warehouse onto group-ERP accounts; leave RM Lager Nord unmapped.
+
+	The gap is deliberate: TC-W3-015 needs a warehouse whose postings are *held* rather than
+	emitted, so the seeded site carries both a mapped and an unmapped warehouse.
+	"""
+	from rheinwerk_mes.setup.w3_boundary import default_account_map
+
+	seeded = []
+	for spec in default_account_map():
+		warehouse = f"{spec['warehouse_name']} - {COMPANY_ABBR}"
+		if not frappe.db.exists("Warehouse", warehouse):
+			continue
+		if frappe.db.exists("Group ERP Account Map", warehouse):
+			seeded.append(warehouse)
+			continue
+		doc = frappe.get_doc(
+			{
+				"doctype": "Group ERP Account Map",
+				"warehouse": warehouse,
+				"company": COMPANY,
+				"currency": "EUR",
+				"stock_account_code": spec["stock_account_code"],
+				"offset_account_code": spec["offset_account_code"],
+				"description": spec["description"],
+			}
+		)
+		doc.insert(ignore_permissions=True)
+		seeded.append(doc.name)
+	return seeded
+
+
+def seed_external_demand() -> list[str]:
+	"""Play the committed orders-in fixture so the site carries inbound demand (URS-W3-010)."""
+	from rheinwerk_mes.integration.boundary import inbound
+
+	seeded = []
+	for fixture in ("erp-in-001-happy.json", "erp-in-003-master-order.json"):
+		result = inbound.play_fixture(fixture)
+		if result.demand:
+			seeded.append(result.demand)
+	return seeded
+
+
 # --------------------------------------------------------------------------------------
 # W3-6: ADR transport data and the two dispatch fixtures (URS-W3-018)
 # --------------------------------------------------------------------------------------
@@ -1851,6 +1902,10 @@ def seed_all() -> dict:
 	# W1-8: the personas only exist now, so their transition roles are granted here as well
 	# as from the installer (URS-W1-029).
 	summary["persona_roles"] = assign_persona_roles()
+	# W3-3/W3-4: the group-ERP boundary account map and the inbound demand the planner
+	# turns into a Production Plan (URS-W3-010, URS-W3-012).
+	summary["group_erp_account_map"] = seed_group_erp_account_map()
+	summary["external_demand"] = seed_external_demand()
 	frappe.db.commit()
 	print(frappe.as_json(summary))
 	return summary

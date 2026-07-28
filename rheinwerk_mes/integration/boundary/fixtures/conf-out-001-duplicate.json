@@ -1,0 +1,15 @@
+{
+  "contract_version": "1.0",
+  "message_type": "confirmation-out",
+  "message_id": "CONF-PO-2026-0001",
+  "sender": "RHEINWERK-MES",
+  "completed_at": "2026-06-15T14:20:00",
+  "production_order": "PO-2026-0001",
+  "external_order_ref": "GRP-SO-77001",
+  "item_code": "RW-CHM-0003",
+  "produced_quantity": 500.0,
+  "uom": "Kg",
+  "batches": [
+    "BATCH-C-1001"
+  ]
+}

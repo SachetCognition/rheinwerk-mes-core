@@ -18,3 +18,4 @@ rheinwerk_mes.setup.w3_esignature
 rheinwerk_mes.setup.w3_scheduling
 rheinwerk_mes.setup.w3_hazmat
 rheinwerk_mes.setup.w3_scada
+rheinwerk_mes.setup.w3_boundary
