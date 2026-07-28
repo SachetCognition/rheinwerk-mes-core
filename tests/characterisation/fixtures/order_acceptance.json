@@ -1,0 +1,89 @@
+{
+	"contract": "CHAR-ORDER-ACCEPT-01",
+	"urs": ["URS-W0-012"],
+	"test_cases": ["TC-W0-014"],
+	"legacy_source": "mes-plugins/mes-plugins-orders/src/main/java/com/qcadoo/mes/orders/states/OrderStateValidationService.java:44-47",
+	"notes": "Refusal on any null field among dateTo, dateFrom, productionLine, technology. Dates German-first (DD.MM.YYYY).",
+	"cases": [
+		{
+			"id": "ACCEPT-01-all-required-fields-missing",
+			"description": "PO-2026-0002 without dates, production line and technology — the TC-W0-014 step 1 fixture",
+			"order": {
+				"number": "PO-2026-0002",
+				"date_from": null,
+				"date_to": null,
+				"production_line": null,
+				"technology": null
+			},
+			"expected": {
+				"allowed": false,
+				"errors": [
+					"orders.order.orderStates.fieldRequired",
+					"orders.order.orderStates.fieldRequired",
+					"orders.order.orderStates.fieldRequired",
+					"orders.order.orderStates.fieldRequired"
+				]
+			}
+		},
+		{
+			"id": "ACCEPT-02-complete-order-accepted",
+			"description": "PO-2026-0001 with dates, LINE-1 and technology RT-COMPOUND-01 — acceptance passes",
+			"order": {
+				"number": "PO-2026-0001",
+				"date_from": "02.02.2026",
+				"date_to": "06.02.2026",
+				"production_line": "LINE-1",
+				"technology": "RT-COMPOUND-01"
+			},
+			"expected": {
+				"allowed": true,
+				"errors": []
+			}
+		},
+		{
+			"id": "ACCEPT-03-production-line-missing",
+			"description": "Production line unassigned — single field refusal",
+			"order": {
+				"number": "PO-2026-0001",
+				"date_from": "02.02.2026",
+				"date_to": "06.02.2026",
+				"production_line": null,
+				"technology": "RT-COMPOUND-01"
+			},
+			"expected": {
+				"allowed": false,
+				"errors": ["orders.order.orderStates.fieldRequired"]
+			}
+		},
+		{
+			"id": "ACCEPT-04-technology-missing",
+			"description": "No technology assigned — single field refusal",
+			"order": {
+				"number": "PO-2026-0001",
+				"date_from": "02.02.2026",
+				"date_to": "06.02.2026",
+				"production_line": "LINE-1",
+				"technology": null
+			},
+			"expected": {
+				"allowed": false,
+				"errors": ["orders.order.orderStates.fieldRequired"]
+			}
+		},
+		{
+			"id": "ACCEPT-05-date-to-missing",
+			"description": "Planned end date missing — single field refusal",
+			"order": {
+				"number": "PO-2026-0001",
+				"date_from": "02.02.2026",
+				"date_to": null,
+				"production_line": "LINE-1",
+				"technology": "RT-COMPOUND-01"
+			},
+			"expected": {
+				"allowed": false,
+				"errors": ["orders.order.orderStates.fieldRequired"]
+			}
+		}
+	]
+}
