@@ -1,0 +1,170 @@
+/* Schedule board — dense planner surface (W3-2 · URS-W3-005, URS-W3-020).
+   Fixed row height keeps the virtualized table's arithmetic exact: the spacers above and
+   below the painted window are computed from it, so a 200-order schedule scrolls without
+   re-layout. Tones carry an icon and a label as well, never colour alone. */
+
+.rw-board {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	font-size: var(--text-sm);
+}
+
+.rw-board__bar {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	flex-wrap: wrap;
+	padding: 0.35rem 0.5rem;
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+	background: var(--fg-color);
+}
+
+.rw-board__hint {
+	color: var(--text-muted);
+	margin-left: auto;
+}
+
+.rw-board__split {
+	display: grid;
+	grid-template-columns: minmax(230px, 22%) 1fr;
+	gap: 0.5rem;
+	align-items: start;
+}
+
+.rw-board__list {
+	max-height: 70vh;
+	overflow-y: auto;
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+}
+
+.rw-board__card {
+	border: 1px solid var(--border-color);
+	border-left: 3px solid transparent;
+	border-radius: var(--border-radius);
+	padding: 0.35rem 0.5rem;
+	cursor: pointer;
+	background: var(--fg-color);
+}
+
+.rw-board__card.is-selected {
+	border-left-color: var(--primary);
+	background: var(--bg-light-gray, var(--subtle-fg));
+}
+
+.rw-board__card-top {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 0.35rem;
+}
+
+.rw-board__card-meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	color: var(--text-muted);
+}
+
+.rw-board__flag {
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	font-weight: 600;
+	color: var(--green-600, green);
+}
+
+.rw-board__headline {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 0.35rem 0.5rem;
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+	background: var(--fg-color);
+}
+
+.rw-board__table {
+	max-height: 62vh;
+	overflow-y: auto;
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+	background: var(--fg-color);
+}
+
+.rw-board__row {
+	display: grid;
+	grid-template-columns: 3.5rem 9rem 9rem 6.5rem 9.5rem 9.5rem 7rem 6.5rem 1fr;
+	align-items: center;
+	gap: 0.25rem;
+	height: 32px;
+	padding: 0 0.5rem;
+	border-bottom: 1px solid var(--border-color);
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+.rw-board__row--head {
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	font-weight: 600;
+	background: var(--subtle-fg, var(--fg-color));
+}
+
+.rw-board__row[data-order]:hover {
+	background: var(--bg-light-gray, var(--subtle-fg));
+	cursor: pointer;
+}
+
+.rw-board__row.is-placeholder {
+	height: 32px;
+	background: repeating-linear-gradient(
+		90deg,
+		var(--fg-color) 0 12px,
+		var(--subtle-fg, #f4f5f6) 12px 24px
+	);
+	opacity: 0.5;
+}
+
+.rw-board__note {
+	color: var(--text-muted);
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.rw-board__ops {
+	width: 100%;
+	border-collapse: collapse;
+	margin-top: 0.35rem;
+}
+
+.rw-board__ops th,
+.rw-board__ops td {
+	border-bottom: 1px solid var(--border-color);
+	padding: 0.2rem 0.4rem;
+	text-align: left;
+}
+
+.rw-board__empty {
+	color: var(--text-muted);
+	padding: 0.5rem;
+}
+
+.rw-board .rw-num {
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+}
+
+.rw-btn--busy {
+	position: relative;
+	opacity: 0.7;
+}
+
+.rw-btn--busy::after {
+	content: "…";
+	margin-left: 0.25rem;
+}

@@ -401,7 +401,7 @@ The programme shall record the e-signature decision for compliance-critical tran
   - AC-2: Given the decision requires e-signatures for any transition, When W2 exits, Then the enforcement-point design (where the hook intercepts, what is captured) is documented and scheduled — implementation itself may land later per the decision.
 - **Dependencies:** URS-W2-006, URS-W2-017, URS-W2-022.
 
-### 3.10 Data migration requirements (open batches & genealogy history)
+### 3.10 Data migration of open batches, genealogy history and quality flags (W2-11)
 
 #### URS-W2-030 — Qcadoo dual-model merge into canonical Batch
 
@@ -445,7 +445,7 @@ The migration shall carry legacy quality flags (Qcadoo `qualityRating`/`blockedF
 - **Rollback condition:** qa_state distribution mismatch beyond zero unexplained rows rolls back the state-assignment step by run-id.
 - **Dependencies:** URS-W2-030.
 
-## 4. Non-functional requirements
+## 4. Non-functional requirements (W2-10)
 
 #### URS-W2-033 — Trace and scan performance
 

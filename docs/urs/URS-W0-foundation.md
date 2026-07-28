@@ -204,7 +204,7 @@ The system shall use ERPNext naming series (not DB-trigger sequences) for all ca
   - **AC-2** Given a migrated Plant A record with Qcadoo trigger number "000123/2025", When the record is opened, Then the legacy number is visible in its `legacy_refs` entry.
 - **Dependencies:** URS-W0-003, URS-W0-006, URS-W0-007.
 
-## 4. Non-functional requirements
+## 4. Non-functional requirements (W0-8)
 
 #### URS-W0-015 — Audit trail on canonical master-data changes
 

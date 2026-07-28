@@ -1,0 +1,30 @@
+{
+	"description": "Plant B (OFBiz) W2 migration pilot extract — Lot master and WorkEffortInventoryAssign/-Produced. Semantics re-expressed from SachetCognition/VM_ofbiz-framework@trunk (never ported): the presence of `lotId` on consumed inventory decides the trace boundary (docs/canonical-model/README.md CDM-01 genealogy_links row). OFBiz batches carry no qa_state (default Released) with the plant-wide trace-boundary date noted (ADR-003 consequences).",
+	"plant": "B",
+	"source": "ofbiz",
+	"trace_boundary_date": "2025-01-01",
+	"lots": [
+		{"lotId": "LOT-B-001", "productId": "RW-CHM-0001", "expirationDate": "2026-09-30", "quantity": 200.0, "supplierBatch": "SUP-BH-B1"},
+		{"lotId": "LOT-B-002", "productId": "RW-CHM-0002", "expirationDate": "2026-11-30", "quantity": 60.0, "supplierBatch": "SUP-K7-B2"},
+		{"lotId": "LOT-B-900", "productId": "RW-CHM-0003", "expirationDate": "2027-03-31", "quantity": 120.0, "supplierBatch": null},
+		{"lotId": "LOT-B-901", "productId": "RW-CHM-0003", "expirationDate": "2027-04-30", "quantity": 90.0, "supplierBatch": null}
+	],
+	"work_efforts": [
+		{
+			"workEffortId": "WE-B-001",
+			"produced": {"lotId": "LOT-B-900", "productId": "RW-CHM-0003", "quantity": 120.0, "uom": "Kg"},
+			"assigned": [
+				{"lotId": "LOT-B-001", "productId": "RW-CHM-0001", "quantity": 100.0, "uom": "Kg"},
+				{"lotId": "LOT-B-002", "productId": "RW-CHM-0002", "quantity": 20.0, "uom": "Kg"}
+			]
+		},
+		{
+			"workEffortId": "WE-B-002",
+			"produced": {"lotId": "LOT-B-901", "productId": "RW-CHM-0003", "quantity": 90.0, "uom": "Kg"},
+			"assigned": [
+				{"lotId": null, "productId": "RW-CHM-0001", "quantity": 80.0, "uom": "Kg"},
+				{"lotId": "LOT-B-002", "productId": "RW-CHM-0002", "quantity": 15.0, "uom": "Kg"}
+			]
+		}
+	]
+}

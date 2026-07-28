@@ -1,0 +1,41 @@
+{
+	"description": "Committed plant simulator script for LINE-1 (W3-5, TC-W3-018/TC-W3-020). MIX-01 starts, produces 3 x 25 kg and stops; FILL-01 publishes a produced count while no order runs there, which must land in the unmatched-events queue.",
+	"events": [
+		{
+			"tag_address": "ns=2;s=Line1.Mix01.OperationStart",
+			"value": 1,
+			"equipment_timestamp": "2026-06-15 08:00:00",
+			"sequence": 1
+		},
+		{
+			"tag_address": "ns=2;s=Line1.Mix01.ProducedKg",
+			"value": 25,
+			"equipment_timestamp": "2026-06-15 08:10:00",
+			"sequence": 2
+		},
+		{
+			"tag_address": "ns=2;s=Line1.Mix01.ProducedKg",
+			"value": 25,
+			"equipment_timestamp": "2026-06-15 08:20:00",
+			"sequence": 3
+		},
+		{
+			"tag_address": "ns=2;s=Line1.Mix01.ProducedKg",
+			"value": 25,
+			"equipment_timestamp": "2026-06-15 08:30:00",
+			"sequence": 4
+		},
+		{
+			"tag_address": "ns=2;s=Line1.Mix01.OperationStop",
+			"value": 0,
+			"equipment_timestamp": "2026-06-15 08:40:00",
+			"sequence": 5
+		},
+		{
+			"tag_address": "ns=2;s=Line1.Fill01.ProducedKg",
+			"value": 12,
+			"equipment_timestamp": "2026-06-15 08:45:00",
+			"sequence": 6
+		}
+	]
+}

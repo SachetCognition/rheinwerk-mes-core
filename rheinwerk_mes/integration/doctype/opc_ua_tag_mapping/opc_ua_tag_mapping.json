@@ -1,0 +1,149 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "hash",
+ "creation": "2026-06-01 09:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 0,
+ "engine": "InnoDB",
+ "field_order": [
+  "tag_address",
+  "event_type",
+  "enabled",
+  "column_break_rw1",
+  "work_centre_code",
+  "production_line",
+  "work_centre",
+  "operation",
+  "uom",
+  "description_section",
+  "description"
+ ],
+ "fields": [
+  {
+   "description": "OPC-UA-Knotenadresse, z. B. ns=2;s=Line1.Mix01.ProducedKg",
+   "fieldname": "tag_address",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "OPC-UA-Adresse",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "event_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Ereignisart",
+   "options": "produced-count\noperation-start\noperation-stop",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Aktiv"
+  },
+  {
+   "fieldname": "column_break_rw1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Arbeitsplatzschl\u00fcssel als Linie/Arbeitsplatz, z. B. LINE-1/MIX-01 (CDM-08).",
+   "fieldname": "work_centre_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Arbeitsplatz-Schl\u00fcssel",
+   "reqd": 1
+  },
+  {
+   "fieldname": "production_line",
+   "fieldtype": "Link",
+   "label": "Produktionslinie",
+   "options": "Production Line",
+   "read_only": 1
+  },
+  {
+   "fieldname": "work_centre",
+   "fieldtype": "Link",
+   "label": "Arbeitsplatz",
+   "options": "Workstation",
+   "read_only": 1
+  },
+  {
+   "description": "Optional: erzwingt den Arbeitsgang; leer = Arbeitsgang des laufenden Auftrags am Arbeitsplatz.",
+   "fieldname": "operation",
+   "fieldtype": "Link",
+   "label": "Arbeitsgang",
+   "options": "Operation"
+  },
+  {
+   "default": "Kg",
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "Einheit",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "description_section",
+   "fieldtype": "Section Break",
+   "label": "Beschreibung"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Beschreibung"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-06-01 09:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Integration",
+ "name": "OPC UA Tag Mapping",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Rheinwerk Technologist",
+   "write": 1
+  },
+  {
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Rheinwerk Planner"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing User"
+  }
+ ],
+ "search_fields": "tag_address,work_centre_code,event_type",
+ "show_title_field_in_link": 1,
+ "sort_field": "tag_address",
+ "sort_order": "ASC",
+ "states": [],
+ "title_field": "tag_address",
+ "track_changes": 1
+}

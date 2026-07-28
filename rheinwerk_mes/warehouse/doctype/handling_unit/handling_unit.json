@@ -1,0 +1,136 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-01-20 09:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "hu_type",
+  "barcode",
+  "column_break_rw1",
+  "warehouse",
+  "storage_location",
+  "company",
+  "reconciliation_section",
+  "reconciliation_flag",
+  "contents_section",
+  "contents"
+ ],
+ "fields": [
+  {
+   "default": "HU-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Nummernkreis",
+   "options": "HU-.######",
+   "reqd": 1
+  },
+  {
+   "default": "Palette",
+   "fieldname": "hu_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Typ",
+   "options": "Palette\nGitterbox\nIBC\nFass\nBig Bag",
+   "reqd": 1
+  },
+  {
+   "description": "Barcode zur Scanner-Identifikation.",
+   "fieldname": "barcode",
+   "fieldtype": "Data",
+   "label": "Barcode",
+   "unique": 1
+  },
+  {
+   "fieldname": "column_break_rw1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Lager",
+   "options": "Warehouse",
+   "reqd": 1
+  },
+  {
+   "fieldname": "storage_location",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Lagerplatz",
+   "options": "Storage Location"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Unternehmen",
+   "options": "Company"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "reconciliation_section",
+   "fieldtype": "Section Break",
+   "label": "Abgleich"
+  },
+  {
+   "default": "0",
+   "description": "Gesetzt, wenn die Referenzmengen dieser Ladeeinheit vom Lagerbuch abweichen.",
+   "fieldname": "reconciliation_flag",
+   "fieldtype": "Check",
+   "label": "Abgleich erforderlich",
+   "read_only": 1
+  },
+  {
+   "fieldname": "contents_section",
+   "fieldtype": "Section Break",
+   "label": "Inhalt"
+  },
+  {
+   "fieldname": "contents",
+   "fieldtype": "Table",
+   "label": "Inhalt",
+   "options": "Handling Unit Content"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-01-20 09:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Warehouse",
+ "name": "Handling Unit",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Rheinwerk Warehouse Clerk",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

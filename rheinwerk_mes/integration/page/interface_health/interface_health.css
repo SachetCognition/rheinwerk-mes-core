@@ -1,0 +1,176 @@
+/* Interface health — KPI tile → dense queue (W3-3 · URS-W3-014).
+ * Same Rheinwerk Petrol tokens as the shop-floor screens. Status is never colour-only: every
+ * pill carries its German label, and the tile states the number in a full sentence. */
+
+.rw-boundary {
+	--rw-petrol-900: #0e3038;
+	--rw-petrol-600: #16606e;
+	--rw-signal-amber: #b4690e;
+	--rw-signal-green: #1a7f47;
+	--rw-signal-red: #a51d2d;
+	--rw-line: #d6dee0;
+
+	color: var(--rw-petrol-900);
+	font-size: 14px;
+}
+
+.rw-boundary .rw-mono {
+	font-variant-numeric: tabular-nums;
+	font-family: var(--font-stack-mono, ui-monospace, "SFMono-Regular", Menlo, monospace);
+}
+
+.rw-boundary__tile {
+	display: grid;
+	gap: 0.25rem;
+	padding: 1rem 1.25rem;
+	margin-bottom: 0.75rem;
+	border: 1px solid var(--rw-line);
+	border-left: 6px solid var(--rw-petrol-600);
+	border-radius: 6px;
+	background: #f6fafb;
+	cursor: pointer;
+}
+
+.rw-boundary__tile:focus-visible {
+	outline: 2px solid var(--rw-petrol-600);
+	outline-offset: 2px;
+}
+
+.rw-boundary__tile[data-tone="green"] {
+	border-left-color: var(--rw-signal-green);
+}
+
+.rw-boundary__tile[data-tone="orange"] {
+	border-left-color: var(--rw-signal-amber);
+}
+
+.rw-boundary__tile[data-tone="red"] {
+	border-left-color: var(--rw-signal-red);
+}
+
+.rw-boundary__headline {
+	font-size: 20px;
+	font-weight: 600;
+}
+
+.rw-boundary__detail {
+	color: #52666b;
+}
+
+.rw-boundary__cta {
+	font-size: 12px;
+	color: var(--rw-petrol-600);
+	text-decoration: underline;
+}
+
+.rw-boundary__counters {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+	gap: 0.5rem;
+	margin-bottom: 0.75rem;
+}
+
+.rw-boundary__counter {
+	display: grid;
+	gap: 0.125rem;
+	padding: 0.5rem 0.75rem;
+	border: 1px solid var(--rw-line);
+	border-radius: 4px;
+}
+
+.rw-boundary__counter--wide {
+	grid-column: 1 / -1;
+}
+
+.rw-boundary__counter-label {
+	font-size: 12px;
+	color: #52666b;
+}
+
+.rw-boundary__counter-value {
+	font-size: 18px;
+	font-weight: 600;
+}
+
+.rw-boundary__bar {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.5rem 0;
+	border-top: 1px solid var(--rw-line);
+	border-bottom: 1px solid var(--rw-line);
+}
+
+.rw-boundary__bar label {
+	margin: 0;
+	font-size: 12px;
+	color: #52666b;
+}
+
+.rw-boundary__table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 13px;
+}
+
+.rw-boundary__table th,
+.rw-boundary__table td {
+	padding: 0.3rem 0.5rem;
+	border-bottom: 1px solid var(--rw-line);
+	text-align: left;
+	vertical-align: top;
+}
+
+.rw-boundary__table th {
+	font-size: 12px;
+	text-transform: uppercase;
+	letter-spacing: 0.02em;
+	color: #52666b;
+	white-space: nowrap;
+}
+
+.rw-boundary__pill {
+	display: inline-block;
+	padding: 0.05rem 0.4rem;
+	border: 1px solid currentColor;
+	border-radius: 999px;
+	font-size: 12px;
+	white-space: nowrap;
+}
+
+.rw-boundary__pill[data-status="Abgelehnt"] {
+	color: var(--rw-signal-red);
+}
+
+.rw-boundary__pill[data-status="Zurückgehalten"],
+.rw-boundary__pill[data-status="In Warteschlange"] {
+	color: var(--rw-signal-amber);
+}
+
+.rw-boundary__pill[data-status="Zugestellt"],
+.rw-boundary__pill[data-status="Verarbeitet"] {
+	color: var(--rw-signal-green);
+}
+
+.rw-boundary .rw-btn {
+	padding: 0.25rem 0.6rem;
+	border: 1px solid var(--rw-line);
+	border-radius: 4px;
+	background: #fff;
+	color: var(--rw-petrol-900);
+}
+
+.rw-boundary .rw-btn--primary {
+	border-color: var(--rw-petrol-600);
+	background: var(--rw-petrol-600);
+	color: #fff;
+}
+
+.rw-boundary .rw-btn--small {
+	font-size: 12px;
+}
+
+.rw-boundary__empty {
+	padding: 1rem 0;
+	color: #52666b;
+}

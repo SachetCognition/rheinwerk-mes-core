@@ -1,0 +1,106 @@
+{
+ "actions": [],
+ "allow_copy": 0,
+ "allow_import": 0,
+ "allow_rename": 0,
+ "autoname": "hash",
+ "creation": "2026-03-02 09:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 0,
+ "engine": "InnoDB",
+ "field_order": [
+  "reference_doctype",
+  "reference_name",
+  "from_state",
+  "to_state",
+  "column_break_rw1",
+  "refused_by",
+  "refused_at",
+  "allowed_roles",
+  "message"
+ ],
+ "fields": [
+  {
+   "fieldname": "reference_doctype",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Referenz-Dokumenttyp",
+   "options": "DocType",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Referenz",
+   "options": "reference_doctype",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "from_state",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Von Zustand",
+   "read_only": 1
+  },
+  {
+   "fieldname": "to_state",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nach Zustand",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_rw1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "refused_by",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Benutzer",
+   "options": "User",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "refused_at",
+   "fieldtype": "Datetime",
+   "label": "Zeitpunkt",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "allowed_roles",
+   "fieldtype": "Data",
+   "label": "Zul\u00e4ssige Rollen",
+   "read_only": 1
+  },
+  {
+   "fieldname": "message",
+   "fieldtype": "Small Text",
+   "label": "Begr\u00fcndung der Ablehnung",
+   "read_only": 1
+  }
+ ],
+ "in_create": 1,
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-03-02 09:00:00.000000",
+ "module": "Manufacturing Core",
+ "name": "Transition Refusal Log",
+ "owner": "Administrator",
+ "permissions": [
+  {"read": 1, "report": 1, "role": "System Manager"},
+  {"read": 1, "report": 1, "role": "Rheinwerk Business Viewer"},
+  {"read": 1, "report": 1, "role": "Rheinwerk Planner"}
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "reference_name",
+ "track_changes": 0
+}

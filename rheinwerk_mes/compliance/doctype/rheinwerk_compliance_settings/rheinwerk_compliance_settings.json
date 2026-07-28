@@ -1,0 +1,61 @@
+{
+ "actions": [],
+ "creation": "2026-07-01 09:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 0,
+ "engine": "InnoDB",
+ "field_order": [
+  "esignature_section",
+  "esignature_enforced",
+  "esignature_note"
+ ],
+ "fields": [
+  {
+   "fieldname": "esignature_section",
+   "fieldtype": "Section Break",
+   "label": "Elektronische Unterschriften"
+  },
+  {
+   "fieldname": "esignature_enforced",
+   "fieldtype": "Check",
+   "label": "Unterschriftspflicht aktiv",
+   "default": "0",
+   "description": "Erzwingt eine elektronische Unterschrift für Chargenfreigabe, Chargensperre, Zertifikatsausstellung und Rezeptfreigabe (DEC-W2-029)."
+  },
+  {
+   "fieldname": "esignature_note",
+   "fieldtype": "Small Text",
+   "label": "Hinweis",
+   "read_only": 1,
+   "default": "Die Unterschriftspflicht wird beim Cutover (W4) aktiviert, sobald jeder automatisierte Freigabepfad einen Unterzeichner führt. Die Unterschriftsfunktion selbst ist unabhängig davon nutzbar."
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-07-01 09:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Compliance",
+ "name": "Rheinwerk Compliance Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "print": 1,
+   "email": 1,
+   "report": 1,
+   "share": 1
+  },
+  {
+   "role": "Quality Manager",
+   "read": 1,
+   "report": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

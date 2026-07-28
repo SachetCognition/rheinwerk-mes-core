@@ -1,0 +1,47 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-04-01 09:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "ancestor_batch",
+  "reason",
+  "flagged_at"
+ ],
+ "fields": [
+  {
+   "fieldname": "ancestor_batch",
+   "fieldtype": "Link",
+   "options": "Batch",
+   "label": "Gesperrter Vorgänger",
+   "in_list_view": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "reason",
+   "fieldtype": "Small Text",
+   "label": "Begründung",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "flagged_at",
+   "fieldtype": "Datetime",
+   "label": "Markiert am",
+   "in_list_view": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-04-01 09:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Genealogy",
+ "name": "Blocked Ancestor Advisory",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "creation",
+ "sort_order": "ASC",
+ "states": []
+}

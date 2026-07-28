@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install ruff
+        run: pip install "ruff==0.14.4"
+      - name: ruff check
+        run: ruff check .
+      - name: ruff format --check
+        run: ruff format --check .
+
+  tests:
+    name: Offline tests (parity contracts + repo checks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install test dependencies
+        run: pip install pytest
+      - name: Run offline suites
+        run: pytest tests -rs
+
+  contracts:
+    name: Characterisation contracts + evidence pack
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install test dependencies
+        run: pip install pytest
+      - name: Qcadoo parity contracts (regression floor — W0-6, URS-W0-012)
+        run: pytest tests/characterisation -rs
+      - name: Group-ERP boundary contract fixtures (W3-3, URS-W3-013 AC-3)
+        # The frozen contract v1.0 and its fixture suite are validated on every run, offline:
+        # no site, no third-party validator. TC-W3-016 requires this to be a CI job step.
+        run: pytest tests/acceptance/test_w3_boundary_contract.py tests/acceptance/test_w3_external_sync_register.py -rs
+      - name: Wave evidence pack — zero unlinked backlog items (W0-7, URS-W0-013)
+        # Regenerates the pack and fails when a backlog item has no URS→TC link.
+        # Evidence-incomplete items are reported, not fatal, while sibling waves are in
+        # flight; `--strict` (or `--check`) is the wave-exit gate, run by the orchestrator.
+        run: python -m tools.evidence.generate --wave W0
+      - name: Wave evidence pack — W1 (W0-7, URS-W0-013)
+        run: python -m tools.evidence.generate --wave W1
+      - name: Per-gate behaviour record — current, signed off (W1-10, URS-W1-031)
+        # Fails when a contract drifts without a recorded divergence, when a divergence
+        # lacks its business sign-off, or when the committed record is stale.
+        run: python -m tools.behaviour.generate --wave W1 --check
+      - name: Upload evidence pack
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wave-evidence
+          path: |
+            docs/evidence/W0-evidence-pack.md
+            docs/evidence/W1-evidence-pack.md
+            docs/evidence/W1-behaviour-record.md

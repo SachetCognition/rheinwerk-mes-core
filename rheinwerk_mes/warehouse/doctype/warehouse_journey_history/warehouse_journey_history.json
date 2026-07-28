@@ -1,0 +1,65 @@
+{
+ "actions": [],
+ "creation": "2026-07-28 09:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "from_state",
+  "to_state",
+  "changed_by",
+  "changed_at",
+  "reason"
+ ],
+ "fields": [
+  {
+   "fieldname": "from_state",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Von Zustand",
+   "read_only": 1
+  },
+  {
+   "fieldname": "to_state",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nach Zustand",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "changed_by",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Ge\u00e4ndert von",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "changed_at",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Ge\u00e4ndert am",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reason",
+   "fieldtype": "Small Text",
+   "label": "Begr\u00fcndung",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-07-28 09:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Warehouse",
+ "name": "Warehouse Journey History",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 0
+}

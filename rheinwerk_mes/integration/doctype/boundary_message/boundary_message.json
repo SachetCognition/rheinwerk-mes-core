@@ -1,0 +1,239 @@
+{
+ "actions": [],
+ "allow_import": 0,
+ "allow_rename": 0,
+ "autoname": "field:idempotency_key",
+ "creation": "2026-05-04 09:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 0,
+ "engine": "InnoDB",
+ "field_order": [
+  "message_id",
+  "message_type",
+  "direction",
+  "column_break_rw1",
+  "message_state",
+  "contract_version",
+  "external_reference",
+  "reference_section",
+  "reference_doctype",
+  "reference_name",
+  "column_break_rw2",
+  "warehouse",
+  "attempts",
+  "reason_section",
+  "reason_code",
+  "reason",
+  "timing_section",
+  "first_seen",
+  "last_attempt",
+  "column_break_rw3",
+  "delivered_at",
+  "receipt",
+  "payload_section",
+  "payload",
+  "idempotency_key"
+ ],
+ "fields": [
+  {
+   "fieldname": "message_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Nachrichtenkennung",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "message_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Nachrichtentyp",
+   "options": "orders-in\nconfirmation-out\ngl-posting-out",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "direction",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Richtung",
+   "options": "Eingehend\nAusgehend",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_rw1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "message_state",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Nachrichtenstatus",
+   "options": "Verarbeitet\nZugestellt\nIn Warteschlange\nAbgelehnt\nZur\u00fcckgehalten",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "contract_version",
+   "fieldtype": "Data",
+   "label": "Vertragsversion",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "external_reference",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Externe Referenz",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_section",
+   "fieldtype": "Section Break",
+   "label": "Datensatz"
+  },
+  {
+   "fieldname": "reference_doctype",
+   "fieldtype": "Link",
+   "label": "Referenz-Dokumenttyp",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Datensatz",
+   "options": "reference_doctype",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_rw2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Lager",
+   "options": "Warehouse",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "attempts",
+   "fieldtype": "Int",
+   "label": "Versuche",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reason_section",
+   "fieldtype": "Section Break",
+   "label": "Grund"
+  },
+  {
+   "fieldname": "reason_code",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Grundschl\u00fcssel (maschinenlesbar)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reason",
+   "fieldtype": "Small Text",
+   "label": "Grund",
+   "read_only": 1
+  },
+  {
+   "fieldname": "timing_section",
+   "fieldtype": "Section Break",
+   "label": "Zeitpunkte"
+  },
+  {
+   "fieldname": "first_seen",
+   "fieldtype": "Datetime",
+   "label": "Erstmals gesehen",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "last_attempt",
+   "fieldtype": "Datetime",
+   "label": "Letzter Versuch",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_rw3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "delivered_at",
+   "fieldtype": "Datetime",
+   "label": "Zugestellt am",
+   "read_only": 1
+  },
+  {
+   "fieldname": "receipt",
+   "fieldtype": "Data",
+   "label": "Empfangsbest\u00e4tigung",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payload_section",
+   "fieldtype": "Section Break",
+   "label": "Nachricht"
+  },
+  {
+   "fieldname": "payload",
+   "fieldtype": "Code",
+   "label": "Nutzlast (JSON)",
+   "options": "JSON",
+   "read_only": 1
+  },
+  {
+   "description": "Nachrichtentyp + Nachrichtenkennung; verhindert doppelte Verarbeitung bei erneuter Zustellung.",
+   "fieldname": "idempotency_key",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Idempotenzschl\u00fcssel",
+   "read_only": 1,
+   "reqd": 1,
+   "unique": 1
+  }
+ ],
+ "in_create": 1,
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-05-04 09:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Integration",
+ "name": "Boundary Message",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager"
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Rheinwerk Planner"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Rheinwerk Business Viewer"
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

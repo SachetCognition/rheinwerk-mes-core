@@ -1,0 +1,109 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 0,
+ "autoname": "field:warehouse",
+ "creation": "2026-05-04 09:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 0,
+ "engine": "InnoDB",
+ "field_order": [
+  "warehouse",
+  "company",
+  "column_break_rw1",
+  "currency",
+  "accounts_section",
+  "stock_account_code",
+  "offset_account_code",
+  "description"
+ ],
+ "fields": [
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Lager",
+   "options": "Warehouse",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Unternehmen",
+   "options": "Company"
+  },
+  {
+   "fieldname": "column_break_rw1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "EUR",
+   "description": "Dreistelliger ISO-4217-Code, z. B. EUR.",
+   "fieldname": "currency",
+   "fieldtype": "Data",
+   "label": "W\u00e4hrung",
+   "reqd": 1
+  },
+  {
+   "fieldname": "accounts_section",
+   "fieldtype": "Section Break",
+   "label": "Gruppen-ERP-Konten"
+  },
+  {
+   "fieldname": "stock_account_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Bestandskonto (Gruppen-ERP)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "offset_account_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Gegenkonto (Gruppen-ERP)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Bemerkung"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-05-04 09:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Integration",
+ "name": "Group ERP Account Map",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Rheinwerk Planner",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Rheinwerk Business Viewer"
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

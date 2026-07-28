@@ -233,7 +233,7 @@ State vocabulary (fixed, per CONSOLIDATION.md and the dossier): production-order
 - **Partner-master ownership at the boundary** (are supplier/customer masters owned by group ERP with MES holding references only?) — business decision D5 (`docs/plan/consolidation-project-plan.md`); no legacy evidence determines the answer. Deferred to the D5 sign-off; URS-W3-010's demand model assumes references-only and must be revisited if D5 decides otherwise.
 - **Finite-capacity optimiser build-vs-buy** — decision D4; recorded as Won't in URS-W3-009 rather than an invented requirement.
 
-## 4. Non-functional requirements
+## 4. Non-functional requirements (W3-8)
 
 #### URS-W3-020 — Planning & boundary performance
 **Statement:** The system shall meet: schedule-board initial render for a 200-order line schedule ≤ 2 s; UI feedback for every planner action < 100 ms with progress shown on the control for longer operations; scan-to-confirmation at dispatch stations ≤ 300 ms server-confirmed; orders-in fixture message processed end-to-end ≤ 10 s.

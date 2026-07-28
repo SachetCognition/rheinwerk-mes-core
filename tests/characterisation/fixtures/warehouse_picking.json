@@ -1,0 +1,147 @@
+{
+	"contract": "CHAR-FEFO-PICK-01",
+	"urs": ["URS-W0-012"],
+	"test_cases": ["TC-W0-014"],
+	"legacy_source": "mes-plugins/mes-plugins-material-flow-resources/src/main/java/com/qcadoo/mes/materialFlowResources/service/ResourceManagementServiceImpl.java:1015-1027; .../constants/WarehouseAlgorithm.java:26-27",
+	"notes": "Resources of RW-CHM-0001 in warehouse 'RM Lager Nord'. Quantities in kg, dates German-first (DD.MM.YYYY); `time` is the resource intake date used by FIFO/LIFO.",
+	"cases": [
+		{
+			"id": "PICK-01-fefo-earliest-expiry-first",
+			"description": "TC-W0-014 step 3: BATCH-A-0002 (30.06.2026) must be picked before BATCH-A-0001 (31.12.2026)",
+			"algorithm": "FEFO",
+			"warehouse": "RM Lager Nord",
+			"resources": [
+				{
+					"batch": "BATCH-A-0001",
+					"expiration_date": "31.12.2026",
+					"available_quantity": 500,
+					"time": "05.01.2026"
+				},
+				{
+					"batch": "BATCH-A-0002",
+					"expiration_date": "30.06.2026",
+					"available_quantity": 50,
+					"time": "12.03.2026"
+				}
+			],
+			"expected": {
+				"picking_order": ["BATCH-A-0002", "BATCH-A-0001"]
+			}
+		},
+		{
+			"id": "PICK-02-fefo-equal-expiry-smallest-quantity-first",
+			"description": "Equal expiry falls back to ascending available quantity (secondary search order)",
+			"algorithm": "FEFO",
+			"warehouse": "RM Lager Nord",
+			"resources": [
+				{
+					"batch": "BATCH-A-0002",
+					"expiration_date": "30.06.2026",
+					"available_quantity": 50,
+					"time": "12.03.2026"
+				},
+				{
+					"batch": "BATCH-A-0003",
+					"expiration_date": "30.06.2026",
+					"available_quantity": 20,
+					"time": "20.03.2026"
+				}
+			],
+			"expected": {
+				"picking_order": ["BATCH-A-0003", "BATCH-A-0002"]
+			}
+		},
+		{
+			"id": "PICK-03-fifo-oldest-intake-first",
+			"description": "FIFO ignores expiry and orders by ascending intake time",
+			"algorithm": "FIFO",
+			"warehouse": "FG Lager Süd",
+			"resources": [
+				{
+					"batch": "BATCH-A-0001",
+					"expiration_date": "31.12.2026",
+					"available_quantity": 500,
+					"time": "05.01.2026"
+				},
+				{
+					"batch": "BATCH-A-0002",
+					"expiration_date": "30.06.2026",
+					"available_quantity": 50,
+					"time": "12.03.2026"
+				}
+			],
+			"expected": {
+				"picking_order": ["BATCH-A-0001", "BATCH-A-0002"]
+			}
+		},
+		{
+			"id": "PICK-04-lifo-newest-intake-first",
+			"description": "LIFO orders by descending intake time",
+			"algorithm": "LIFO",
+			"warehouse": "FG Lager Süd",
+			"resources": [
+				{
+					"batch": "BATCH-A-0001",
+					"expiration_date": "31.12.2026",
+					"available_quantity": 500,
+					"time": "05.01.2026"
+				},
+				{
+					"batch": "BATCH-A-0002",
+					"expiration_date": "30.06.2026",
+					"available_quantity": 50,
+					"time": "12.03.2026"
+				}
+			],
+			"expected": {
+				"picking_order": ["BATCH-A-0002", "BATCH-A-0001"]
+			}
+		},
+		{
+			"id": "PICK-05-lefo-latest-expiry-first",
+			"description": "LEFO orders by descending expiry, then ascending available quantity",
+			"algorithm": "LEFO",
+			"warehouse": "RM Lager Nord",
+			"resources": [
+				{
+					"batch": "BATCH-A-0001",
+					"expiration_date": "31.12.2026",
+					"available_quantity": 500,
+					"time": "05.01.2026"
+				},
+				{
+					"batch": "BATCH-A-0002",
+					"expiration_date": "30.06.2026",
+					"available_quantity": 50,
+					"time": "12.03.2026"
+				}
+			],
+			"expected": {
+				"picking_order": ["BATCH-A-0001", "BATCH-A-0002"]
+			}
+		},
+		{
+			"id": "PICK-06-unknown-algorithm-falls-back-to-fifo",
+			"description": "WarehouseAlgorithm.parseString falls back to FIFO for unknown values",
+			"algorithm": "07unknown",
+			"warehouse": "RM Lager Nord",
+			"resources": [
+				{
+					"batch": "BATCH-A-0002",
+					"expiration_date": "30.06.2026",
+					"available_quantity": 50,
+					"time": "12.03.2026"
+				},
+				{
+					"batch": "BATCH-A-0001",
+					"expiration_date": "31.12.2026",
+					"available_quantity": 500,
+					"time": "05.01.2026"
+				}
+			],
+			"expected": {
+				"picking_order": ["BATCH-A-0001", "BATCH-A-0002"]
+			}
+		}
+	]
+}
