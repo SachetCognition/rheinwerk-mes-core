@@ -85,6 +85,9 @@ after_install = [
 	# W3-5: the SCADA/OPC-UA adapter's service account, adapter role and permissions
 	# (URS-W3-015 … URS-W3-017, URS-W3-021) — after the W0/W1 roles it grants against.
 	"rheinwerk_mes.setup.w3_scada.setup_w3_scada",
+	# W3-3/W3-4: the group-ERP boundary's roles, account map and health surface
+	# (URS-W3-010 … URS-W3-014) — a fresh install skips patches, so it is registered here too.
+	"rheinwerk_mes.setup.w3_boundary.setup_w3_boundary",
 ]
 
 # Client-side additions to anchor forms; W1-4 renders the recipe's `gov_state` pill on the
