@@ -28,6 +28,10 @@ log() { printf '\n=== %s\n' "$1"; }
 
 log "MariaDB + Redis"
 sudo service mariadb start >/dev/null 2>&1 || true
+# Ensure the local root login uses a native password bench can authenticate with —
+# otherwise `bench new-site --db-root-password` fails and leaves a half-created site
+# (the dir exists but its database/user were never created). Idempotent; best-effort.
+sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED VIA mysql_native_password USING PASSWORD('$DB_ROOT_PASSWORD'); FLUSH PRIVILEGES;" >/dev/null 2>&1 || true
 
 cd "$BENCH_PATH"
 
@@ -82,6 +86,16 @@ ln -sfn ../../node_modules apps/frappe/frappe/public/node_modules
 ( cd apps/erpnext && yarn install --check-files >/dev/null )
 
 log "site $SITE"
+# An interrupted previous run can leave sites/$SITE on disk without a usable database
+# (e.g. new-site aborted after creating the dir, or root auth failed). Detect that and
+# recreate, so a re-run self-heals instead of skipping new-site and then failing on
+# every later command with "Access denied for user '_<sitehash>'@'localhost'".
+site_usable() { bench --site "$SITE" list-apps >/dev/null 2>&1; }
+if [ -d "sites/$SITE" ] && ! site_usable; then
+	log "site $SITE exists but its database is unusable — recreating"
+	bench drop-site "$SITE" --db-root-password "$DB_ROOT_PASSWORD" --force --no-backup >/dev/null 2>&1 || true
+	rm -rf "sites/$SITE"
+fi
 if [ ! -d "sites/$SITE" ]; then
 	bench new-site "$SITE" \
 		--db-root-password "$DB_ROOT_PASSWORD" \
