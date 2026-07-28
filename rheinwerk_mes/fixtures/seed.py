@@ -587,6 +587,22 @@ def seed_personas() -> list[str]:
 	return seeded
 
 
+#: Batch identity fixture the shop-floor scanner journey identifies material with
+#: (TST-W1 §1: BATCH-A-0001). The batch *object* with `qa_state` arrives in W2.
+BATCHES = ({"batch_id": "BATCH-A-0001", "item": "RW-CHM-0001", "manufacturing_date": "2026-01-15"},)
+
+
+def seed_batches() -> list[str]:
+	seeded = []
+	for spec in BATCHES:
+		if not frappe.db.exists("Item", spec["item"]):
+			continue
+		if not frappe.db.exists("Batch", spec["batch_id"]):
+			frappe.get_doc({"doctype": "Batch", **spec}).insert(ignore_permissions=True)
+		seeded.append(spec["batch_id"])
+	return seeded
+
+
 def seed_all() -> dict:
 	"""Seed every programme fixture; safe to re-run."""
 	summary = {
@@ -604,6 +620,7 @@ def seed_all() -> dict:
 	summary["bom"] = seed_bom()
 	summary["production_order"] = seed_production_order(summary["bom"])
 	summary["second_production_order"] = seed_second_production_order(summary["bom"])
+	summary["batches"] = seed_batches()
 	summary["legacy_refs"] = seed_legacy_refs()
 	summary["personas"] = seed_personas()
 	frappe.db.commit()

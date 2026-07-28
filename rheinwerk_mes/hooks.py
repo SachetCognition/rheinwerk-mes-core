@@ -59,6 +59,9 @@ fixtures = [
 
 after_install = "rheinwerk_mes.install.after_install"
 
+# W1-7: Desk/Terminal density tokens and status pills for the shop-floor screens.
+app_include_css = "/assets/rheinwerk_mes/css/shopfloor.css"
+
 doc_events = {
 	# W0-2: item-level UoM conversion invariants (URS-W0-004).
 	# W1: execution-gating hooks are appended here.
@@ -70,6 +73,10 @@ doc_events = {
 		"before_insert": "rheinwerk_mes.manufacturing_core.exec_state.set_default_exec_state",
 		"validate": "rheinwerk_mes.manufacturing_core.exec_state.validate_exec_state_change",
 		"before_update_after_submit": "rheinwerk_mes.manufacturing_core.exec_state.validate_exec_state_change",
+	},
+	# W1-7: the job card's own name is the barcode the terminal scans (URS-W1-028).
+	"Job Card": {
+		"validate": "rheinwerk_mes.setup.w1_shopfloor.set_job_card_scan_code",
 	},
 }
 

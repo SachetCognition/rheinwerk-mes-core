@@ -5,6 +5,8 @@ from frappe import _
 
 from rheinwerk_mes.setup.w0 import setup_w0
 from rheinwerk_mes.setup.w1_exec_state import setup_w1_exec_state
+from rheinwerk_mes.setup.w1_roles import setup_w1_roles
+from rheinwerk_mes.setup.w1_shopfloor import setup_w1_shopfloor
 
 MODULES = (
 	"Manufacturing Core",
@@ -25,3 +27,5 @@ def after_install() -> None:
 		frappe.throw(_("rheinwerk_mes Module sind nicht registriert: {0}").format(", ".join(missing)))
 	setup_w0()
 	setup_w1_exec_state()
+	setup_w1_shopfloor()
+	setup_w1_roles()

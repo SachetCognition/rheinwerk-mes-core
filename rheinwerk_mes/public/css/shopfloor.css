@@ -1,0 +1,173 @@
+/* Shopfloor-Terminal styling — Rheinwerk Petrol tokens, Desk/Terminal density modes.
+ * Mirrors rheinwerk_mes/manufacturing_core/shopfloor/terminal.py (URS-W1-035):
+ * Desk 14px base / 32px rows, Terminal 18px base / 48px minimum touch targets.
+ * Status is never colour-only — every pill carries an icon and a label. */
+
+.rw-terminal {
+	--rw-petrol-900: #0e3038;
+	--rw-petrol-600: #16606e;
+	--rw-signal-amber: #b4690e;
+	--rw-signal-red: #a51d2d;
+	--rw-signal-green: #1a7f47;
+	--rw-base-font: 14px;
+	--rw-row-height: 32px;
+	--rw-target: 32px;
+	--rw-pill-font: 12px;
+
+	font-size: var(--rw-base-font);
+	color: var(--rw-petrol-900);
+}
+
+.rw-terminal[data-mode="Terminal"] {
+	--rw-base-font: 18px;
+	--rw-row-height: 56px;
+	--rw-target: 48px;
+	--rw-pill-font: 16px;
+}
+
+.rw-terminal__header {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	padding: 0.5rem 0.75rem;
+	background: var(--rw-petrol-900);
+	color: #fff;
+	position: sticky;
+	top: 0;
+}
+
+.rw-mono {
+	font-family: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+.rw-num {
+	font-variant-numeric: tabular-nums;
+	text-align: right;
+}
+
+.rw-scan {
+	width: 100%;
+	min-height: var(--rw-target);
+	font-size: var(--rw-base-font);
+	border: 2px solid var(--rw-petrol-600);
+}
+
+.rw-scan:focus {
+	outline: 3px solid var(--rw-petrol-600);
+	outline-offset: 2px;
+}
+
+.rw-scan__error {
+	color: var(--rw-signal-red);
+	margin: 0.25rem 0 0;
+}
+
+.rw-btn {
+	min-height: var(--rw-target);
+	min-width: var(--rw-target);
+	font-size: var(--rw-base-font);
+	border: 1px solid var(--rw-petrol-600);
+	background: #fff;
+}
+
+.rw-btn--primary {
+	background: var(--rw-petrol-600);
+	color: #fff;
+	min-height: calc(var(--rw-target) * 1.5);
+	font-weight: 600;
+	flex: 1 1 60%;
+}
+
+.rw-btn--busy {
+	background-image: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+}
+
+/* One task at a time: the card carries the facts, then the giant primary action. */
+.rw-card {
+	border: 1px solid #d8e0e2;
+	padding: 1rem 1.25rem;
+	margin-bottom: 1rem;
+}
+
+.rw-card__facts {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(8rem, 1fr));
+	gap: 0.25rem 1.5rem;
+	margin: 0 0 1rem;
+}
+
+.rw-card__facts dt {
+	grid-row: 1;
+	font-size: calc(var(--rw-base-font) * 0.85);
+	font-weight: 500;
+	color: #4a5b5f;
+}
+
+.rw-card__facts dd {
+	grid-row: 2;
+	margin: 0;
+	font-size: calc(var(--rw-base-font) * 1.15);
+	font-weight: 600;
+}
+
+.rw-card__actions {
+	display: flex;
+	gap: 0.75rem;
+}
+
+/* Never colour alone: every pill renders its icon next to its label. */
+.rw-pill__icon::before {
+	content: attr(data-icon);
+}
+
+.rw-row {
+	display: grid;
+	grid-template-columns: 12rem 8rem 8rem 10rem 1fr;
+	align-items: center;
+	min-height: var(--rw-row-height);
+	border-bottom: 1px solid #d8e0e2;
+}
+
+.rw-row--current {
+	box-shadow: inset 3px 0 0 var(--rw-petrol-600);
+}
+
+.rw-row--scanned {
+	background: #d9edf3;
+}
+
+.rw-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	font-size: var(--rw-pill-font);
+	padding: 0.15rem 0.6rem;
+	border: 1px solid currentColor;
+	border-radius: 999px;
+}
+
+.rw-pill[data-state="In Progress"],
+.rw-pill[data-state="Work In Progress"] {
+	color: var(--rw-petrol-600);
+}
+
+.rw-pill[data-state="Completed"] {
+	color: var(--rw-signal-green);
+}
+
+.rw-pill[data-state="Interrupted"],
+.rw-pill[data-state="On Hold"] {
+	color: var(--rw-signal-amber);
+}
+
+.rw-pill[data-state="Abandoned"],
+.rw-pill[data-state="Declined"] {
+	color: var(--rw-signal-red);
+}
+
+/* Motion budget near zero: state changes only, and never against the user's preference. */
+@media (prefers-reduced-motion: no-preference) {
+	.rw-row--scanned {
+		transition: background 150ms linear;
+	}
+}
