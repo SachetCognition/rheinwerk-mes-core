@@ -6,6 +6,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "validator_label",
   "validator",
   "passed",
   "column_break_rw1",
@@ -14,10 +15,16 @@
  ],
  "fields": [
   {
-   "fieldname": "validator",
+   "fieldname": "validator_label",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Pr\u00fcfung",
+   "read_only": 1
+  },
+  {
+   "fieldname": "validator",
+   "fieldtype": "Data",
+   "label": "Pr\u00fcfungs-ID",
    "read_only": 1,
    "reqd": 1
   },

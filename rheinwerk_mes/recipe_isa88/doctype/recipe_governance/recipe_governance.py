@@ -190,6 +190,7 @@ class RecipeGovernance(Document):
 				"validator_results",
 				{
 					"validator": validator,
+					"validator_label": _(governance.VALIDATOR_LABELS.get(validator, validator)),
 					"passed": 0 if finding else 1,
 					"subject": finding.subject if finding else "",
 					"message_key": finding.message_key if finding else "",

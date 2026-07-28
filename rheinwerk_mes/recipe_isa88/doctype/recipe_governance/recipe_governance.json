@@ -63,8 +63,10 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Freigabestatus",
+   "description": "Wird \u00fcber die Freigabeaktionen (Workflow) gesetzt.",
    "no_copy": 1,
    "options": "Draft\nChecked\nAccepted\nOutdated\nDeclined",
+   "read_only": 1,
    "reqd": 1
   },
   {
