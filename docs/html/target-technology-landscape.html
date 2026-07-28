@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Target Technology Landscape</title>
+<style>
+:root{--accent:#1f4e79;--accent2:#2e74b5;--bg:#f7f9fb;--card:#ffffff;--text:#24292f;--muted:#6a737d;--border:#e1e6eb;--sidebar-w:300px}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",Calibri,Arial,sans-serif;color:var(--text);background:var(--bg);line-height:1.55;font-size:15px}
+#sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:var(--accent);color:#fff;overflow-y:auto;padding:22px 18px}
+#sidebar .brand{font-size:15px;font-weight:600;letter-spacing:.4px;border-bottom:1px solid rgba(255,255,255,.25);padding-bottom:12px;margin-bottom:12px}
+#sidebar .brand small{display:block;font-weight:400;opacity:.75;margin-top:4px}
+#sidebar nav ul{list-style:none;margin:0;padding-left:0}
+#sidebar nav ul ul{padding-left:14px}
+#sidebar nav a{display:block;color:rgba(255,255,255,.85);text-decoration:none;font-size:12.6px;padding:4px 8px;border-radius:5px;border-left:3px solid transparent}
+#sidebar nav a:hover{background:rgba(255,255,255,.12);color:#fff}
+#sidebar nav a.active{background:rgba(255,255,255,.18);color:#fff;border-left-color:#9cc3e5;font-weight:600}
+#content{margin-left:var(--sidebar-w);padding:42px 56px;max-width:1080px}
+header.doc{border-bottom:3px solid var(--accent);padding-bottom:18px;margin-bottom:30px}
+header.doc h1{color:var(--accent);font-size:30px;margin:0 0 6px}
+header.doc .sub{color:var(--accent2);font-size:15.5px;font-weight:600}
+h1,h2{color:var(--accent);margin-top:2.1em;border-bottom:1px solid var(--border);padding-bottom:.25em}
+h3,h4{color:var(--accent2);margin-top:1.7em}
+a{color:var(--accent2)}
+table{border-collapse:collapse;width:100%;margin:1.1em 0;background:var(--card);font-size:13.2px;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+th{background:var(--accent);color:#fff;text-align:left;padding:8px 10px;font-weight:600}
+td{border:1px solid var(--border);padding:7px 10px;vertical-align:top}
+tr:nth-child(even) td{background:#f2f6fa}
+code{background:#eef2f6;border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:12px;font-family:Consolas,Menlo,monospace;color:#0b3d66}
+pre{background:#0f2a43;color:#dce8f5;padding:14px 16px;border-radius:8px;overflow-x:auto;font-size:12.5px}
+pre code{background:none;border:none;color:inherit;padding:0}
+blockquote{margin:1em 0;padding:10px 16px;background:#eaf1f8;border-left:5px solid var(--accent2);border-radius:0 6px 6px 0;color:#243b53}
+img.diagram,p img{max-width:100%;background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px;box-shadow:0 1px 3px rgba(0,0,0,.08);display:block;margin:1.2em auto}
+#top-btn{position:fixed;right:26px;bottom:26px;background:var(--accent);color:#fff;border:none;border-radius:50%;width:46px;height:46px;font-size:19px;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .25s;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+#top-btn.show{opacity:.92;pointer-events:auto}
+footer.doc{margin-top:60px;border-top:1px solid var(--border);padding-top:14px;color:var(--muted);font-size:12px}
+@media(max-width:900px){#sidebar{display:none}#content{margin-left:0;padding:24px}}
+</style>
+</head>
+<body>
+<aside id="sidebar">
+  <div class="brand">Target Technology Landscape<small>Pinned stack +
+rationale for 40+ plant global deployment</small></div>
+  <nav><ul>
+<li><a href="#application-tier" id="toc-application-tier">1. Application
+tier</a></li>
+<li><a href="#data-tier-per-regional-hub" id="toc-data-tier-per-regional-hub">2. Data tier (per regional
+hub)</a></li>
+<li><a href="#platform-runtime" id="toc-platform-runtime">3. Platform /
+runtime</a></li>
+<li><a href="#integration-and-edge" id="toc-integration-and-edge">4.
+Integration and edge</a></li>
+<li><a href="#observability-cicd-dr" id="toc-observability-cicd-dr">5.
+Observability, CI/CD, DR</a></li>
+<li><a href="#explicitly-retired-runtimes" id="toc-explicitly-retired-runtimes">6. Explicitly retired
+runtimes</a></li>
+<li><a href="#version-governance" id="toc-version-governance">7. Version
+governance</a></li>
+</ul></nav>
+</aside>
+<main id="content">
+  <header class="doc"><h1>Target Technology
+Landscape</h1><div class="sub">Pinned stack + rationale for 40+ plant
+global deployment</div></header>
+<p>Pinned technology stack for the consolidated Rheinwerk MES at global
+scale (40+ plants, regional-hub topology). Companion to
+<code>docs/design/HLD.md</code> §deployment; every row carries its
+rationale and the decision/evidence it traces to. Versions are the
+recommended pins at time of writing (2026-07) — re-validate at W0
+platform bring-up and record deviations in an ADR.</p>
+<blockquote>
+<p><strong>No Java in the target stack.</strong> Java appears only in
+the two retiring legacy systems (Qcadoo: Java 8/Spring-XML; OFBiz: Java
+17/Gradle). Per ADR-001 their semantics are re-implemented in Python on
+the Frappe platform — no Java code, runtime, or build toolchain is
+carried into the target.</p>
+</blockquote>
+<h2 id="application-tier">1. Application tier</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Version pin</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ERPNext (anchor application)</td>
+<td><strong>v16.x — latest stable LTS line</strong> (not the
+<code>develop</code>/v17-dev ref the dossier analysed)</td>
+<td>ADR-001: golden source for quality, planning, costing, master data;
+healthiest codebase of the three sources. Stable LTS gets ~18 months of
+maintenance; <code>develop</code> is analysis-only, never a production
+target.</td>
+</tr>
+<tr>
+<td>Frappe Framework</td>
+<td><strong>v16.x</strong> (matched to ERPNext major — Frappe/ERPNext
+majors must be identical)</td>
+<td>Platform substrate: DocType metadata model, workflow engine, RBAC,
+hooks (<code>doc_events</code>) — the extension mechanism the whole
+Absorb strategy (LLD §1) depends on.</td>
+</tr>
+<tr>
+<td><code>rheinwerk_mes</code> custom app</td>
+<td>Versioned with the repo; semantic versioning from W0</td>
+<td>Integrity + chemicals layers live here (ARCHITECTURE.md); anchor
+DocTypes are never forked, so upgrades of the anchor stay cheap.</td>
+</tr>
+<tr>
+<td>Python</td>
+<td><strong>3.12.x</strong> (minimum supported by Frappe v16; upgrade to
+3.13 only when Frappe declares support)</td>
+<td>Anchor runtime language. Staying on the framework-certified version
+protects the characterisation-test parity contract from
+interpreter-level drift.</td>
+</tr>
+<tr>
+<td>Node.js</td>
+<td><strong>22.x LTS</strong></td>
+<td>Required by Frappe for asset builds and the Socket.IO real-time
+server (shop-floor live updates). LTS line matches the app-server
+support window.</td>
+</tr>
+<tr>
+<td>Socket.IO (bundled with Frappe)</td>
+<td>as shipped by Frappe v16</td>
+<td>Real-time work-order/job-card updates to operator terminals — needed
+for T3 shop-floor execution; no custom fork.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="data-tier-per-regional-hub">2. Data tier (per regional hub)</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Version pin</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MariaDB</td>
+<td><strong>10.11.x LTS</strong> (managed: RDS for MariaDB / equivalent,
+multi-AZ)</td>
+<td>Frappe’s primary certified database. 10.11 is the long-term-support
+series certified for Frappe v16; the immutable SLE/GLE ledger pattern
+(ADR-005) is proven on it at scale. Managed service gives PITR,
+automated failover.</td>
+</tr>
+<tr>
+<td>MariaDB read replicas</td>
+<td>2+ per region</td>
+<td>Genealogy traversals (CDM-01) and reporting are read-heavy; replicas
+keep them off the transactional primary that owns stock postings.</td>
+</tr>
+<tr>
+<td>Redis</td>
+<td><strong>7.2.x</strong> (managed)</td>
+<td>Frappe requires Redis for cache, queues (RQ) and Socket.IO pub/sub.
+7.2 is the certified line; managed service for HA.</td>
+</tr>
+<tr>
+<td>Object storage</td>
+<td>S3-compatible (service, not versioned software)</td>
+<td>CoA PDFs (CDM-07), SDS/hazmat documents (T22), evidence packs:
+immutable, cheap, region-replicated; keeps the DB small.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="platform-runtime">3. Platform / runtime</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Version pin</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Kubernetes</td>
+<td><strong>1.31+</strong> (managed: EKS or equivalent, per region)</td>
+<td>Stateless Frappe web/worker pods scale horizontally; HPA on queue
+depth. Managed control plane removes undifferentiated ops for a
+3–5-region estate.</td>
+</tr>
+<tr>
+<td>Container images</td>
+<td>Frappe bench image, immutable, built in CI</td>
+<td>Same artifact through dev→staging→prod; blue-green per regional
+cluster; rollback = previous image. Schema migrations gated by the
+characterisation suite (LLD §9).</td>
+</tr>
+<tr>
+<td>Ingress + API gateway</td>
+<td>NGINX Ingress / cloud LB + gateway</td>
+<td>TLS termination, WAF, rate limiting for the ERP-boundary APIs
+(ADR-002).</td>
+</tr>
+<tr>
+<td>Identity</td>
+<td>OIDC via corporate IdP (e.g. Entra ID); SAML fallback</td>
+<td>40+ plants need federated SSO; Frappe supports OIDC natively. Role
+model = ERPNext RBAC + workflow-state permissions (T30, HLD
+cross-cutting).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="integration-and-edge">4. Integration and edge</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Version pin</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Event backbone</td>
+<td><strong>Apache Kafka 3.8+</strong> (or managed equivalent:
+MSK/Confluent)</td>
+<td>ERP boundary contract (orders in, confirmations + GL postings out —
+ADR-002) as replayable events: decouples plant operations from group-ERP
+availability and gives audit/reconciliation replay.</td>
+</tr>
+<tr>
+<td>SCADA/OPC-UA edge adapter</td>
+<td>Python 3.12 service using <strong>open62541-backed
+<code>opcua-asyncio</code> (latest stable)</strong>, one per plant</td>
+<td>T23 white-space rebuild (W3-5). Runs at the plant edge with
+store-and-forward (local MQTT broker, <strong>Eclipse Mosquitto
+2.x</strong>) so shop-floor capture survives WAN outages; MES itself
+stays regional. Python keeps one-language operations.</td>
+</tr>
+<tr>
+<td>ERP interface services</td>
+<td>Part of <code>rheinwerk_mes</code> (Frappe server scripts/API) +
+Kafka producers/consumers</td>
+<td>Contract-first (HLD integration architecture); no separate
+middleware product to license/operate.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="observability-cicd-dr">5. Observability, CI/CD, DR</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Version pin</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Metrics/dashboards</td>
+<td>Prometheus + Grafana (current LTS)</td>
+<td>Per-plant SLO dashboards; HPA signals. De-facto standard on
+Kubernetes.</td>
+</tr>
+<tr>
+<td>Logs/traces</td>
+<td>OpenTelemetry SDK + collector (current stable)</td>
+<td>Vendor-neutral; one instrumentation for logs, traces and the
+ERP-boundary message audit trail.</td>
+</tr>
+<tr>
+<td>CI/CD</td>
+<td>GitHub Actions (this repo) building bench images; environment
+promotion via GitOps (Argo CD 2.x)</td>
+<td>Repo is already GitHub-hosted; GitOps makes per-region rollout state
+declarative and auditable — required for the W4 cutover evidence
+packs.</td>
+</tr>
+<tr>
+<td>Backups/DR</td>
+<td>Cross-region replication of DB snapshots + object storage; RPO ≤ 15
+min, RTO ≤ 4 h</td>
+<td>HLD NFR table; tighten per plant criticality class during W0.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="explicitly-retired-runtimes">6. Explicitly retired runtimes</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Legacy runtime</th>
+<th>Where it lives today</th>
+<th>Disposition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Java 8 + Spring XML + AspectJ (Qcadoo)</td>
+<td><code>Chem_mes</code></td>
+<td>Retired with Plant A cutover (W4). Semantics absorbed as Python
+hooks/workflows (LLD); no Java carried — the dossier rates this platform
+the riskiest host for new investment.</td>
+</tr>
+<tr>
+<td>Java 17 + Gradle/Groovy/FreeMarker (OFBiz)</td>
+<td><code>VM_ofbiz-framework</code></td>
+<td>Retired with Plant B cutover (W4); data-migration source only
+(ADR-001).</td>
+</tr>
+<tr>
+<td>jqGrid/JSP and OFBiz widget UIs</td>
+<td>legacy UIs</td>
+<td>Replaced by Frappe Desk + shop-floor pages (UX criterion, base-repo
+decision).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="version-governance">7. Version governance</h2>
+<ul>
+<li>Anchor upgrades: track the ERPNext LTS line; take minor/patch
+releases monthly, majors only after the characterisation suite passes
+against a staging clone.</li>
+<li>Pins live in the bench image build (single source of truth); this
+document records the <em>intent and rationale</em>, the image records
+the <em>exact digest</em>.</li>
+<li>Any deviation from a pin above requires a short ADR referencing this
+page.</li>
+</ul>
+  <footer class="doc">Rheinwerk Chemie GmbH — MES consolidation programme. Generated from the Markdown source of record in SachetCognition/rheinwerk-mes-core.</footer>
+</main>
+<button id="top-btn" title="Back to top">⇧</button>
+<script>
+const links=[...document.querySelectorAll('#sidebar nav a')];
+const targets=links.map(a=>document.getElementById(decodeURIComponent(a.hash.slice(1)))).filter(Boolean);
+function onScroll(){
+  const y=window.scrollY+90;let cur=targets[0];
+  for(const t of targets){if(t.offsetTop<=y)cur=t;else break}
+  links.forEach(a=>a.classList.toggle('active',cur&&decodeURIComponent(a.hash.slice(1))===cur.id));
+  document.getElementById('top-btn').classList.toggle('show',window.scrollY>500);
+}
+document.addEventListener('scroll',onScroll,{passive:true});onScroll();
+document.getElementById('top-btn').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
+</script>
+</body>
+</html>

@@ -52,6 +52,7 @@ Each wave is a wave-level Jira issue (type *Workstream* — the project scheme's
 | 2.3 | Canonical-entity ADRs (sign-off gates before the waves that touch them) | `docs/adr/ADR-003…010` |
 | 3 | High-Level Design / Low-Level Design | `docs/design/HLD.md`, `docs/design/LLD.md` |
 | 4 | Consolidation implementation project plan (waves, milestones M0–M4, RAID) | `docs/plan/` (md + xlsx) |
+| — | Target technology landscape (pinned versions + rationale for 40+ plant scale) | `docs/design/target-technology-landscape.md` |
 | 5 | Wave User Requirements Specifications URS-W0…W4 (126 requirements, full lineage) | `docs/urs/` |
 | 5 | Wave Test & Verification documents TST-W0…W4 (155 test cases, traceability matrices, wave acceptance checklists) | `docs/test/` |
 | — | Standalone styled HTML for all artefacts (start at `index.html`) | `docs/html/` (regenerate via `tools/htmlgen/`) |
