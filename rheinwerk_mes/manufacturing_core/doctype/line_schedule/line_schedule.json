@@ -1,0 +1,155 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "format:LS-{production_line}-{#####}",
+ "creation": "2026-05-04 09:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "production_line",
+  "planned_start",
+  "column_break_rw1",
+  "schedule_state",
+  "is_operative",
+  "decision_section",
+  "decided_by",
+  "decided_at",
+  "decision_reason",
+  "entries_section",
+  "entries",
+  "operations_section",
+  "operations"
+ ],
+ "fields": [
+  {
+   "fieldname": "production_line",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Fertigungslinie",
+   "options": "Production Line",
+   "reqd": 1
+  },
+  {
+   "fieldname": "planned_start",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Planbeginn",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_rw1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "schedule_state",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Planzustand",
+   "options": "Draft\nApproved\nRejected",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_operative",
+   "fieldtype": "Check",
+   "in_standard_filter": 1,
+   "label": "Operativ",
+   "read_only": 1
+  },
+  {
+   "fieldname": "decision_section",
+   "fieldtype": "Section Break",
+   "label": "Entscheidung"
+  },
+  {
+   "fieldname": "decided_by",
+   "fieldtype": "Link",
+   "label": "Entschieden von",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "decided_at",
+   "fieldtype": "Datetime",
+   "label": "Entschieden am",
+   "read_only": 1
+  },
+  {
+   "fieldname": "decision_reason",
+   "fieldtype": "Small Text",
+   "label": "Begründung"
+  },
+  {
+   "fieldname": "entries_section",
+   "fieldtype": "Section Break",
+   "label": "Auftragsfolge"
+  },
+  {
+   "fieldname": "entries",
+   "fieldtype": "Table",
+   "label": "Aufträge",
+   "options": "Line Schedule Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "operations_section",
+   "fieldtype": "Section Break",
+   "label": "Arbeitsgänge"
+  },
+  {
+   "fieldname": "operations",
+   "fieldtype": "Table",
+   "label": "Arbeitsgänge",
+   "options": "Line Schedule Operation",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 0,
+ "links": [],
+ "modified": "2026-05-04 09:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Manufacturing Core",
+ "name": "Line Schedule",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Rheinwerk Planner",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Rheinwerk Business Viewer"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing User"
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "production_line",
+ "track_changes": 1
+}

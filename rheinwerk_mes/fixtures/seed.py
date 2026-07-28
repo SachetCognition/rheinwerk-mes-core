@@ -26,6 +26,7 @@ and custom fields land.
 from __future__ import annotations
 
 import frappe
+from frappe import _
 from frappe.model.naming import NamingSeries
 
 from rheinwerk_mes.setup.naming import WORK_ORDER_SERIES
@@ -91,6 +92,44 @@ WORK_CENTRES = (
 OPERATIONS = (
 	{"operation": "MIX", "workstation": "MIX-01", "time_in_mins": 90.0},
 	{"operation": "FILL", "workstation": "FILL-01", "time_in_mins": 45.0},
+)
+
+# W3-2: TJ/TPZ norms behind the realization times (URS-W3-006 AC-1). For the 500 kg
+# PO-2026-0001 they give MIX = 30 + 500 × 0,6 = 330 min and FILL = 15 + 500 × 0,3 = 165 min,
+# i.e. 495 min for the sequential routing.
+TIME_NORMS = (
+	{
+		"operation": "MIX",
+		"workstation": "MIX-01",
+		"production_line": "LINE-1",
+		"tpz_min": 30.0,
+		"tj_min_per_unit": 0.6,
+	},
+	{
+		"operation": "FILL",
+		"workstation": "FILL-01",
+		"production_line": "LINE-1",
+		"tpz_min": 15.0,
+		"tj_min_per_unit": 0.3,
+	},
+)
+
+# W3-2: the LINE-1 changeover norm sequencing inserts between two orders (URS-W3-007 AC-1) —
+# the 45-minute intermediate cleaning between two Rheinol 40 batches.
+CHANGEOVER_NORMS = (
+	{
+		"production_line": "LINE-1",
+		"from_item": "RW-CHM-0003",
+		"to_item": "RW-CHM-0003",
+		"changeover_min": 45.0,
+	},
+)
+
+# W3-2: the anchor's capacity ceiling per work centre (`Workstation.production_capacity`) —
+# one job at a time, so a second order in the same window is refused (URS-W3-008 AC-1).
+WORK_CENTRE_CAPACITY = (
+	{"workstation": "MIX-01", "production_capacity": 1},
+	{"workstation": "FILL-01", "production_capacity": 1},
 )
 
 ROUTING = "RT-COMPOUND-01"
@@ -887,6 +926,81 @@ def seed_workstation_limits() -> None:
 			)
 
 
+def seed_time_norms() -> list[str]:
+	"""W3-2: TJ/TPZ norms per operation and work centre (URS-W3-006 AC-1).
+
+	Idempotent; skipped when the `Operation Time Norm` DocType is not installed yet.
+	"""
+	if not frappe.db.exists("DocType", "Operation Time Norm"):
+		return []
+	seeded = []
+	for spec in TIME_NORMS:
+		existing = frappe.db.get_value(
+			"Operation Time Norm",
+			{"operation": spec["operation"], "workstation": spec["workstation"]},
+			"name",
+		)
+		if existing:
+			_backfill(
+				"Operation Time Norm",
+				existing,
+				{"tpz_min": spec["tpz_min"], "tj_min_per_unit": spec["tj_min_per_unit"]},
+			)
+			seeded.append(existing)
+			continue
+		description = _("Rüstzeit (TPZ) und Stückzeit (TJ) nach Qcadoo-Norm für {0} auf {1}.").format(
+			spec["operation"], spec["workstation"]
+		)
+		doc = frappe.get_doc({"doctype": "Operation Time Norm", **spec, "description": description}).insert(
+			ignore_permissions=True
+		)
+		seeded.append(doc.name)
+	return seeded
+
+
+def seed_changeover_norms() -> list[str]:
+	"""W3-2: the LINE-1 changeover norms used when sequencing (URS-W3-007 AC-1).
+
+	Idempotent; skipped when the `Line Changeover Norm` DocType is not installed yet.
+	"""
+	if not frappe.db.exists("DocType", "Line Changeover Norm"):
+		return []
+	seeded = []
+	for spec in CHANGEOVER_NORMS:
+		existing = frappe.db.get_value(
+			"Line Changeover Norm",
+			{
+				"production_line": spec["production_line"],
+				"from_item": spec["from_item"],
+				"to_item": spec["to_item"],
+			},
+			"name",
+		)
+		if existing:
+			_backfill("Line Changeover Norm", existing, {"changeover_min": spec["changeover_min"]})
+			seeded.append(existing)
+			continue
+		description = _("Zwischenreinigung {0} beim Produktwechsel {1} → {2}.").format(
+			spec["production_line"], spec["from_item"], spec["to_item"]
+		)
+		doc = frappe.get_doc({"doctype": "Line Changeover Norm", **spec, "description": description}).insert(
+			ignore_permissions=True
+		)
+		seeded.append(doc.name)
+	return seeded
+
+
+def seed_work_centre_capacity() -> None:
+	"""W3-2: the anchor capacity ceiling the slot search reads (URS-W3-008 AC-1)."""
+	for spec in WORK_CENTRE_CAPACITY:
+		if not frappe.db.exists("Workstation", spec["workstation"]):
+			continue
+		if not frappe.db.get_value("Workstation", spec["workstation"], "production_capacity"):
+			frappe.db.set_value(
+				"Workstation", spec["workstation"], "production_capacity", spec["production_capacity"]
+			)
+
+
 def seed_isa88_recipe(bom_no: str) -> str | None:
 	"""W2-6: the ISA-88 structured variant of BOM-RW-CHM-0003-001 (URS-W2-020 AC-1).
 
@@ -1436,6 +1550,11 @@ def seed_all() -> dict:
 	summary["work_centres"] = seed_work_centres()
 	seed_workstation_limits()
 	summary["operations"] = seed_operations()
+	# W3-2: TJ/TPZ norms, LINE-1 changeover norms and the work-centre capacity ceilings
+	# (URS-W3-006/007/008) — after the operations and work centres they reference.
+	summary["time_norms"] = seed_time_norms()
+	summary["changeover_norms"] = seed_changeover_norms()
+	seed_work_centre_capacity()
 	summary["routing"] = seed_routing()
 	summary["bom"] = seed_bom()
 	summary["recipe_governance"] = seed_recipe_governance(summary["bom"])

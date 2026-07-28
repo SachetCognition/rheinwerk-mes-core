@@ -32,6 +32,8 @@ def test_contracts_are_enumerable_and_fully_declared():
 		"CHAR-FEFO-PICK-01",
 		"CHAR-ORDER-ACCEPT-01",
 		"CHAR-ORDER-COMPLETE-01",
+		"CHAR-REALIZATION-TIME-01",
+		"CHAR-SCHEDULE-STATE-01",
 		"CHAR-TECH-VALIDATE-01",
 	}
 	for contract in contracts:

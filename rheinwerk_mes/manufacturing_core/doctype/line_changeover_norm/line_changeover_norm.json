@@ -1,0 +1,98 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "format:CHG-{#####}",
+ "creation": "2026-05-04 09:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "production_line",
+  "from_item",
+  "to_item",
+  "column_break_rw1",
+  "changeover_min",
+  "description"
+ ],
+ "fields": [
+  {
+   "fieldname": "production_line",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Fertigungslinie",
+   "options": "Production Line"
+  },
+  {
+   "fieldname": "from_item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Von Produkt",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "description": "Leer bedeutet: Umrüstung auf jedes andere Produkt.",
+   "fieldname": "to_item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Nach Produkt",
+   "options": "Item"
+  },
+  {
+   "fieldname": "column_break_rw1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "changeover_min",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Umrüstzeit (min)",
+   "precision": "2"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Beschreibung"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 0,
+ "links": [],
+ "modified": "2026-05-04 09:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Manufacturing Core",
+ "name": "Line Changeover Norm",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Rheinwerk Technologist",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Rheinwerk Planner"
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

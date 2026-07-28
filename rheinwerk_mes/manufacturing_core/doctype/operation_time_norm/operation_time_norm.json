@@ -1,0 +1,136 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "format:{operation}-{workstation}",
+ "creation": "2026-05-04 09:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "operation",
+  "workstation",
+  "production_line",
+  "column_break_rw1",
+  "tpz_min",
+  "tj_min_per_unit",
+  "norms_section",
+  "workstations_count",
+  "tj_divisible",
+  "staff_factor",
+  "description"
+ ],
+ "fields": [
+  {
+   "fieldname": "operation",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Arbeitsgang",
+   "options": "Operation",
+   "reqd": 1
+  },
+  {
+   "fieldname": "workstation",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Arbeitsplatz",
+   "options": "Workstation"
+  },
+  {
+   "fieldname": "production_line",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Fertigungslinie",
+   "options": "Production Line"
+  },
+  {
+   "fieldname": "column_break_rw1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Vorbereitungszeit je Arbeitsgang in Minuten (Qcadoo TPZ).",
+   "fieldname": "tpz_min",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Rüstzeit TPZ (min)",
+   "precision": "2"
+  },
+  {
+   "default": "0",
+   "description": "Ausführungszeit je Mengeneinheit in Minuten (Qcadoo TJ).",
+   "fieldname": "tj_min_per_unit",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Stückzeit TJ (min/kg)",
+   "precision": "4"
+  },
+  {
+   "fieldname": "norms_section",
+   "fieldtype": "Section Break",
+   "label": "Normparameter"
+  },
+  {
+   "default": "1",
+   "fieldname": "workstations_count",
+   "fieldtype": "Int",
+   "label": "Anzahl Arbeitsplätze"
+  },
+  {
+   "default": "1",
+   "fieldname": "tj_divisible",
+   "fieldtype": "Check",
+   "label": "TJ teilbar"
+  },
+  {
+   "default": "1",
+   "fieldname": "staff_factor",
+   "fieldtype": "Float",
+   "label": "Personalfaktor",
+   "precision": "4"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Beschreibung"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 0,
+ "links": [],
+ "modified": "2026-05-04 09:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Manufacturing Core",
+ "name": "Operation Time Norm",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Rheinwerk Technologist",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Rheinwerk Planner"
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
