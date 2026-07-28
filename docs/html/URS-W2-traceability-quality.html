@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>URS W2 — Traceability &amp; Quality</title>
+<style>
+:root{--accent:#1f4e79;--accent2:#2e74b5;--bg:#f7f9fb;--card:#ffffff;--text:#24292f;--muted:#6a737d;--border:#e1e6eb;--sidebar-w:300px}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",Calibri,Arial,sans-serif;color:var(--text);background:var(--bg);line-height:1.55;font-size:15px}
+#sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:var(--accent);color:#fff;overflow-y:auto;padding:22px 18px}
+#sidebar .brand{font-size:15px;font-weight:600;letter-spacing:.4px;border-bottom:1px solid rgba(255,255,255,.25);padding-bottom:12px;margin-bottom:12px}
+#sidebar .brand small{display:block;font-weight:400;opacity:.75;margin-top:4px}
+#sidebar nav ul{list-style:none;margin:0;padding-left:0}
+#sidebar nav ul ul{padding-left:14px}
+#sidebar nav a{display:block;color:rgba(255,255,255,.85);text-decoration:none;font-size:12.6px;padding:4px 8px;border-radius:5px;border-left:3px solid transparent}
+#sidebar nav a:hover{background:rgba(255,255,255,.12);color:#fff}
+#sidebar nav a.active{background:rgba(255,255,255,.18);color:#fff;border-left-color:#9cc3e5;font-weight:600}
+#content{margin-left:var(--sidebar-w);padding:42px 56px;max-width:1080px}
+header.doc{border-bottom:3px solid var(--accent);padding-bottom:18px;margin-bottom:30px}
+header.doc h1{color:var(--accent);font-size:30px;margin:0 0 6px}
+header.doc .sub{color:var(--accent2);font-size:15.5px;font-weight:600}
+h1,h2{color:var(--accent);margin-top:2.1em;border-bottom:1px solid var(--border);padding-bottom:.25em}
+h3,h4{color:var(--accent2);margin-top:1.7em}
+a{color:var(--accent2)}
+table{border-collapse:collapse;width:100%;margin:1.1em 0;background:var(--card);font-size:13.2px;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+th{background:var(--accent);color:#fff;text-align:left;padding:8px 10px;font-weight:600}
+td{border:1px solid var(--border);padding:7px 10px;vertical-align:top}
+tr:nth-child(even) td{background:#f2f6fa}
+code{background:#eef2f6;border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:12px;font-family:Consolas,Menlo,monospace;color:#0b3d66}
+pre{background:#0f2a43;color:#dce8f5;padding:14px 16px;border-radius:8px;overflow-x:auto;font-size:12.5px}
+pre code{background:none;border:none;color:inherit;padding:0}
+blockquote{margin:1em 0;padding:10px 16px;background:#eaf1f8;border-left:5px solid var(--accent2);border-radius:0 6px 6px 0;color:#243b53}
+img.diagram,p img{max-width:100%;background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px;box-shadow:0 1px 3px rgba(0,0,0,.08);display:block;margin:1.2em auto}
+#top-btn{position:fixed;right:26px;bottom:26px;background:var(--accent);color:#fff;border:none;border-radius:50%;width:46px;height:46px;font-size:19px;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .25s;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+#top-btn.show{opacity:.92;pointer-events:auto}
+footer.doc{margin-top:60px;border-top:1px solid var(--border);padding-top:14px;color:var(--muted);font-size:12px}
+@media(max-width:900px){#sidebar{display:none}#content{margin-left:0;padding:24px}}
+</style>
+</head>
+<body>
+<aside id="sidebar">
+  <div class="brand">URS W2 — Traceability &amp; Quality<small>Rheinwerk
+MES Consolidation — User Requirements Specification</small></div>
+  <nav><ul>
+<li><a href="#purpose-scope" id="toc-purpose-scope">1. Purpose &amp;
+scope</a></li>
+<li><a href="#personas-in-scope" id="toc-personas-in-scope">2. Personas
+in scope</a></li>
+<li><a href="#requirements" id="toc-requirements">3. Requirements</a>
+<ul>
+<li><a href="#genealogy-object-model-w2-1" id="toc-genealogy-object-model-w2-1">3.1 Genealogy object model
+(W2-1)</a></li>
+<li><a href="#unified-batch-object-w2-2" id="toc-unified-batch-object-w2-2">3.2 Unified batch object
+(W2-2)</a></li>
+<li><a href="#batch-blocking-quarantine-with-propagation-w2-3" id="toc-batch-blocking-quarantine-with-propagation-w2-3">3.3 Batch
+blocking / quarantine with propagation (W2-3)</a></li>
+<li><a href="#quality-inspection-engine-w2-4" id="toc-quality-inspection-engine-w2-4">3.4 Quality Inspection engine
+(W2-4)</a></li>
+<li><a href="#certificates-of-analysis-w2-5" id="toc-certificates-of-analysis-w2-5">3.5 Certificates of Analysis
+(W2-5)</a></li>
+<li><a href="#isa-88-batch-recipes-w2-6" id="toc-isa-88-batch-recipes-w2-6">3.6 ISA-88 batch recipes
+(W2-6)</a></li>
+<li><a href="#hazmat-regulatory-master-data-w2-7" id="toc-hazmat-regulatory-master-data-w2-7">3.7 Hazmat / regulatory
+master data (W2-7)</a></li>
+<li><a href="#warehouse-fidelity-completion-w2-8" id="toc-warehouse-fidelity-completion-w2-8">3.8 Warehouse fidelity
+completion (W2-8)</a></li>
+<li><a href="#multi-level-trace-demonstration-w2-9-and-e-signature-decision-w2-10" id="toc-multi-level-trace-demonstration-w2-9-and-e-signature-decision-w2-10">3.9
+Multi-level trace demonstration (W2-9) and e-signature decision
+(W2-10)</a></li>
+<li><a href="#data-migration-requirements-open-batches-genealogy-history" id="toc-data-migration-requirements-open-batches-genealogy-history">3.10
+Data migration requirements (open batches &amp; genealogy
+history)</a></li>
+</ul></li>
+<li><a href="#non-functional-requirements" id="toc-non-functional-requirements">4. Non-functional
+requirements</a></li>
+<li><a href="#wave-exit-criteria-decomposed" id="toc-wave-exit-criteria-decomposed">5. Wave exit criteria
+(decomposed)</a></li>
+<li><a href="#untraceable-deferred" id="toc-untraceable-deferred">6.
+Untraceable / deferred</a></li>
+</ul></nav>
+</aside>
+<main id="content">
+  <header class="doc"><h1>URS W2 — Traceability &amp;
+Quality</h1><div class="sub">Rheinwerk MES Consolidation — User
+Requirements Specification</div></header>
+<p><strong>Programme:</strong> Rheinwerk Chemie GmbH — MES consolidation
+<strong>Wave:</strong> W2 (Traceability &amp; Quality) — backlog
+<code>docs/waves/W2-traceability-quality.md</code> (W2-1…W2-10)
+<strong>Document type:</strong> User Requirements Specification
+<strong>Companion document:</strong>
+<code>docs/test/TST-W2-traceability-quality.md</code></p>
+<hr />
+<h2 id="purpose-scope">1. Purpose &amp; scope</h2>
+<p>Wave W2 delivers the chemicals-critical traceability and quality
+capability of the consolidated MES: the genealogy object model as
+system-of-record (Absorb Qcadoo), the unified canonical Batch carrying
+identity + qa_state + expiry + genealogy links (ADR-003/CDM-01), batch
+blocking/quarantine with propagation through genealogy trees and
+exclusion from picking, adoption of the ERPNext Quality Inspection
+engine wired to the W1 execution state machine (ADR-009/CDM-07), and
+three white-space rebuilds: Certificates of Analysis, ISA-88 batch
+recipes with scaling, and hazmat/regulatory master data (dossier §6.3).
+It also completes warehouse physical fidelity (quarantine locations,
+pallet balances, stocktaking/repacking) and records the e-signature
+decision (W2-10). The wave closes when full multi-level trace is
+demonstrable, CoA is generated from inspection results, and recipe
+scaling is functional (wave exit,
+<code>docs/plan/consolidation-project-plan.md</code> M2).</p>
+<p><strong>Out of scope for W2</strong> (visible scope boundary, pulled
+from later waves):</p>
+<ul>
+<li>MRP / production planning journeys and finite-capacity scheduling
+(W3-1, W3-2)</li>
+<li>Group-ERP interface, costing/valuation GL boundary (W3-3, W3-4)</li>
+<li>SCADA/OPC-UA adapter — tracking events from process control
+(W3-5)</li>
+<li>Hazmat <em>shipping/ADR boundary and label data</em> — W2 lands
+master data only; boundary completion is W3-6</li>
+<li>Per-plant cutover, Plant A/B genealogy and stock backfill at
+production scale (W4-2, W4-3, W4-4) — W2 lands the migration
+<em>mechanism</em> and pilot reconciliation only</li>
+<li>E-signature <em>implementation</em> if the W2-10 decision selects it
+— W2 delivers the decision record and the enforcement point design, not
+a Part-11 subsystem</li>
+</ul>
+<h2 id="personas-in-scope">2. Personas in scope</h2>
+<p>From the dossier role model (dossier ch. 3.1 §B.2 role groups;
+ch. 3.2 §B personas):</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Persona</th>
+<th>W2 relevance</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Quality inspector (“Q. Fischer”)</td>
+<td>Quality Inspections, batch disposition (Release/Block), CoA
+issue</td>
+<td>dossier ch. 3.2 §B — <code>Quality Manager</code> role on Quality
+Inspection (<code>quality_inspection.json</code>); ch. 3.1 §B.2
+quality/genealogy officer (<code>ROLE_ADVANCED_GENEALOGY</code>,
+<code>ROLE_BATCHES</code>)</td>
+</tr>
+<tr>
+<td>Warehouse clerk (“W. Braun”)</td>
+<td>Quarantine locations, picking exclusion, stocktaking/repacking,
+pallet balances</td>
+<td>dossier ch. 3.1 §B.2 warehouse operator
+(<code>ROLE_DOCUMENTS_STATES_ACCEPT</code>,
+<code>ROLE_DOCUMENT_POSITIONS</code>)</td>
+</tr>
+<tr>
+<td>Shop-floor operator (“O. Weber”)</td>
+<td>Genealogy capture at consumption/production, gate refusals at the
+terminal</td>
+<td>dossier ch. 3.1 §B.2; ch. 3.2 <code>Manufacturing User</code></td>
+</tr>
+<tr>
+<td>Technologist (“T. Schmid”)</td>
+<td>ISA-88 recipe authoring and scaling, QI templates, hazmat master
+data</td>
+<td>dossier ch. 3.1 §B.2 master-data manager; ch. 3.2
+<code>Manufacturing Manager</code>, <code>Item Manager</code></td>
+</tr>
+<tr>
+<td>Business viewer (“B. Vogel”)</td>
+<td>Trace Ribbon drill-down, recall evidence, CoA retrieval</td>
+<td>design skill “The three audiences” — business/management</td>
+</tr>
+</tbody>
+</table>
+<p>Planner (“P. Krüger”) is <strong>out of scope</strong> for W2
+(planning journeys are W3); the planner appears only as fixture context
+on production orders created in W1 scope.</p>
+<h2 id="requirements">3. Requirements</h2>
+<p>Requirement IDs: <code>URS-W2-NNN</code>. Priorities: MoSCoW. Each
+requirement carries a one-line lineage block: disposition · golden
+source · evidence. State vocabulary is fixed: <code>qa_state</code> ∈
+{Quarantined, Released, Blocked}; <code>exec_state</code> ∈ {Pending,
+Accepted, In Progress, Completed, Interrupted, Abandoned, Declined};
+<code>gov_state</code> ∈ {Draft, Checked, Accepted, Outdated, Declined}.
+“Status” is never used unqualified.</p>
+<h3 id="genealogy-object-model-w2-1">3.1 Genealogy object model
+(W2-1)</h3>
+<h4 id="urs-w2-001-genealogy-links-as-system-of-record">URS-W2-001 —
+Genealogy links as system-of-record</h4>
+<p>The system shall record, for every production order that consumes or
+produces batch-managed material, genealogy links (direction
+consumed/produced, batch, production order, quantity) on the canonical
+Batch, so that the quality inspector can reconstruct lineage without
+deriving it from stock ledger joins.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Absorb · Qcadoo Advanced Genealogy ·
+<code>TrackingRecordFields.java:31-49</code> (producedBatch ↔︎
+usedBatchesSimple); ADR-003/CDM-01 <code>genealogy_links</code> child
+table</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given PO-2026-0001 (500 kg Rheinol 40 Compound on LINE-1) in
+exec_state In Progress consuming BATCH-A-0001 (Rheinol 40 Basisharz, 480
+kg) and BATCH-A-0002 (Additiv K7, 20 kg), When O. Weber records output
+producing BATCH-C-1001, Then BATCH-C-1001 carries two
+<code>consumed</code> genealogy links (BATCH-A-0001 qty 480 kg;
+BATCH-A-0002 qty 20 kg) and one <code>produced</code> link referencing
+PO-2026-0001.</li>
+<li>AC-2: Given the links in AC-1 exist, When any of the linked stock
+entries is cancelled and reposted, Then the genealogy links remain the
+system-of-record and are corrected by the same transaction — a
+reconciliation query between genealogy links and SLE-derived trace
+returns zero divergent rows.</li>
+<li>AC-3: Given a production order consuming a non-batch-managed
+material (e.g. process water), When output is recorded, Then no
+genealogy link is created for that material and the produced batch’s
+genealogy is still considered complete (no
+<code>genealogy_incomplete</code> flag).</li>
+</ul></li>
+<li><strong>Dependencies:</strong> W1-1 state machine (URS-W1-xxx,
+exec_state transitions); W0 canonical Batch scaffold.</li>
+</ul>
+<h4 id="urs-w2-002-forward-and-backward-tree-browsing">URS-W2-002 —
+Forward and backward tree browsing</h4>
+<p>The system shall let the quality inspector browse the genealogy of
+any batch in both directions — backward (“produced from”) to supplier
+batches and forward (“used to produce”) to finished-goods batches —
+across an arbitrary number of levels.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Absorb · Qcadoo Advanced Genealogy ·
+<code>AdvancedGenealogyTreeViewListeners.java:71-73</code> (producedFrom
+/ usedToProduce directions)</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given BATCH-C-1001 produced from BATCH-A-0001 and BATCH-A-0002
+(URS-W2-001 AC-1), When Q. Fischer opens the backward trace of
+BATCH-C-1001, Then both raw batches appear at level 1 with their
+consumed quantities (480 kg / 20 kg).</li>
+<li>AC-2: Given BATCH-A-0002 was consumed into BATCH-C-1001 and
+BATCH-C-1002, When Q. Fischer opens the forward trace of BATCH-A-0002,
+Then both FG batches appear with the production order that links them
+(PO-2026-0001, PO-2026-0002).</li>
+<li>AC-3: Given a three-level chain (supplier batch → intermediate batch
+→ BATCH-C-1001), When the backward trace is expanded to all levels, Then
+the supplier batch appears at level 2 and the trace terminates with no
+cycle and no duplicate visit of a node.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W2-001.</li>
+</ul>
+<h4 id="urs-w2-003-trace-ribbon-genealogy-ui">URS-W2-003 — Trace Ribbon
+genealogy UI</h4>
+<p>The system shall render batch genealogy as the Trace Ribbon: a
+horizontal flowing ribbon with supplier batches on the left, the batch
+in focus centred, and downstream products on the right; blocked branches
+rendered in signal-red with a hard visual break; interactive (expand
+levels, jump to any batch), printable, and identical in the CoA and
+recall views.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Absorb + extend · Qcadoo tree semantics
+rendered per design skill ·
+<code>AdvancedGenealogyTreeViewListeners.java:71-73</code>; design skill
+“Layout patterns” #4 (The Trace Ribbon — signature element)</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given BATCH-C-1001 with the genealogy of URS-W2-001 AC-1, When
+B. Vogel opens the Trace Ribbon for BATCH-C-1001, Then BATCH-A-0001 and
+BATCH-A-0002 render left of centre, BATCH-C-1001 centred, and any
+downstream consumption right of centre.</li>
+<li>AC-2: Given BATCH-A-0002 is Blocked, When the ribbon for
+BATCH-C-1001 renders, Then the BATCH-A-0002 branch renders in
+<code>--rw-signal-red</code> with a hard visual break and its status
+pill shows icon + label “Blocked” + colour.</li>
+<li>AC-3: Given the ribbon is open, When Q. Fischer activates the batch
+chip of BATCH-A-0001 (mouse or Enter on the focused chip), Then the
+ribbon re-centres on BATCH-A-0001 without losing the expansion state of
+already-expanded levels.</li>
+<li>AC-4: Given the ribbon is open, When the print action is invoked,
+Then a print rendering identical in structure to the on-screen ribbon is
+produced (status conveyed by icon + label, not colour alone).</li>
+</ul></li>
+<li><strong>Design conformance:</strong> design skill pattern 4 (Trace
+Ribbon); status pill = icon + label + colour (Component rules); batch
+chip = mono ID + status dot + one-click to Trace Ribbon; keyboard path
+per Interaction rules (arrows move focus, Enter opens, Esc closes);
+renders in Desk and Terminal modes with identical information.</li>
+<li><strong>Dependencies:</strong> URS-W2-002, URS-W2-009 (blocked
+rendering).</li>
+</ul>
+<h4 id="urs-w2-004-genealogy-completeness-marking">URS-W2-004 —
+Genealogy completeness marking</h4>
+<p>The system shall mark any batch whose lineage is not fully recorded
+(migrated Qcadoo resource-string batches without matched genealogy
+Batch; OFBiz history behind the trace boundary) with the
+<code>genealogy_incomplete</code> flag, visible wherever the batch is
+traced.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Absorb + migration rule · ADR-003
+consequences (<code>genealogy_incomplete</code>, trace-boundary) ·
+dossier §7 implication 9; §8.2 Q2/Q3</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given a migrated batch created from an unmatched Qcadoo
+<code>Resource.batch</code> string, When it is saved by the migration,
+Then <code>genealogy_incomplete = true</code> and the Trace Ribbon
+renders the flag as an amber advisory pill (icon + label “Trace
+incomplete”) on that node.</li>
+<li>AC-2: Given a batch with <code>genealogy_incomplete = true</code>,
+When it appears in a backward trace, Then the trace does not silently
+terminate: the incomplete node is shown with the advisory and the
+recorded trace-boundary date where applicable (OFBiz history).</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W2-030 (migration),
+URS-W2-001.</li>
+</ul>
+<h3 id="unified-batch-object-w2-2">3.2 Unified batch object (W2-2)</h3>
+<h4 id="urs-w2-005-canonical-batch-identity-qa_state-expiry-genealogy">URS-W2-005
+— Canonical Batch: identity + qa_state + expiry + genealogy</h4>
+<p>The system shall provide one canonical Batch object per lot carrying
+identity (<code>batch_id</code>, item, qty_original/uom,
+supplier_batch_no, legacy_refs), qa_state
+(Quarantined/Released/Blocked), expiry (manufacturing_date,
+expiry_date), and genealogy links — extending the anchor Batch DocType,
+never forking it.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Absorb + extend · ADR-003/CDM-01 · dossier
+§7 implication 2; ch. 3.1 §B.4 (dual model); ch. 3.2
+<code>batch.py:97-115</code> (stateless anchor Batch)</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given the technologist creates BATCH-A-0001 for RW-CHM-0001
+“Rheinol 40 Basisharz” with 500 kg and expiry 31.12.2026, When the batch
+is saved, Then it carries <code>batch_id</code> BATCH-A-0001, item
+RW-CHM-0001, qty_original 500 kg, expiry_date 31.12.2026 and qa_state
+Quarantined (default at creation).</li>
+<li>AC-2: Given an item flagged shelf-life-managed, When a batch is
+created without expiry_date, Then save is refused naming the missing
+field (parity with anchor <code>batch.py:194-220</code> mandatory-expiry
+throw).</li>
+<li>AC-3: Given BATCH-A-0001 exists, When its record is inspected via
+the API, Then the anchor Batch DocType is unmodified (extensions live in
+custom fields / linked DocTypes) — verified by schema diff against the
+anchor.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> W0 canonical-entity scaffold; ADR-003
+sign-off (<strong>Business sign-off required</strong> — ADR-003 status
+is Proposed).</li>
+</ul>
+<h4 id="urs-w2-006-qa_state-workflow">URS-W2-006 — qa_state
+workflow</h4>
+<p>The system shall govern qa_state by workflow: batches are created
+Quarantined (or Released where QC-exempt), move Quarantined → Released
+only by Quality Inspection acceptance, and move Blocked ⇄ Released only
+by a quality-inspector decision with a mandatory reason.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Absorb + extend · Qcadoo
+<code>BatchState.java:31-44</code> (TRACKED⇄BLOCKED, reversible)
+extended with Quarantined per ADR-003 · CDM-01 lifecycle</li>
+<li><strong>Behaviour-parity note:</strong> legacy Qcadoo has only
+TRACKED⇄BLOCKED; the Quarantined entry state is a <strong>deliberate
+deviation</strong> beyond all three sources (ADR-003 “deliberately
+designed beyond all three”). <strong>Business sign-off required</strong>
+for the Quarantined-by-default policy (QC-exempt item list).</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given BATCH-C-1001 is created by production receipt, When
+creation completes, Then qa_state = Quarantined and its stock is
+excluded from picking (URS-W2-010).</li>
+<li>AC-2: Given BATCH-C-1001 is Quarantined and its Quality Inspection
+(QIT-COMPOUND) is accepted, When the inspection is submitted as
+Accepted, Then qa_state transitions to Released automatically and the
+transition is audited (user, timestamp, triggering inspection).</li>
+<li>AC-3: Given BATCH-A-0002 is Released, When Q. Fischer blocks it
+without entering a reason, Then the transition is refused; When a reason
+(“supplier recall K7/2026-06”) is entered, Then qa_state = Blocked and
+reason, user and timestamp are recorded.</li>
+<li>AC-4: Given BATCH-A-0002 is Blocked, When O. Weber (shop-floor
+operator role) attempts to unblock it, Then the transition is refused as
+a permission gate — only the quality-inspector role may transition
+qa_state.</li>
+<li>AC-5: Given any batch, When a transition not in the workflow
+(e.g. Quarantined → Blocked skipping inspection disposition, or Released
+→ Quarantined) is attempted via UI or API, Then it is rejected naming
+the allowed transitions.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W2-013 (QI wiring); W1-8 role
+model (URS-W1-xxx).</li>
+</ul>
+<h4 id="urs-w2-007-legacy-reference-preservation">URS-W2-007 — Legacy
+reference preservation</h4>
+<p>The system shall preserve every legacy identifier of a batch (Qcadoo
+genealogy batch number, Qcadoo resource batch string, ERPNext batch_no,
+OFBiz lotId) in the <code>legacy_refs</code> child table, and offer the
+legacy field name on hover per the legacy-bridge affordance.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Absorb (migration) · ADR-003/CDM-01
+<code>legacy_refs</code> · dossier §5.2 batch/lot row (dual model, four
+meanings)</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given a migrated batch merged from Qcadoo genealogy batch
+“GB-4711” and resource batch string “RB-4711”, When the batch is opened,
+Then <code>legacy_refs</code> lists both (system=Qcadoo, ref values
+preserved verbatim).</li>
+<li>AC-2: Given a field mapped from a legacy system (e.g. expiry_date
+from <code>Resource.expirationDate</code>), When the user
+hovers/long-presses the field label, Then the legacy origin is shown
+(“was: Resource.expirationDate → now: expiry_date”), removable by
+feature flag after cutover.</li>
+</ul></li>
+<li><strong>Design conformance:</strong> design skill Interaction rules
+— legacy bridge affordance.</li>
+<li><strong>Dependencies:</strong> URS-W2-030 (migration).</li>
+</ul>
+<h4 id="urs-w2-008-expiry-drives-fefo-and-the-hard-stop">URS-W2-008 —
+Expiry drives FEFO and the hard stop</h4>
+<p>The system shall carry expiry on the canonical Batch such that FEFO
+picking (RM Lager Nord) orders by expiry_date and consumption of an
+expired batch is refused per the W1 expiry policy decision.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Adopt ERPNext hard stop + Absorb Qcadoo
+FEFO · <code>stock_ledger_entry.py:287-299</code> (expired-batch throw);
+<code>WarehouseAlgorithm.java:26-27</code> (FEFO) · policy per W1-9
+decision (<strong>Business sign-off required</strong> — W1-9 records the
+estate-wide policy; W2 inherits it)</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given RM Lager Nord (FEFO) holds BATCH-A-0001 (expiry
+31.12.2026) and a second Basisharz batch expiring 30.09.2026, When W.
+Braun picks 100 kg of RW-CHM-0001, Then the batch expiring 30.09.2026 is
+proposed first.</li>
+<li>AC-2: Given BATCH-A-0002 has expiry_date 30.06.2026 and today is
+01.07.2026, When an issue against BATCH-A-0002 is submitted, Then the
+posting is refused naming the batch and its expiry date (per the
+signed-off W1-9 policy; if W1-9 selected FEFO-advisory for Plant A
+journeys, this AC executes in the hard-stop configuration and the
+advisory configuration is exercised in parity tests).</li>
+</ul></li>
+<li><strong>Dependencies:</strong> W1-9 decision, W1-5 warehouse
+fidelity base (URS-W1-xxx).</li>
+</ul>
+<h3 id="batch-blocking-quarantine-with-propagation-w2-3">3.3 Batch
+blocking / quarantine with propagation (W2-3)</h3>
+<h4 id="urs-w2-009-blocking-propagates-advisories-through-genealogy">URS-W2-009
+— Blocking propagates advisories through genealogy</h4>
+<p>The system shall, when a batch is Blocked, propagate an advisory flag
+to all downstream batches in its forward genealogy (all levels), and
+clear the advisory when the batch is unblocked and no other blocked
+ancestor remains.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Absorb + extend · Qcadoo blocking
+(<code>BatchState.java:31-44</code>) extended with propagation per
+dossier §7 implication 3 (“blocking must propagate through genealogy
+trees — none does the former automatically”) · ADR-003 consequences</li>
+<li><strong>Behaviour-parity note:</strong> propagation is a
+<strong>deliberate deviation</strong> beyond legacy behaviour (no legacy
+system propagates). <strong>Business sign-off required</strong> for
+advisory semantics (downstream batches flagged, not auto-Blocked).</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given BATCH-A-0002 was consumed into BATCH-C-1001 and
+BATCH-C-1002, When Q. Fischer blocks BATCH-A-0002, Then both FG batches
+receive a blocked-ancestor advisory naming BATCH-A-0002 within the same
+transaction.</li>
+<li>AC-2: Given the advisory of AC-1, When Q. Fischer unblocks
+BATCH-A-0002 (reason recorded) and no other ancestor of
+BATCH-C-1001/1002 is Blocked, Then the advisories are cleared.</li>
+<li>AC-3: Given BATCH-C-1001 carries a blocked-ancestor advisory, When
+it renders anywhere (queue, ribbon, batch chip), Then the advisory shows
+as an amber pill (icon + label “Blocked ancestor: BATCH-A-0002”) — the
+batch’s own qa_state is unchanged.</li>
+</ul></li>
+<li><strong>Design conformance:</strong> status pill icon + label +
+colour; ribbon blocked-branch rendering per URS-W2-003 AC-2.</li>
+<li><strong>Dependencies:</strong> URS-W2-001, URS-W2-006.</li>
+</ul>
+<h4 id="urs-w2-010-blocked-and-quarantined-stock-excluded-from-picking">URS-W2-010
+— Blocked and Quarantined stock excluded from picking</h4>
+<p>The system shall exclude all stock of Blocked and Quarantined batches
+from picking proposals, reservations and issue documents, in every
+warehouse and for every disposal algorithm.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Absorb · Qcadoo
+<code>ResourceCriteriaModifiers.java:59,70</code> (QC-blocked resources
+excluded from lookups) + extend to Quarantined per ADR-003
+lifecycle</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given BATCH-A-0002 (50 kg Additiv K7 in RM Lager Nord) is
+Blocked, When W. Braun creates a pick for 5 kg of RW-CHM-0002, Then
+BATCH-A-0002 is absent from the proposal; if it is the only stock, the
+pick fails naming the blocked batch as the reason.</li>
+<li>AC-2: Given BATCH-C-1001 is Quarantined in FG Lager Süd, When a
+delivery reservation for RW-CHM-0003 is attempted, Then BATCH-C-1001
+quantity is not reservable and the availability figure excludes it.</li>
+<li>AC-3: Given an operator scans HU-000123 containing Blocked stock at
+a terminal issue screen, When the scan is confirmed, Then a gate-refusal
+modal names the rule (blocked-batch exclusion), the record
+(BATCH-A-0002, HU-000123) and the resolution (QA unblock required), and
+the refusal is logged.</li>
+</ul></li>
+<li><strong>Design conformance:</strong> gate refusals are modal, never
+a toast; name rule/record/resolution (design skill “Hard gates look
+hard”); scanner path with full-row confirmation.</li>
+<li><strong>Dependencies:</strong> URS-W2-006; W1-5/W1-6 warehouse +
+reservation base (URS-W1-xxx).</li>
+</ul>
+<h4 id="urs-w2-011-blocking-excludes-batches-from-further-genealogy-use">URS-W2-011
+— Blocking excludes batches from further genealogy use</h4>
+<p>The system shall refuse recording consumption of a Blocked batch into
+any production order, at both the UI gate and the posting hook.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Absorb · Qcadoo “batch must be unblocked
+(TRACKED) before further use” · <code>BatchState.java:31-44</code>;
+<code>BatchBasicStateListenerService.java</code> (dossier ch. 3.1
+§C.3)</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given PO-2026-0002 In Progress and BATCH-A-0002 Blocked, When
+O. Weber scans BATCH-A-0002 for consumption, Then the terminal refuses
+with a gate-refusal modal (rule: blocked-batch consumption; record:
+BATCH-A-0002; resolution: QA unblock) and no genealogy link is
+written.</li>
+<li>AC-2: Given the same setup, When consumption is attempted directly
+via API (bypassing UI), Then the server hook refuses the posting with
+the same rule identifier — server-side enforcement is
+authoritative.</li>
+</ul></li>
+<li><strong>Design conformance:</strong> gate refusal modal naming
+rule/record/resolution; gated actions confirm from the server (no
+optimistic UI).</li>
+<li><strong>Dependencies:</strong> URS-W2-006, URS-W2-001.</li>
+</ul>
+<h4 id="urs-w2-012-quarantine-storage-locations">URS-W2-012 — Quarantine
+storage locations</h4>
+<p>The system shall support flagging Storage Locations as quarantine
+locations; stock of Quarantined batches put away in a quarantine-flagged
+location, and movements out of quarantine locations, require the
+quality-inspector or warehouse-clerk role per transition.</p>
+<ul>
+<li><strong>Priority:</strong> Should</li>
+<li><strong>Lineage:</strong> Absorb · Qcadoo storage-location model ·
+<code>storageLocation.xml:37-54</code> (location flags) + ADR-005/CDM-03
+Storage Location extension; W2-8 backlog item</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given NORD-A-01-01 is flagged as a quarantine location, When
+BATCH-C-1001 (Quarantined) is received, Then the putaway proposal
+targets NORD-A-01-01.</li>
+<li>AC-2: Given Quarantined stock in NORD-A-01-01, When O. Weber
+(operator role) attempts a transfer out, Then the movement is refused as
+a role gate; When W. Braun performs it after the batch is Released, Then
+it posts.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W2-006; W1-5 storage-location
+DocType (URS-W1-xxx).</li>
+</ul>
+<h3 id="quality-inspection-engine-w2-4">3.4 Quality Inspection engine
+(W2-4)</h3>
+<h4 id="urs-w2-013-adopt-typed-template-driven-quality-inspections">URS-W2-013
+— Adopt typed, template-driven Quality Inspections</h4>
+<p>The system shall provide Quality Inspections of types Incoming,
+Outgoing and In Process with parametric readings (numeric min/max, value
+match, formula acceptance) instantiated from per-item templates, used
+as-is from the anchor.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Adopt · ERPNext QI engine ·
+<code>quality_inspection.py:265-336</code> (auto accept/reject from
+readings, min/max, <code>safe_eval</code> formula);
+<code>quality_inspection.json:74,237</code> (types,
+Accepted/Rejected/Cancelled)</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given template QIT-COMPOUND (viscosity 1200–1400 mPa·s;
+density 1.02–1.06 g/cm³; moisture ≤ 0.5 %) assigned to RW-CHM-0003, When
+Q. Fischer creates an In Process inspection for BATCH-C-1001, Then all
+three parameters are instantiated with their limits.</li>
+<li>AC-2: Given readings viscosity 1290 mPa·s, density 1.04 g/cm³,
+moisture 0.3 %, When the inspection is evaluated, Then every reading
+passes and the inspection result is Accepted automatically.</li>
+<li>AC-3: Given a reading viscosity 1450 mPa·s, When the inspection is
+evaluated, Then the inspection result is Rejected and the failing
+parameter and limit are identified on the reading row.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> W0 anchor platform; template master
+data (technologist).</li>
+</ul>
+<h4 id="urs-w2-014-qi-gates-wired-to-the-w1-state-machine">URS-W2-014 —
+QI gates wired to the W1 state machine</h4>
+<p>The system shall wire Quality Inspection gates to the execution state
+machine: a production order whose produced batch requires inspection
+cannot reach exec_state Completed while a required inspection is
+missing, unsubmitted or Rejected; inspection severity is fixed to Stop
+(refusal), not warn.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Adopt + wire · ERPNext QI gating
+(<code>quality_inspection_service.py:21-127</code>;
+<code>job_card.py:843-889</code>) wired to Absorb-Qcadoo exec_state
+(W1-1) · dossier §8.2 Q1 (severity setting) — <strong>Business sign-off
+required</strong>: severity fixed to Stop estate-wide deviates from
+Plant C’s configurable behaviour</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given PO-2026-0001 In Progress with output BATCH-C-1001 and no
+submitted inspection, When O. Weber attempts to complete the order, Then
+a gate-refusal modal names the rule (QI-required gate), the record
+(PO-2026-0001, BATCH-C-1001, QIT-COMPOUND) and the resolution (submit an
+Accepted inspection), and exec_state remains In Progress.</li>
+<li>AC-2: Given the inspection for BATCH-C-1001 is Rejected, When
+completion is attempted, Then the refusal names the Rejected inspection;
+the permitted paths are QA disposition of the batch (Blocked or rework)
+— completion stays gated.</li>
+<li>AC-3: Given the inspection is Accepted, When completion is
+attempted, Then exec_state transitions to Completed and BATCH-C-1001
+qa_state is Released (URS-W2-006 AC-2).</li>
+</ul></li>
+<li><strong>Design conformance:</strong> gate refusal modal naming
+rule/record/resolution; server-confirmed gating.</li>
+<li><strong>Dependencies:</strong> W1-1/W1-2 state machine + gating
+hooks (URS-W1-xxx); URS-W2-006, URS-W2-013.</li>
+</ul>
+<h4 id="urs-w2-015-inspection-queue-for-the-quality-inspector">URS-W2-015 —
+Inspection queue for the quality inspector</h4>
+<p>The system shall provide the quality inspector a Work Queue → Detail
+screen of due inspections (filterable by type, item, batch, production
+order), with reading entry optimised for keyboard and units suffixed
+inside inputs.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Adopt · ERPNext QI engine, presented per
+design skill · <code>quality_inspection.py</code>; design skill Layout
+pattern 1 (Work Queue → Detail)</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given inspections due for BATCH-C-1001 and BATCH-C-1002, When
+Q. Fischer opens the inspection queue, Then both appear with batch chip,
+item, type and due indication; arrow keys move the selection and Enter
+opens the detail.</li>
+<li>AC-2: Given the detail for BATCH-C-1001 open, When Q. Fischer enters
+readings, Then units (mPa·s, g/cm³, %) render suffixed inside the
+inputs, validation is inline on blur, and no entered value is lost on a
+failed submit.</li>
+<li>AC-3: Given an empty queue, When the queue renders, Then the empty
+state directs (“No inspections due — next scheduled …”), never
+decorates.</li>
+</ul></li>
+<li><strong>Design conformance:</strong> Work Queue → Detail;
+keyboard-first parity (<code>?</code> shortcut sheet); forms
+label-above-field, units suffixed, inline validation; Desk and Terminal
+modes render the same information.</li>
+<li><strong>Dependencies:</strong> URS-W2-013.</li>
+</ul>
+<h4 id="urs-w2-016-rejection-routes-to-qa-disposition">URS-W2-016 —
+Rejection routes to QA disposition</h4>
+<p>The system shall route a Rejected inspection to an explicit QA
+disposition on the batch — Blocked (with reason) or rework reference —
+so no Rejected result leaves a batch in an undispositioned state.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Adopt + extend · ADR-009/CDM-07
+(“rejection routes to QA disposition (Blocked or rework)”) ·
+<code>quality_inspection.py:265-281</code></li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given the inspection for BATCH-C-1002 is Rejected, When Q.
+Fischer opens the disposition action, Then the choices are Block batch
+or Assign rework (reference to a rework production order), each
+requiring a reason.</li>
+<li>AC-2: Given no disposition has been recorded, When a nightly
+integrity check runs, Then BATCH-C-1002 is listed as “Rejected without
+disposition” in the quality inspector’s queue.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W2-006, URS-W2-013.</li>
+</ul>
+<h3 id="certificates-of-analysis-w2-5">3.5 Certificates of Analysis
+(W2-5)</h3>
+<h4 id="urs-w2-017-coa-generated-from-accepted-inspections">URS-W2-017 —
+CoA generated from accepted inspections</h4>
+<p>The system shall generate a Certificate of Analysis per batch from
+its accepted inspection results: a CoA Certificate record (link batch;
+readings snapshot; approved signatory; issue date) with a PDF
+artefact.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Rebuild (white space — absent in all
+three, dossier §6.3) · ADR-009/CDM-07 CoA Certificate spec</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given BATCH-C-1001 is Released with an Accepted QIT-COMPOUND
+inspection (viscosity 1290 mPa·s, density 1.04 g/cm³, moisture 0.3 %),
+When Q. Fischer issues the CoA, Then a CoA Certificate is created
+snapshotting the three readings with limits, batch identity
+BATCH-C-1001, item RW-CHM-0003, signatory Q. Fischer and issue date, and
+a PDF artefact is attached.</li>
+<li>AC-2: Given a batch with no Accepted inspection (Quarantined or
+Rejected), When CoA issue is attempted, Then it is refused naming the
+missing/failed inspection.</li>
+<li>AC-3: Given the CoA of AC-1 is issued and the underlying inspection
+is later cancelled/amended, When the CoA is viewed, Then the snapshot is
+unchanged (immutability) and the CoA is marked as superseded only by
+issuing a new version.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W2-013, URS-W2-006.</li>
+</ul>
+<h4 id="urs-w2-018-coa-embeds-the-trace-ribbon">URS-W2-018 — CoA embeds
+the Trace Ribbon</h4>
+<p>The system shall render the batch’s Trace Ribbon (identical to the
+browsing view) inside the CoA view and its print rendering.</p>
+<ul>
+<li><strong>Priority:</strong> Should</li>
+<li><strong>Lineage:</strong> Rebuild · design skill pattern 4
+(“identical in the CoA and recall views”)</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given the CoA for BATCH-C-1001, When it is viewed, Then the
+embedded ribbon shows the same nodes and states as the standalone ribbon
+for BATCH-C-1001 at the same instant.</li>
+</ul></li>
+<li><strong>Design conformance:</strong> Trace Ribbon identical in CoA
+and recall views; print-safe (icon + label, not colour-only).</li>
+<li><strong>Dependencies:</strong> URS-W2-003, URS-W2-017.</li>
+</ul>
+<h4 id="urs-w2-019-coa-retrieval-for-business-viewers">URS-W2-019 — CoA
+retrieval for business viewers</h4>
+<p>The system shall let the business viewer retrieve issued CoAs by
+batch, item or customer-facing identifier without training, via the
+Command Dashboard drill-down.</p>
+<ul>
+<li><strong>Priority:</strong> Should</li>
+<li><strong>Lineage:</strong> Rebuild · design skill Layout pattern 3
+(Command Dashboard — lens on the same data)</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given issued CoAs exist, When B. Vogel searches “BATCH-C-1001”
+from the dashboard, Then the CoA opens read-only with its PDF
+downloadable; the drill-down lands in the same professional view, not a
+separate report world.</li>
+</ul></li>
+<li><strong>Design conformance:</strong> plain-language tiles,
+drill-down to professional queue views.</li>
+<li><strong>Dependencies:</strong> URS-W2-017.</li>
+</ul>
+<h3 id="isa-88-batch-recipes-w2-6">3.6 ISA-88 batch recipes (W2-6)</h3>
+<h4 id="urs-w2-020-isa-88-recipe-structure-over-bomrouting">URS-W2-020 —
+ISA-88 recipe structure over BOM/Routing</h4>
+<p>The system shall let the technologist structure a recipe as ISA-88
+unit procedures, operations and phases layered over the anchor BOM +
+Routing pair (BOM-RW-CHM-0003-001 / RT-COMPOUND-01), without forking the
+anchor DocTypes.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Rebuild (white space — dossier §6.3, ch. G
+“ISA-88: Absent” in all three) · ADR-006/CDM-04 (governed BOM+Routing
+pair) · CONSOLIDATION.md <code>recipe_isa88</code></li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given BOM-RW-CHM-0003-001 with routing RT-COMPOUND-01, When T.
+Schmid defines unit procedure “Mischen” (work centre LINE-1/MIX-01) with
+phases “Dosieren Basisharz”, “Dosieren Additiv”, “Mischen 30 min”, and
+unit procedure “Abfüllen” (LINE-1/FILL-01), Then the recipe persists the
+hierarchy recipe → unit procedure → phase with material assignments per
+phase (Basisharz 480 kg to Dosieren Basisharz, Additiv K7 20 kg to
+Dosieren Additiv).</li>
+<li>AC-2: Given the recipe of AC-1, When the anchor BOM is inspected,
+Then its schema is unchanged (ISA-88 structure lives in
+<code>recipe_isa88</code> module DocTypes referencing BOM/Routing).</li>
+<li>AC-3: Given a phase referencing a material not present in the BOM,
+When the recipe is checked, Then validation fails naming the phase and
+material.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> W1-4 recipe governance (URS-W1-xxx —
+gov_state); ADR-006 sign-off.</li>
+</ul>
+<h4 id="urs-w2-021-recipe-scaling">URS-W2-021 — Recipe scaling</h4>
+<p>The system shall scale a recipe’s phase material quantities and
+declared output proportionally to a target batch size, with UoM-safe
+rounding and validation that scaled quantities stay within declared
+equipment limits.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Rebuild (white space) · wave exit
+criterion “recipe scaling functional”
+(<code>docs/waves/W2-traceability-quality.md</code>)</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given the recipe of URS-W2-020 declared for 500 kg output (480
+kg Basisharz + 20 kg Additiv K7), When T. Schmid scales it to 250 kg for
+PO-2026-0002, Then phase quantities become 240 kg and 10 kg and the
+scaled recipe references its source recipe and scale factor 0.5.</li>
+<li>AC-2: Given MIX-01 declares a working volume maximum equivalent to
+600 kg, When scaling to 750 kg is attempted, Then scaling is refused
+naming the phase, work centre and limit.</li>
+<li>AC-3: Given a scaled quantity that would round below the item’s UoM
+precision (e.g. 0.004 kg), When scaling is computed, Then the result is
+flagged for technologist confirmation rather than silently rounded to
+zero.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W2-020.</li>
+</ul>
+<h4 id="urs-w2-022-recipes-execute-under-governance">URS-W2-022 —
+Recipes execute under governance</h4>
+<p>The system shall permit production orders to reference only recipes
+whose governance state (gov_state) is Accepted; scaling produces a new
+governed recipe version in Draft.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Rebuild wired to Absorb · ADR-006/CDM-04
+(“orders may only reference Accepted recipes”); Qcadoo
+<code>TechnologyState.java:33-66</code> semantics via W1-4</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given a scaled recipe in gov_state Draft, When a production
+order accept referencing it is attempted, Then the accept gate refuses
+naming the recipe and its gov_state.</li>
+<li>AC-2: Given the scaled recipe passes validators and is Accepted,
+When PO-2026-0002 references it and is accepted, Then the order proceeds
+and the recipe’s <code>in_use_lock</code> prevents structural
+edits.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W2-020, URS-W2-021; W1-4
+(URS-W1-xxx).</li>
+</ul>
+<h3 id="hazmat-regulatory-master-data-w2-7">3.7 Hazmat / regulatory
+master data (W2-7)</h3>
+<h4 id="urs-w2-023-hazmat-profile-on-itembatch">URS-W2-023 — Hazmat
+profile on Item/Batch</h4>
+<p>The system shall provide a Hazmat Profile (UN number, SDS reference,
+storage class) linkable from Item and Batch, maintained by the
+technologist.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Rebuild (white space — dossier §6.3; ch. G
+“Hazmat: Absent” ×3, searches documented) · CDM-01
+<code>hazmat_profile</code> field · CONSOLIDATION.md
+<code>regulatory_hazmat</code> (completes in W3)</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given T. Schmid creates hazmat profile “UN 1866 / SDS-RW-0001
+/ storage class 3” and links it to RW-CHM-0001, When BATCH-A-0001 is
+viewed, Then the profile is visible on the batch via its item
+(batch-level override allowed for repacked goods).</li>
+<li>AC-2: Given an item flagged hazmat-mandatory without a linked
+profile, When a batch for it is created, Then creation is refused naming
+the missing profile.</li>
+<li>AC-3: Given the profile of AC-1, When the SDS reference is updated,
+Then the change is version-audited (user, timestamp, before/after).</li>
+</ul></li>
+<li><strong>Dependencies:</strong> W0-2 master data (URS-W0-xxx);
+boundary/label data explicitly deferred to W3-6.</li>
+</ul>
+<h4 id="urs-w2-024-hazmat-visibility-in-warehouse-and-trace-views">URS-W2-024
+— Hazmat visibility in warehouse and trace views</h4>
+<p>The system shall display the storage class and UN number wherever a
+hazmat batch appears in warehouse screens and the Trace Ribbon.</p>
+<ul>
+<li><strong>Priority:</strong> Should</li>
+<li><strong>Lineage:</strong> Rebuild · dossier §6.3; design skill
+density rules (nothing hides on desktop)</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given BATCH-A-0001 with the profile of URS-W2-023, When it
+renders in the RM Lager Nord stock view and the Trace Ribbon, Then
+storage class 3 and UN 1866 render as data columns/chips, not behind
+progressive disclosure.</li>
+</ul></li>
+<li><strong>Design conformance:</strong> nothing hides on desktop; mono
+identifiers; density.</li>
+<li><strong>Dependencies:</strong> URS-W2-023, URS-W2-003.</li>
+</ul>
+<h3 id="warehouse-fidelity-completion-w2-8">3.8 Warehouse fidelity
+completion (W2-8)</h3>
+<h4 id="urs-w2-025-pallet-balances">URS-W2-025 — Pallet balances</h4>
+<p>The system shall provide per-location pallet balances (handling units
+by storage location and type) reconciled against handling-unit content
+records.</p>
+<ul>
+<li><strong>Priority:</strong> Should</li>
+<li><strong>Lineage:</strong> Absorb · Qcadoo material-flow-resources ·
+<code>palletBalance.xml</code> (dossier ch. 3.1 §B.3 evidence);
+ADR-005/CDM-03 Handling Unit</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given HU-000123 (pallet) holding 20 × 25 kg sacks of
+BATCH-A-0001 at NORD-A-01-01, When W. Braun opens the pallet balance for
+RM Lager Nord, Then HU-000123 appears at NORD-A-01-01 with its content
+(RW-CHM-0001, BATCH-A-0001, 500 kg).</li>
+<li>AC-2: Given the sum of HU contents diverges from Bin quantity for an
+item/warehouse, When the reconciliation report runs, Then the divergent
+rows are listed (single-truth constraint: ledger is truth, HU is
+reference — CDM-03).</li>
+</ul></li>
+<li><strong>Dependencies:</strong> W1-5 Handling Unit/Storage Location
+DocTypes (URS-W1-xxx).</li>
+</ul>
+<h4 id="urs-w2-026-stocktaking-journey">URS-W2-026 — Stocktaking
+journey</h4>
+<p>The system shall provide a stocktaking journey with its own workflow
+(draft → in progress → accepted) generating correcting stock movements
+on acceptance, honouring the warehouse’s disposal algorithm for
+count-sheet ordering.</p>
+<ul>
+<li><strong>Priority:</strong> Should</li>
+<li><strong>Lineage:</strong> Absorb · Qcadoo
+<code>StocktakingState.java</code>;
+<code>ResourceManagementServiceImpl.java:1015-1027</code>
+(algorithm-ordered selection) · W2-8 backlog</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given a stocktaking for RM Lager Nord counting BATCH-A-0001 at
+495 kg against a book quantity of 500 kg, When W. Braun accepts the
+stocktaking, Then a correcting issue of 5 kg posts against BATCH-A-0001
+and the stocktaking becomes immutable.</li>
+<li>AC-2: Given a stocktaking in progress, When a second stocktaking for
+the same warehouse is created, Then creation is refused (one open
+stocktaking per warehouse).</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W2-025; W1-5 (URS-W1-xxx).</li>
+</ul>
+<h4 id="urs-w2-027-repacking-journey">URS-W2-027 — Repacking
+journey</h4>
+<p>The system shall provide a repacking journey that splits/merges batch
+quantities across handling units, preserving batch identity via
+<code>parent_batch</code> lineage where a new lot identity is
+created.</p>
+<ul>
+<li><strong>Priority:</strong> Should</li>
+<li><strong>Lineage:</strong> Absorb · Qcadoo
+<code>RepackingState.java</code> · CDM-01 <code>parent_batch</code>
+(“split/repack lineage, distinct from genealogy”)</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given 500 kg of BATCH-A-0001 on HU-000123, When W. Braun
+repacks 100 kg onto a new handling unit, Then stock reflects 400/100 kg
+on the two HUs and batch identity BATCH-A-0001 is unchanged.</li>
+<li>AC-2: Given a repack that creates a new lot identity
+(e.g. re-drumming with new labelling), When it is accepted, Then the new
+batch carries <code>parent_batch</code> = BATCH-A-0001, and the Trace
+Ribbon renders the split as lineage distinct from production
+genealogy.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W2-025, URS-W2-005.</li>
+</ul>
+<h3 id="multi-level-trace-demonstration-w2-9-and-e-signature-decision-w2-10">3.9
+Multi-level trace demonstration (W2-9) and e-signature decision
+(W2-10)</h3>
+<h4 id="urs-w2-028-multi-level-trace-acceptance-demonstration">URS-W2-028 —
+Multi-level trace acceptance demonstration</h4>
+<p>The system shall demonstrably produce a full forward and backward
+trace across at least three genealogy levels including blocked-batch
+propagation, executed as a scripted acceptance scenario on the shared
+fixtures.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Wave exit criterion ·
+<code>docs/waves/W2-traceability-quality.md</code> W2-9 · dossier §5.3
+“Trace a defect batch” journey</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given the fixture chain supplier batch → BATCH-A-0002 →
+BATCH-C-1001/BATCH-C-1002, When the demo script blocks BATCH-A-0002 and
+runs forward trace, Then both FG batches are found with advisories, and
+backward trace from BATCH-C-1001 reaches the supplier batch — all
+levels, both directions, with quantities.</li>
+<li>AC-2: Given the demo run, When it completes, Then its output (trace
+listings + ribbon screenshots) is attached to the wave acceptance
+record.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W2-001…004, URS-W2-009.</li>
+</ul>
+<h4 id="urs-w2-029-e-signature-decision-record">URS-W2-029 — E-signature
+decision record</h4>
+<p>The programme shall record the e-signature decision for
+compliance-critical transitions (which qa_state/exec_state/gov_state
+transitions and CoA issue require e-signatures vs audit trail only), as
+a signed-off decision record before wave exit.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Decision / Rebuild (white space — dossier
+§6.3 “Electronic signatures: no e-signature construct in any repo”;
+audit findings ch. 3.1/3.2/3.3 §E) · plan D3 (“Business sign-off Q2:
+which transitions legally require e-signatures”) — <strong>Business
+sign-off required</strong></li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given the decision workshop output, When the decision record
+is committed (ADR or plan appendix), Then it lists per governed
+transition (at minimum: Blocked⇄Released, CoA issue, recipe Accept)
+whether an e-signature is required, and names the sign-off authority and
+date.</li>
+<li>AC-2: Given the decision requires e-signatures for any transition,
+When W2 exits, Then the enforcement-point design (where the hook
+intercepts, what is captured) is documented and scheduled —
+implementation itself may land later per the decision.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W2-006, URS-W2-017,
+URS-W2-022.</li>
+</ul>
+<h3 id="data-migration-requirements-open-batches-genealogy-history">3.10
+Data migration requirements (open batches &amp; genealogy history)</h3>
+<h4 id="urs-w2-030-qcadoo-dual-model-merge-into-canonical-batch">URS-W2-030
+— Qcadoo dual-model merge into canonical Batch</h4>
+<p>The migration shall merge Qcadoo’s dual batch model — genealogy
+<code>Batch</code> records and warehouse <code>Resource.batch</code>
+strings — into canonical Batches: conventionally-linked pairs merge into
+one Batch with both legacy refs; unmatched resource strings create
+identity-only Batches flagged <code>genealogy_incomplete</code>.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Absorb migration · ADR-003 consequences;
+CDM-01 source mapping (<code>batch_id</code> row: “dual model collapsed;
+conventionally-linked pairs merged at migration”) · dossier §5.2
+batch/lot row; assumption A6</li>
+<li><strong>Source→canonical mapping reference:</strong> CDM-01 mapping
+table (<code>docs/canonical-model/README.md</code> §CDM-01):
+<code>advancedGenealogy.Batch.number</code> +
+<code>Resource.batch</code> → <code>batch_id</code>;
+<code>BatchState</code> TRACKED→Released, BLOCKED→Blocked,
+<code>Resource.blockedForQualityControl</code>→Quarantined →
+<code>qa_state</code>; <code>Resource.expirationDate</code> →
+<code>expiry_date</code> (lot→batch: earliest wins, conflicts
+reported).</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given a pilot extract with a genealogy Batch “GB-100” linked
+by convention to resource strings “GB-100”, When migration runs, Then
+exactly one canonical Batch exists with both refs in
+<code>legacy_refs</code> and
+<code>genealogy_incomplete = false</code>.</li>
+<li>AC-2: Given a resource string “RB-ORPHAN” with no genealogy Batch,
+When migration runs, Then an identity-only Batch is created with
+<code>genealogy_incomplete = true</code>.</li>
+<li>AC-3: Given two resource lots of one merged batch with expiry dates
+30.06.2026 and 31.07.2026, When migration runs, Then canonical
+<code>expiry_date</code> = 30.06.2026 and the conflict is listed on the
+migration report.</li>
+</ul></li>
+<li><strong>Reconciliation criteria:</strong> batch counts — canonical
+batch count = distinct(genealogy batches ∪ resource batch strings) after
+merge-pair dedup, reported per plant; qa_state distribution reconciled
+against legacy state counts (TRACKED/BLOCKED/blockedForQualityControl);
+100-record random spot-check comparing legacy field values to canonical
+fields with zero unexplained mismatches; checksum on (batch_id, item,
+expiry_date) tuples between staging and target.</li>
+<li><strong>Rollback condition:</strong> if reconciliation counts
+diverge &gt; 0 batches unexplained, or the spot-check finds any
+field-level corruption, the migration batch is rolled back (canonical
+Batches created by the run are deleted by run-id) and the run is
+repeated after correction; no partial acceptance.</li>
+<li><strong>Dependencies:</strong> W0-5 migration tooling (URS-W0-xxx);
+URS-W2-005.</li>
+</ul>
+<h4 id="urs-w2-031-genealogy-history-migration">URS-W2-031 — Genealogy
+history migration</h4>
+<p>The migration shall load Qcadoo TrackingRecord history (including
+archived <code>arch_*</code> orders in W4 backfill scope, pilot subset
+in W2) as genealogy links on canonical Batches, and record the OFBiz
+trace-boundary date for Plant B history.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Absorb migration · CDM-01
+<code>genealogy_links</code> mapping (“= TrackingRecord used/produced
+tree”); ADR-003 consequences (“OFBiz history carries a recorded
+trace-boundary”) · dossier §7 implication 9; §8.2 Q2/Q3</li>
+<li><strong>Source→canonical mapping reference:</strong> CDM-01
+<code>genealogy_links</code> row (Qcadoo <code>=</code> TrackingRecord;
+ERPNext <code>≈</code> SLE + Serial and Batch Bundle joins; OFBiz
+<code>≈</code> <code>WorkEffortInventoryAssign/-Produced</code> where
+lotId present).</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given a pilot TrackingRecord set (produced batch, used
+batches, quantities), When migration runs, Then each produced batch
+carries consumed links matching the used-batch rows one-to-one with
+quantities preserved.</li>
+<li>AC-2: Given Plant B history where <code>lotId</code> is absent on
+consumed inventory, When migration runs, Then the produced batch is
+flagged <code>genealogy_incomplete</code> and the plant-wide
+trace-boundary date is recorded in the migration register.</li>
+</ul></li>
+<li><strong>Reconciliation criteria:</strong> link counts — target
+consumed/produced link count = source TrackingRecord used/produced row
+count (per plant, per direction); orphan check — zero genealogy links
+referencing non-existent batches; spot-check of 50 randomly selected
+trees comparing full backward trace legacy-vs-target with identical node
+sets.</li>
+<li><strong>Rollback condition:</strong> any orphan link, or tree
+spot-check divergence, rolls back the genealogy-link load by run-id
+(batches from URS-W2-030 are retained); rerun after correction.</li>
+<li><strong>Dependencies:</strong> URS-W2-030; W0-5 (URS-W0-xxx).</li>
+</ul>
+<h4 id="urs-w2-032-legacy-quality-flags-migrate-as-qa_state-history">URS-W2-032
+— Legacy quality flags migrate as qa_state history</h4>
+<p>The migration shall carry legacy quality flags (Qcadoo
+<code>qualityRating</code>/<code>blockedForQualityControl</code>, OFBiz
+<code>quantityRejected</code>) as qa_state history/notes only — no
+parametric inspection backfill.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Adopt-boundary migration rule · ADR-009
+consequences (“No parametric backfill … legacy quality flags migrate as
+QA-state history”); CDM-07 mapping</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given a migrated batch whose legacy resource had
+<code>blockedForQualityControl = true</code>, When migration completes,
+Then the batch’s qa_state is Quarantined and a history entry cites the
+legacy flag as origin.</li>
+<li>AC-2: Given migrated data, When the Quality Inspection list is
+queried for pre-migration dates, Then no synthetic parametric
+inspections exist (zero backfilled QI records).</li>
+</ul></li>
+<li><strong>Reconciliation criteria:</strong> count of
+Quarantined/Blocked migrated batches = count of legacy flagged
+resources/batches per plant; zero QI records with inspection date before
+the migration cut date.</li>
+<li><strong>Rollback condition:</strong> qa_state distribution mismatch
+beyond zero unexplained rows rolls back the state-assignment step by
+run-id.</li>
+<li><strong>Dependencies:</strong> URS-W2-030.</li>
+</ul>
+<h2 id="non-functional-requirements">4. Non-functional requirements</h2>
+<h4 id="urs-w2-033-trace-and-scan-performance">URS-W2-033 — Trace and
+scan performance</h4>
+<p>The system shall render a Trace Ribbon of up to 200 nodes with UI
+feedback &lt; 100 ms and server-confirmed data ≤ 2 s;
+scan-to-confirmation on batch identification screens shall be ≤ 300 ms
+server-confirmed with UI feedback &lt; 100 ms.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Rebuild NFR · design skill “No dead air”
+(&lt;100 ms feel, progress on control, gated actions server-confirmed);
+shared NFR baseline from the programme brief</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given a fixture genealogy of 200 nodes, When the ribbon opens
+on the reference test environment, Then p95 server response ≤ 2 s over
+20 runs and the control shows progress beyond 100 ms.</li>
+<li>AC-2: Given a terminal issue screen, When BATCH-A-0001 is scanned 50
+times in test, Then p95 scan-to-server-confirmation ≤ 300 ms and every
+scan gives full-row visual + audible confirmation.</li>
+</ul></li>
+<li><strong>Design conformance:</strong> scanner first-class input; no
+optimistic UI for gated actions.</li>
+</ul>
+<h4 id="urs-w2-034-audit-of-gated-quality-actions">URS-W2-034 — Audit of
+gated quality actions</h4>
+<p>The system shall write an audit record (user, timestamp, rule id,
+record ids, outcome, reason where mandatory) for every qa_state
+transition, QI gate refusal, blocked-consumption refusal, CoA issue, and
+migration run.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Absorb · Qcadoo <code>*StateChange</code>
+audit pattern (<code>orderStateChange.xml:36-47</code>, equivalents for
+batch) + anchor <code>track_changes</code> · dossier ch. 3.1/3.2 §E</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given the block of BATCH-A-0002 (URS-W2-006 AC-3), When the
+audit log is queried, Then one entry exists with user Q. Fischer, the
+reason text, and before/after qa_state.</li>
+<li>AC-2: Given the gate refusal of URS-W2-011 AC-1, When the audit log
+is queried, Then the refusal is logged with rule id and record ids
+(refusals are logged, never toast-only).</li>
+</ul></li>
+</ul>
+<h4 id="urs-w2-035-german-first-i18n-and-locale-formats">URS-W2-035 —
+German-first i18n and locale formats</h4>
+<p>The system shall externalize all W2 UI strings with German as first
+language, render dates DD.MM.YYYY and quantities in kg (locale-correct),
+with no string concatenation.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Adopt platform i18n + design skill
+“Content and language” · ERPNext <code>de.po</code> evidence (dossier
+ch. 3.2 §F #46)</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given the German locale, When the Trace Ribbon, inspection
+queue and CoA render, Then all labels come from externalized catalogues
+(spot-check: zero hardcoded English literals in W2 templates) and
+BATCH-A-0001’s expiry renders “31.12.2026”.</li>
+<li>AC-2: Given a quantity of 480 kg, When it renders in any W2 table,
+Then the numeral is tabular, right-aligned, with unit kg.</li>
+</ul></li>
+</ul>
+<h4 id="urs-w2-036-access-control-on-w2-transitions">URS-W2-036 — Access
+control on W2 transitions</h4>
+<p>The system shall enforce workflow-state-level permissions: qa_state
+transitions restricted to the quality-inspector role; CoA issue to the
+quality inspector; recipe Accept to the technologist reviewer role;
+stocktaking acceptance to the warehouse clerk; enforced server-side.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Absorb · Qcadoo per-transition roles
+(dossier §7 implication 7; ch. 3.1 §B.2) expressed in Frappe RBAC per
+W1-8</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li>AC-1: Given O. Weber’s operator role, When each restricted action
+above is attempted via API, Then each is refused with a permission error
+and audited; When performed by the mapped role, each succeeds.</li>
+<li>AC-2: Given B. Vogel (business viewer), When any W2 screen renders,
+Then all data is readable but every state-changing action is
+absent/disabled.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> W1-8 (URS-W1-xxx).</li>
+</ul>
+<h2 id="wave-exit-criteria-decomposed">5. Wave exit criteria
+(decomposed)</h2>
+<p>Restated from <code>docs/waves/W2-traceability-quality.md</code>
+(“full multi-level trace demonstrable; CoA generated from inspection
+results; recipe scaling functional”) and plan M2:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>ID</th>
+<th>Check</th>
+<th>Verified by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>EXIT-W2-1</td>
+<td>Full multi-level (≥3 level) forward + backward trace demonstrable on
+fixtures, including blocked-batch propagation and
+<code>genealogy_incomplete</code> advisories</td>
+<td>URS-W2-028 demo; TST TC-W2 acceptance checklist</td>
+</tr>
+<tr>
+<td>EXIT-W2-2</td>
+<td>CoA generated from accepted inspection results for a fixture batch,
+immutable snapshot with PDF, refused where no accepted inspection
+exists</td>
+<td>URS-W2-017</td>
+</tr>
+<tr>
+<td>EXIT-W2-3</td>
+<td>Recipe scaling functional: ISA-88 recipe scaled 500 kg → 250 kg with
+limit validation, executable only when gov_state Accepted</td>
+<td>URS-W2-020…022</td>
+</tr>
+<tr>
+<td>EXIT-W2-4</td>
+<td>Pilot migration of open batches + genealogy history reconciles
+(counts, spot-checks, checksums) with zero unexplained divergence and
+documented rollback rehearsed once</td>
+<td>URS-W2-030…032</td>
+</tr>
+<tr>
+<td>EXIT-W2-5</td>
+<td>E-signature decision record signed off and committed</td>
+<td>URS-W2-029</td>
+</tr>
+<tr>
+<td>EXIT-W2-6</td>
+<td>All W2 UI-bearing requirements pass design-conformance review
+(Desk/Terminal, keyboard/scanner paths, pills, gate-refusal modals,
+German-first)</td>
+<td>Design-conformance TCs</td>
+</tr>
+</tbody>
+</table>
+<h2 id="untraceable-deferred">6. Untraceable / deferred</h2>
+<ul>
+<li><strong>Equipment working-volume limits for scaling (URS-W2-021
+AC-2):</strong> no legacy source models equipment limits (work centres
+are Workstation/FixedAsset records without capacity-volume semantics —
+CDM-08). The limit fields are net-new master data; values require
+business input. Deferred to master-data collection; the validation
+mechanism itself is in scope.</li>
+<li><strong>QC-exempt item list (URS-W2-006):</strong> which items skip
+Quarantined-at-creation has no legacy precedent (ERPNext batches are
+stateless; Qcadoo blocking is manual). Requires business sign-off;
+flagged on URS-W2-006.</li>
+<li><strong>Plant A genealogy population completeness (dossier §8.2 Q2)
+and Plant B lot coverage (Q3):</strong> open questions that size
+<code>genealogy_incomplete</code> volumes; the mechanism
+(URS-W2-004/030/031) is fully specified, the expected data quality is
+not — must be answered before W2 exit per waves README rule 3.</li>
+<li><strong>Sizing note:</strong> 36 requirements — within the 25–40
+guide for W2.</li>
+</ul>
+  <footer class="doc">Rheinwerk Chemie GmbH — MES consolidation programme. Generated from the Markdown source of record in SachetCognition/rheinwerk-mes-core.</footer>
+</main>
+<button id="top-btn" title="Back to top">⇧</button>
+<script>
+const links=[...document.querySelectorAll('#sidebar nav a')];
+const targets=links.map(a=>document.getElementById(decodeURIComponent(a.hash.slice(1)))).filter(Boolean);
+function onScroll(){
+  const y=window.scrollY+90;let cur=targets[0];
+  for(const t of targets){if(t.offsetTop<=y)cur=t;else break}
+  links.forEach(a=>a.classList.toggle('active',cur&&decodeURIComponent(a.hash.slice(1))===cur.id));
+  document.getElementById('top-btn').classList.toggle('show',window.scrollY>500);
+}
+document.addEventListener('scroll',onScroll,{passive:true});onScroll();
+document.getElementById('top-btn').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
+</script>
+</body>
+</html>
