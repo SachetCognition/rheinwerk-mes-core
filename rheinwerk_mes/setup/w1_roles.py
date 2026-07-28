@@ -155,24 +155,29 @@ def assign_persona_roles() -> dict[str, list[str]]:
 
 
 def _apply_transition_roles(workflow_name: str, matrix: dict[tuple[str, str], tuple[str, ...]]) -> int:
-	"""Rewrite a workflow's transition rows so each carries exactly its allowed roles."""
+	"""Level a workflow's transition rows onto the matrix, one row per allowed role.
+
+	Only pairs the workflow already declares *and* the matrix names are touched: a
+	transition another wave child owns and this matrix says nothing about keeps its own
+	rows, and this matrix never invents a transition the workflow does not declare.
+	"""
 	if not frappe.db.exists("Workflow", workflow_name):
 		return 0
 	workflow = frappe.get_doc("Workflow", workflow_name)
-	known_states = {row.state for row in workflow.states}
-	existing_actions = {(row.state, row.next_state): row.action for row in workflow.transitions if row.action}
-	rows = []
-	for (from_state, to_state), roles in matrix.items():
-		if from_state not in known_states or to_state not in known_states:
-			continue
-		action = existing_actions.get((from_state, to_state)) or ACTION_LABELS.get(
-			(from_state, to_state), to_state
-		)
-		for role in roles:
-			rows.append((from_state, to_state, action, role))
-	if not rows:
+	governed = {(row.state, row.next_state) for row in workflow.transitions} & set(matrix)
+	if not governed:
 		return 0
+	existing_actions = {(row.state, row.next_state): row.action for row in workflow.transitions if row.action}
+	kept = [row for row in workflow.transitions if (row.state, row.next_state) not in governed]
+	rows = []
+	for pair in governed:
+		from_state, to_state = pair
+		action = existing_actions.get(pair) or ACTION_LABELS.get(pair, to_state)
+		for role in matrix[pair]:
+			rows.append((from_state, to_state, action, role))
 	workflow.set("transitions", [])
+	for row in kept:
+		workflow.append("transitions", row.as_dict(no_default_fields=True))
 	for from_state, to_state, action, role in rows:
 		_ensure_action(action)
 		workflow.append(
