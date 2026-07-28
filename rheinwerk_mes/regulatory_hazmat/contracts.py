@@ -95,6 +95,51 @@ GHS_PICTOGRAMS: dict[str, str] = {
 	"GHS09": "Umwelt",
 }
 
+#: ADR Teil 2 — Gefahrgutklasse → German designation (W3-6 · URS-W3-018). The transport
+#: classification is a *different* axis from the TRGS 510 storage class above: ADR classifies
+#: for carriage, TRGS 510 for storage, and a substance carries both (UN 1263 is ADR class 3
+#: and Lagerklasse 3, but e.g. corrosives are ADR class 8 and Lagerklasse 8A/8B).
+ADR_CLASSES: dict[str, str] = {
+	"1": "Explosive Stoffe und Gegenstände mit Explosivstoff",
+	"2": "Gase",
+	"3": "Entzündbare flüssige Stoffe",
+	"4.1": "Entzündbare feste Stoffe, selbstzersetzliche Stoffe",
+	"4.2": "Selbstentzündliche Stoffe",
+	"4.3": "Stoffe, die in Berührung mit Wasser entzündbare Gase entwickeln",
+	"5.1": "Entzündend (oxidierend) wirkende Stoffe",
+	"5.2": "Organische Peroxide",
+	"6.1": "Giftige Stoffe",
+	"6.2": "Ansteckungsgefährliche Stoffe",
+	"7": "Radioaktive Stoffe",
+	"8": "Ätzende Stoffe",
+	"9": "Verschiedene gefährliche Stoffe und Gegenstände",
+}
+
+#: ADR 2.1.1.3 — Verpackungsgruppe → degree of danger (German designation).
+PACKING_GROUPS: dict[str, str] = {
+	"I": "hoher Gefährdungsgrad",
+	"II": "mittlerer Gefährdungsgrad",
+	"III": "geringer Gefährdungsgrad",
+}
+
+#: Profile fields that must be complete before a hazmat batch may be dispatched
+#: (URS-W3-018 AC-2), in the order ADR 5.4.1.1.1 requires them in the transport document.
+ADR_REQUIRED_FIELDS: tuple[str, ...] = (
+	"un_number",
+	"proper_shipping_name",
+	"adr_class",
+	"adr_packing_group",
+)
+
+#: German-first labels of the ADR fields, for the dispatch refusal and the label.
+ADR_FIELD_LABELS: dict[str, str] = {
+	"un_number": "UN-Nummer",
+	"proper_shipping_name": "Offizielle Benennung (ADR)",
+	"adr_class": "ADR-Klasse",
+	"adr_packing_group": "Verpackungsgruppe",
+	"adr_tunnel_code": "Tunnelbeschränkungscode",
+}
+
 SIGNAL_WORD_DANGER = "Gefahr"
 SIGNAL_WORD_WARNING = "Achtung"
 SIGNAL_WORDS: tuple[str, ...] = (SIGNAL_WORD_DANGER, SIGNAL_WORD_WARNING)
@@ -219,3 +264,71 @@ def hazmat_chip(profile: dict[str, Any] | None) -> dict[str, Any] | None:
 		"kind": "hazmat",
 		**signal_for_storage_class(storage_class),
 	}
+
+
+# --------------------------------------------------------------------------------------
+# ADR transport data (W3-6 · URS-W3-018)
+# --------------------------------------------------------------------------------------
+
+
+def validate_adr_class(value: str | None) -> str:
+	"""Refuse a transport class outside the ADR Teil 2 class list."""
+	raw = (value or "").strip()
+	if not raw:
+		raise HazmatDataError(_("Die ADR-Klasse fehlt."))
+	if raw not in ADR_CLASSES:
+		raise HazmatDataError(
+			_("Unbekannte ADR-Klasse {0}. Zulässig sind die Klassen nach ADR Teil 2: {1}.").format(
+				raw, ", ".join(ADR_CLASSES)
+			)
+		)
+	return raw
+
+
+def validate_packing_group(value: str | None) -> str:
+	"""Refuse a Verpackungsgruppe outside ADR 2.1.1.3 (I, II, III)."""
+	raw = (value or "").strip().upper()
+	if not raw:
+		raise HazmatDataError(_("Die Verpackungsgruppe fehlt."))
+	if raw not in PACKING_GROUPS:
+		raise HazmatDataError(
+			_("Unbekannte Verpackungsgruppe {0}. Zulässig sind I, II und III (ADR 2.1.1.3).").format(raw)
+		)
+	return raw
+
+
+def adr_class_label(adr_class: str) -> str:
+	"""`3` → `Klasse 3 — Entzündbare flüssige Stoffe` (never a bare code)."""
+	designation = ADR_CLASSES.get(adr_class, "")
+	if not designation:
+		return _("Klasse {0}").format(adr_class)
+	return _("Klasse {0} — {1}").format(adr_class, _(designation))
+
+
+def packing_group_label(packing_group: str) -> str:
+	"""`III` → `Verpackungsgruppe III — geringer Gefährdungsgrad`."""
+	designation = PACKING_GROUPS.get(packing_group, "")
+	if not designation:
+		return _("Verpackungsgruppe {0}").format(packing_group)
+	return _("Verpackungsgruppe {0} — {1}").format(packing_group, _(designation))
+
+
+def shipping_name(proper_shipping_name: str | None) -> str:
+	"""The proper shipping name as ADR 5.4.1.1.1 renders it on documents: upper case."""
+	return (proper_shipping_name or "").strip().upper()
+
+
+def missing_adr_fields(profile: dict[str, Any] | None) -> tuple[str, ...]:
+	"""ADR fields a profile still owes before its material may be dispatched (URS-W3-018 AC-2).
+
+	A profile that does not exist at all owes *every* field — the caller decides whether an
+	item without a profile is hazardous at all (`profiles.effective_profile`).
+	"""
+	if not profile:
+		return ADR_REQUIRED_FIELDS
+	return tuple(field for field in ADR_REQUIRED_FIELDS if not (profile.get(field) or "").strip())
+
+
+def adr_is_complete(profile: dict[str, Any] | None) -> bool:
+	"""True when the profile carries every ADR field the shipping boundary needs."""
+	return not missing_adr_fields(profile)

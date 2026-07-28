@@ -1,0 +1,95 @@
+{#- Hazmat dispatch label (W3-6 · URS-W3-018 AC-1). One markup for the Terminal preview and
+    the printed label, so what the clerk approves on screen is what the drum carries. ADR
+    5.4.1.1.1 order: UN number, proper shipping name (upper case), class, packing group,
+    tunnel code. German-first, mass in kg, dates DD.MM.YYYY. -#}
+<div class="rw-label">
+	<style>
+		.rw-label { font-family: Inter, Arial, sans-serif; color: #14181a; font-size: 12pt; }
+		.rw-label h1 { font-size: 15pt; margin: 0 0 2mm 0; }
+		.rw-label .rw-adr {
+			border: 0.8mm solid #14181a; padding: 3mm; margin: 0 0 4mm 0; font-size: 16pt;
+			font-weight: 700; letter-spacing: 0.2mm;
+		}
+		.rw-label .rw-adr small { display: block; font-size: 9pt; font-weight: 400; color: #444; }
+		.rw-label table { width: 100%; border-collapse: collapse; margin-bottom: 4mm; }
+		.rw-label td { padding: 1mm 2mm 1mm 0; vertical-align: top; }
+		.rw-label .rw-label__key { color: #555; width: 42mm; }
+		.rw-label .rw-num { font-variant-numeric: tabular-nums; }
+		.rw-label .rw-pict { display: inline-block; border: 0.4mm solid #14181a; padding: 1mm 2mm;
+			margin: 0 1.5mm 1.5mm 0; font-size: 9pt; }
+		.rw-label .rw-incomplete { border: 0.8mm solid #a51d2d; color: #a51d2d; padding: 2mm;
+			font-weight: 700; }
+	</style>
+
+	<h1>{{ _("Versandetikett Gefahrgut") }}</h1>
+
+	<div class="rw-adr">
+		{{ label.transport_document_line or _("keine ADR-Daten hinterlegt") }}
+		<small>{{ _("Angaben nach ADR 5.4.1.1.1") }}</small>
+	</div>
+
+	{% if not label.complete %}
+	<p class="rw-incomplete">
+		{{ _("Versand gesperrt — fehlende ADR-Angaben: {0}").format(label.missing_labels | join(", ")) }}
+	</p>
+	{% endif %}
+
+	<table>
+		<tr>
+			<td class="rw-label__key">{{ _("Charge") }}</td><td><b>{{ label.batch }}</b></td>
+			<td class="rw-label__key">{{ _("UN-Nummer") }}</td><td><b>{{ label.un_number }}</b></td>
+		</tr>
+		<tr>
+			<td class="rw-label__key">{{ _("Artikel") }}</td>
+			<td>{{ label.item }} — {{ label.item_name }}</td>
+			<td class="rw-label__key">{{ _("Offizielle Benennung (ADR)") }}</td>
+			<td><b>{{ label.proper_shipping_name }}</b></td>
+		</tr>
+		<tr>
+			<td class="rw-label__key">{{ _("Nettomenge") }}</td>
+			<td class="rw-num"><b>{{ label.net_qty_display }}</b></td>
+			<td class="rw-label__key">{{ _("ADR-Klasse") }}</td>
+			<td>{{ label.adr_class_label or label.adr_class }}</td>
+		</tr>
+		<tr>
+			<td class="rw-label__key">{{ _("Versandlager") }}</td><td>{{ label.warehouse }}</td>
+			<td class="rw-label__key">{{ _("Verpackungsgruppe") }}</td>
+			<td>{{ label.packing_group_label or label.packing_group }}</td>
+		</tr>
+		<tr>
+			<td class="rw-label__key">{{ _("Ladeeinheit") }}</td>
+			<td>{{ label.handling_unit or "—" }}</td>
+			<td class="rw-label__key">{{ _("Tunnelbeschränkungscode") }}</td>
+			<td>{{ label.tunnel_code or "—" }}</td>
+		</tr>
+		<tr>
+			<td class="rw-label__key">{{ _("Herstelldatum") }}</td><td>{{ label.manufacturing_date }}</td>
+			<td class="rw-label__key">{{ _("Gefahrzettel") }}</td><td>{{ label.label_numbers or "—" }}</td>
+		</tr>
+		<tr>
+			<td class="rw-label__key">{{ _("Verfallsdatum") }}</td><td>{{ label.expiry_date }}</td>
+			<td class="rw-label__key">{{ _("Lagerklasse (TRGS 510)") }}</td>
+			<td>{{ label.storage_class_label or label.storage_class }}</td>
+		</tr>
+		<tr>
+			<td class="rw-label__key">{{ _("Absender") }}</td><td>{{ label.consignor }}</td>
+			<td class="rw-label__key">{{ _("Signalwort") }}</td><td>{{ label.signal_word }}</td>
+		</tr>
+		<tr>
+			<td class="rw-label__key">{{ _("Sicherheitsdatenblatt") }}</td>
+			<td>{{ label.sds_reference }}{% if label.sds_version %} ({{ label.sds_version }}){% endif %}</td>
+			<td class="rw-label__key">{{ _("Wassergefährdungsklasse (AwSV)") }}</td>
+			<td>{{ label.water_hazard_class or "—" }}</td>
+		</tr>
+	</table>
+
+	{% if label.pictograms %}
+	<p>
+		{% for pictogram in label.pictograms %}
+		<span class="rw-pict">{{ pictogram.code }} — {{ pictogram.designation }}</span>
+		{% endfor %}
+	</p>
+	{% endif %}
+
+	<p>{{ _("Gedruckt am {0} von {1}").format(label.printed_on, label.printed_by) }}</p>
+</div>
