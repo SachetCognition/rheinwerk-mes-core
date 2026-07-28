@@ -1,0 +1,71 @@
+{
+	"contract": "CHAR-SCHEDULE-STATE-01",
+	"urs": ["URS-W3-005"],
+	"test_cases": ["TC-W3-007"],
+	"legacy_source": "mes-plugins/mes-plugins-orders/src/main/java/com/qcadoo/mes/orders/states/constants/ScheduleState.java:8-24",
+	"notes": "Qcadoo's ScheduleState has DRAFT, APPROVED and REJECTED. DRAFT may change to APPROVED or REJECTED; APPROVED may additionally still change to REJECTED (ScheduleState.java:16-23); REJECTED is terminal. URS-W3-005 AC-3 narrows the target to exactly {Draft → Approved, Draft → Rejected}: the Approved → Rejected case is flagged `new_behaviour`, with `expected` the legacy verdict and `expected_target` the Rheinwerk narrowing (docs/design/W3-finite-capacity.md, decision D-W3-2-A).",
+	"cases": [
+		{
+			"id": "SCHED-01-draft-to-approved",
+			"description": "DRAFT → APPROVED: the plan becomes the operative line sequence",
+			"transition": {"from_state": "Draft", "to_state": "Approved"},
+			"expected": {"allowed": true, "errors": []}
+		},
+		{
+			"id": "SCHED-02-draft-to-rejected",
+			"description": "DRAFT → REJECTED: the plan is discarded without operative effect",
+			"transition": {"from_state": "Draft", "to_state": "Rejected"},
+			"expected": {"allowed": true, "errors": []}
+		},
+		{
+			"id": "SCHED-03-approved-to-draft-refused",
+			"description": "APPROVED → DRAFT is refused — an approved plan is not re-opened",
+			"transition": {"from_state": "Approved", "to_state": "Draft"},
+			"expected": {"allowed": false, "errors": ["orders.schedule.state.error.illegalTransition"]}
+		},
+		{
+			"id": "SCHED-04-rejected-to-approved-refused",
+			"description": "REJECTED → APPROVED is refused — REJECTED is terminal",
+			"transition": {"from_state": "Rejected", "to_state": "Approved"},
+			"expected": {"allowed": false, "errors": ["orders.schedule.state.error.illegalTransition"]}
+		},
+		{
+			"id": "SCHED-05-rejected-to-draft-refused",
+			"description": "REJECTED → DRAFT is refused; a new Draft schedule is created instead",
+			"transition": {"from_state": "Rejected", "to_state": "Draft"},
+			"expected": {"allowed": false, "errors": ["orders.schedule.state.error.illegalTransition"]}
+		},
+		{
+			"id": "SCHED-06-draft-to-draft-refused",
+			"description": "a no-op transition is not a state change",
+			"transition": {"from_state": "Draft", "to_state": "Draft"},
+			"expected": {"allowed": false, "errors": ["orders.schedule.state.error.illegalTransition"]}
+		},
+		{
+			"id": "SCHED-07-approved-to-approved-refused",
+			"description": "an already approved plan cannot be approved again",
+			"transition": {"from_state": "Approved", "to_state": "Approved"},
+			"expected": {"allowed": false, "errors": ["orders.schedule.state.error.illegalTransition"]}
+		},
+		{
+			"id": "SCHED-08-approved-to-rejected-narrowed",
+			"new_behaviour": true,
+			"description": "legacy APPROVED → REJECTED (ScheduleState.java:16-23) is refused by the target: URS-W3-005 AC-3 allows Draft as the only source state",
+			"transition": {"from_state": "Approved", "to_state": "Rejected"},
+			"expected": {"allowed": true, "errors": []},
+			"expected_target": {"allowed": false, "errors": ["orders.schedule.state.error.illegalTransition"]}
+		},
+		{
+			"id": "SCHED-09-unknown-target-refused",
+			"description": "a state outside ScheduleState is refused",
+			"transition": {"from_state": "Draft", "to_state": "Completed"},
+			"expected": {"allowed": false, "errors": ["orders.schedule.state.error.illegalTransition"]}
+		},
+		{
+			"id": "SCHED-10-entry-state-is-draft",
+			"description": "a schedule without a state yet is a DRAFT and may be approved",
+			"transition": {"from_state": null, "to_state": "Approved"},
+			"expected": {"allowed": true, "errors": []}
+		}
+	]
+}

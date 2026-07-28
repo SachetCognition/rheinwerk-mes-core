@@ -1,0 +1,117 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "creation": "2026-05-04 09:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "sequence",
+  "work_order",
+  "operation",
+  "workstation",
+  "quantity",
+  "tpz_min",
+  "tj_min_per_unit",
+  "setup_min",
+  "run_min",
+  "duration_min",
+  "planned_start",
+  "planned_end"
+ ],
+ "fields": [
+  {
+   "fieldname": "sequence",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Folge"
+  },
+  {
+   "fieldname": "work_order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Produktionsauftrag",
+   "options": "Work Order",
+   "reqd": 1
+  },
+  {
+   "fieldname": "operation",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Arbeitsgang",
+   "options": "Operation"
+  },
+  {
+   "fieldname": "workstation",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Arbeitsplatz",
+   "options": "Workstation"
+  },
+  {
+   "fieldname": "quantity",
+   "fieldtype": "Float",
+   "label": "Menge (kg)",
+   "precision": "3",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tpz_min",
+   "fieldtype": "Int",
+   "label": "TPZ (min)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tj_min_per_unit",
+   "fieldtype": "Float",
+   "label": "TJ (min/kg)",
+   "precision": "4",
+   "read_only": 1
+  },
+  {
+   "fieldname": "setup_min",
+   "fieldtype": "Int",
+   "label": "Rüstzeit (min)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "run_min",
+   "fieldtype": "Int",
+   "label": "Ausführungszeit (min)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "duration_min",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Dauer (min)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "planned_start",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Geplanter Start",
+   "read_only": 1
+  },
+  {
+   "fieldname": "planned_end",
+   "fieldtype": "Datetime",
+   "label": "Geplantes Ende",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-05-04 09:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Manufacturing Core",
+ "name": "Line Schedule Operation",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 0
+}

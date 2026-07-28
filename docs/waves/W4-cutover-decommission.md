@@ -15,3 +15,4 @@ Per-plant cutover by journey; data backfill; legacy systems read-only then archi
 | W4-5 | Legacy read-only period: freeze legacy writes, keep query access; then archive | — | Wave definition |
 | W4-6 | Archive Qcadoo build artefacts + `nexus.qcadoo.org` snapshot dependencies before decommission (build unreproducibility risk) | — | §7 implication 10; ch. 3.1 §E |
 | W4-7 | Decommission evidence pack: per-plant persona sign-off, data-reconciliation reports, trace-boundary register | — | Wave exit criterion |
+| W4-8 | Arm estate-wide e-signature enforcement (`Rheinwerk Compliance Settings.esignature_enforced`): every automated release path — accepted inspection releasing its batch, QA disposition, migration loaders, fixture seeding — must carry a named signer first | W3 delivery, `docs/design/W3-esignature-enforcement.md` §4 | DEC-W2-029 (signed) |
