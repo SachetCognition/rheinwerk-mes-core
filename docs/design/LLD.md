@@ -284,14 +284,20 @@ Characterisation reference: order cannot be ACCEPTED without dateFrom, dateTo, p
 Hook point: workflow transition `→ In Progress` **and** `Stock Entry.before_submit` for Material Transfer for Manufacture entries (the posting that physically releases material). Double placement mirrors Qcadoo, which checked availability in the order-start listener (`OrderStatesListenerServicePFTD.java:580`).
 
 ```text
-on transition Start(work_order) or before_submit(stock_entry of WO transfer):
+check_material_availability(work_order):                  # shared by both hook points
     for row in required_items(work_order):
         available = bin_qty(row.item, row.source_warehouse)
                     - reserved_qty_other_orders(row.item, row.source_warehouse)
         available -= qty_in_blocked_or_quarantined_batches(row.item, row.source_warehouse)  # §5.3
         if available < row.required_qty:
             throw MaterialAvailabilityError(row.item, available, row.required_qty)   # hard stop
-    append state_history(→ In Progress)
+
+on transition Start(work_order):
+    check_material_availability(work_order)
+    append state_history(→ In Progress)                    # history only on the workflow transition
+
+before_submit(stock_entry of WO transfer):
+    check_material_availability(stock_entry.work_order)    # re-check at posting; no state change
 ```
 
 Characterisation reference: material availability & resource reservations checked when order starts — `OrderStatesListenerServicePFTD.java:129,134,580,633` (dossier ch. 3.1 §C.3). Divergence note vs anchor (availability not blocking in ERPNext — dossier §5.4 row 4): target adopts the **hard** gate; recorded per W1-10. Tests: CH-ORD-04.
@@ -357,7 +363,7 @@ Characterisation reference: draft warehouse documents reserve stock; reservation
 
 ### G7 — Expiry enforcement (W1-9 decision)
 
-Hook point: anchor already throws on expired outward SLEs (`stock_ledger_entry.py:287-299`) and expired picking (`pick_list.py:286-311`) — adopted. The W1-9 decision (hard stop vs FEFO-advisory estate-wide) is a **configuration policy**, not new code: a per-company `expiry_enforcement` Select (`Hard Stop\nFEFO Advisory`) gates whether the hook downgrades the throw to a warning for legacy-Plant-A parity during transition. Characterisation delta recorded per W1-10 (divergence: only ERPNext enforced expiry — dossier §5.4 row 2). Tests: CH-WH-03 (both policy values).
+Hook point: anchor already throws on expired outward SLEs (`stock_ledger_entry.py:287-299`) and expired picking (`pick_list.py:286-311`) — adopted as the default (**Hard Stop**). The W1-9 decision (hard stop vs FEFO-advisory estate-wide) is carried by a per-company `expiry_enforcement` Select (`Hard Stop\nFEFO Advisory`). Implementation note: the throw lives inside anchor SLE submission, so a `doc_events` hook cannot downgrade it — if the business signs off FEFO-Advisory for a transition period, the relaxation is implemented at the *entry* documents (Stock Entry/Pick List `before_submit` converting the pre-check to a warning **plus** a site-level `override_doctype_class` on Stock Ledger Entry, Frappe's sanctioned extension point — a configuration override, not a fork). Default recommendation stays Hard Stop (union-of-gates, T2). Characterisation delta recorded per W1-10 (divergence: only ERPNext enforced expiry — dossier §5.4 row 2). Tests: CH-WH-03 (both policy values).
 
 ---
 
@@ -387,6 +393,8 @@ Hook point: anchor already throws on expired outward SLEs (`stock_ledger_entry.p
 | `record_state` | Select | `Draft\nAccepted\nCorrected` (Qcadoo `TrackingRecordState.java:31-64`) |
 
 Genealogy is written at posting time (capture hook §6.2) — a first-class object model, not a derived report (`ARCHITECTURE.md` non-negotiables; dossier §6.2: ERPNext trace is derived, not first-class).
+
+**Ownership note (Frappe constraint):** child-table rows belong to exactly one parent document, so `Genealogy Link` rows cannot be shared between `Tracking Record.used_batches` and `Batch.genealogy_links`. The **Tracking Record is the write-side source of truth**; the capture hook mirrors each link into the affected Batches' `genealogy_links` tables (one `produced` row on each consumed batch, `consumed` rows on the produced batch) as maintained projections for per-batch browsing. Mirror consistency is asserted by CH-GEN-02 fixtures; corrections (`record_state = Corrected`) rewrite the mirrors transactionally.
 
 Tree browsing: `produced_from(batch)` walks `consumed` links upward, `used_to_produce(batch)` walks `produced` links downward (Qcadoo `AdvancedGenealogyTreeViewListeners.java:71-73` directions).
 

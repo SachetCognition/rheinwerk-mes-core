@@ -32,7 +32,7 @@ flowchart TB
     maint --> mes
 
     erp -- "orders in<br/>(demand: sales orders / planned orders)" --> mes
-    mes -- "confirmations out<br/>(order status, produced qty, consumption)" --> erp
+    mes -- "confirmations out<br/>(exec_state, produced qty, consumption)" --> erp
     mes -- "GL postings out<br/>(perpetual-inventory stock GL events)" --> erp
 
     scada -- "process values, batch events" --> adapter["SCADA/OPC-UA Adapter<br/>[boundary service, W3-5]"]
