@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Capability Disposition Map</title>
+<style>
+:root{--accent:#1f4e79;--accent2:#2e74b5;--bg:#f7f9fb;--card:#ffffff;--text:#24292f;--muted:#6a737d;--border:#e1e6eb;--sidebar-w:300px}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",Calibri,Arial,sans-serif;color:var(--text);background:var(--bg);line-height:1.55;font-size:15px}
+#sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:var(--accent);color:#fff;overflow-y:auto;padding:22px 18px}
+#sidebar .brand{font-size:15px;font-weight:600;letter-spacing:.4px;border-bottom:1px solid rgba(255,255,255,.25);padding-bottom:12px;margin-bottom:12px}
+#sidebar .brand small{display:block;font-weight:400;opacity:.75;margin-top:4px}
+#sidebar nav ul{list-style:none;margin:0;padding-left:0}
+#sidebar nav ul ul{padding-left:14px}
+#sidebar nav a{display:block;color:rgba(255,255,255,.85);text-decoration:none;font-size:12.6px;padding:4px 8px;border-radius:5px;border-left:3px solid transparent}
+#sidebar nav a:hover{background:rgba(255,255,255,.12);color:#fff}
+#sidebar nav a.active{background:rgba(255,255,255,.18);color:#fff;border-left-color:#9cc3e5;font-weight:600}
+#content{margin-left:var(--sidebar-w);padding:42px 56px;max-width:1080px}
+header.doc{border-bottom:3px solid var(--accent);padding-bottom:18px;margin-bottom:30px}
+header.doc h1{color:var(--accent);font-size:30px;margin:0 0 6px}
+header.doc .sub{color:var(--accent2);font-size:15.5px;font-weight:600}
+h1,h2{color:var(--accent);margin-top:2.1em;border-bottom:1px solid var(--border);padding-bottom:.25em}
+h3,h4{color:var(--accent2);margin-top:1.7em}
+a{color:var(--accent2)}
+table{border-collapse:collapse;width:100%;margin:1.1em 0;background:var(--card);font-size:13.2px;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+th{background:var(--accent);color:#fff;text-align:left;padding:8px 10px;font-weight:600}
+td{border:1px solid var(--border);padding:7px 10px;vertical-align:top}
+tr:nth-child(even) td{background:#f2f6fa}
+code{background:#eef2f6;border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:12px;font-family:Consolas,Menlo,monospace;color:#0b3d66}
+pre{background:#0f2a43;color:#dce8f5;padding:14px 16px;border-radius:8px;overflow-x:auto;font-size:12.5px}
+pre code{background:none;border:none;color:inherit;padding:0}
+blockquote{margin:1em 0;padding:10px 16px;background:#eaf1f8;border-left:5px solid var(--accent2);border-radius:0 6px 6px 0;color:#243b53}
+img.diagram,p img{max-width:100%;background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px;box-shadow:0 1px 3px rgba(0,0,0,.08);display:block;margin:1.2em auto}
+#top-btn{position:fixed;right:26px;bottom:26px;background:var(--accent);color:#fff;border:none;border-radius:50%;width:46px;height:46px;font-size:19px;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .25s;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+#top-btn.show{opacity:.92;pointer-events:auto}
+footer.doc{margin-top:60px;border-top:1px solid var(--border);padding-top:14px;color:var(--muted);font-size:12px}
+@media(max-width:900px){#sidebar{display:none}#content{margin-left:0;padding:24px}}
+</style>
+</head>
+<body>
+<aside id="sidebar">
+  <div class="brand">Capability Disposition Map<small>Stage 2.2 —
+Sub-capability → disposition → target home</small></div>
+  <nav></nav>
+</aside>
+<main id="content">
+  <header class="doc"><h1>Capability Disposition
+Map</h1><div class="sub">Stage 2.2 — Sub-capability → disposition →
+target home</div></header>
+<p>Single-page map: <strong>sub-capability → source disposition → target
+home</strong>. Golden-source calls from the dossier (Part 6.2) were
+re-confirmed against the validated evidence; two calls are refined
+(marked ⚠). Dispositions: <strong>Adopt</strong> (use anchor as shipped)
+/ <strong>Absorb</strong> (re-implement source semantics on anchor) /
+<strong>Rebuild</strong> (net-new) / <strong>Retire</strong>.</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th>Sub-capability</th>
+<th>Golden source (dossier)</th>
+<th>Confirmed?</th>
+<th>Disposition</th>
+<th>Target home</th>
+<th>Wave</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Order state machine &amp; transitions</td>
+<td>Qcadoo</td>
+<td>Confirmed</td>
+<td>Absorb</td>
+<td>Integrity</td>
+<td>W1</td>
+</tr>
+<tr>
+<td>Execution gating (release/complete gates)</td>
+<td>Qcadoo</td>
+<td>Confirmed</td>
+<td>Absorb</td>
+<td>Integrity</td>
+<td>W1</td>
+</tr>
+<tr>
+<td>Posting hard stops (over-production, expired batch)</td>
+<td>ERPNext</td>
+<td>Confirmed</td>
+<td>Adopt</td>
+<td>Anchor</td>
+<td>W1</td>
+</tr>
+<tr>
+<td>Shop-floor UI / job cards / time logs</td>
+<td>ERPNext</td>
+<td>Confirmed</td>
+<td>Adopt</td>
+<td>Anchor</td>
+<td>W1</td>
+</tr>
+<tr>
+<td>BOM &amp; routing definition</td>
+<td>ERPNext</td>
+<td>Confirmed</td>
+<td>Adopt</td>
+<td>Anchor</td>
+<td>W0</td>
+</tr>
+<tr>
+<td>Recipe approval governance</td>
+<td>Qcadoo</td>
+<td>Confirmed</td>
+<td>Absorb</td>
+<td>Integrity</td>
+<td>W1</td>
+</tr>
+<tr>
+<td>ISA-88 master/control recipes, scaling</td>
+<td>— (white space)</td>
+<td>n/a</td>
+<td>Rebuild</td>
+<td>Chemicals</td>
+<td>W2</td>
+</tr>
+<tr>
+<td>Batch master data</td>
+<td>Qcadoo ⚠</td>
+<td><strong>Refined</strong>: unified canonical entity beyond both
+(CDM-01); ERPNext Batch is the storage anchor, Qcadoo contributes state
+semantics</td>
+<td>Absorb + extend</td>
+<td>Integrity</td>
+<td>W2</td>
+</tr>
+<tr>
+<td>Batch genealogy</td>
+<td>Qcadoo</td>
+<td>Confirmed</td>
+<td>Absorb</td>
+<td>Integrity</td>
+<td>W2</td>
+</tr>
+<tr>
+<td>Quarantine / blocking with propagation</td>
+<td>Qcadoo</td>
+<td>Confirmed (extension needed)</td>
+<td>Absorb + extend</td>
+<td>Integrity</td>
+<td>W2</td>
+</tr>
+<tr>
+<td>Quality inspection engine</td>
+<td>ERPNext</td>
+<td>Confirmed</td>
+<td>Adopt</td>
+<td>Anchor</td>
+<td>W2</td>
+</tr>
+<tr>
+<td>Parametric QC specs</td>
+<td>ERPNext</td>
+<td>Confirmed</td>
+<td>Adopt</td>
+<td>Anchor</td>
+<td>W2</td>
+</tr>
+<tr>
+<td>Certificates of Analysis</td>
+<td>— (white space)</td>
+<td>n/a</td>
+<td>Rebuild</td>
+<td>Chemicals</td>
+<td>W2</td>
+</tr>
+<tr>
+<td>E-signatures</td>
+<td>— (white space)</td>
+<td>n/a</td>
+<td>Rebuild</td>
+<td>Chemicals</td>
+<td>W2/W3 (Q2)</td>
+</tr>
+<tr>
+<td>Warehouse tree &amp; putaway</td>
+<td>ERPNext</td>
+<td>Confirmed</td>
+<td>Adopt</td>
+<td>Anchor</td>
+<td>W0</td>
+</tr>
+<tr>
+<td>Pallets / handling units / storage locations</td>
+<td>Qcadoo</td>
+<td>Confirmed</td>
+<td>Absorb</td>
+<td>Integrity</td>
+<td>W1</td>
+</tr>
+<tr>
+<td>FEFO/FIFO/LIFO disposal algorithms</td>
+<td>Qcadoo ⚠</td>
+<td><strong>Refined</strong>: anchor already ships FIFO/LIFO/Expiry
+picking; absorb only the per-warehouse algorithm selection + LEFO</td>
+<td>Adopt + absorb delta</td>
+<td>Anchor + Integrity</td>
+<td>W1</td>
+</tr>
+<tr>
+<td>Draft-document reservations</td>
+<td>Qcadoo</td>
+<td>Confirmed</td>
+<td>Absorb</td>
+<td>Integrity</td>
+<td>W1</td>
+</tr>
+<tr>
+<td>Order/batch-level stock reservation</td>
+<td>ERPNext</td>
+<td>Confirmed</td>
+<td>Adopt</td>
+<td>Anchor</td>
+<td>W1</td>
+</tr>
+<tr>
+<td>Valuation methods &amp; repost engine</td>
+<td>ERPNext</td>
+<td>Confirmed</td>
+<td>Adopt</td>
+<td>Anchor (postings → Boundary)</td>
+<td>W3</td>
+</tr>
+<tr>
+<td>Production Plan / MPS / MRP</td>
+<td>ERPNext</td>
+<td>Confirmed</td>
+<td>Adopt</td>
+<td>Anchor</td>
+<td>W3</td>
+</tr>
+<tr>
+<td>Finite-capacity norms &amp; line schedules</td>
+<td>Qcadoo (partial)</td>
+<td>Confirmed</td>
+<td>Absorb (optimiser: buy, Q3)</td>
+<td>Integrity</td>
+<td>W3</td>
+</tr>
+<tr>
+<td>Item/UoM master data</td>
+<td>ERPNext</td>
+<td>Confirmed</td>
+<td>Adopt</td>
+<td>Anchor</td>
+<td>W0</td>
+</tr>
+<tr>
+<td>Hazmat/regulatory data</td>
+<td>— (white space)</td>
+<td>n/a</td>
+<td>Rebuild</td>
+<td>Chemicals</td>
+<td>W2/W3</td>
+</tr>
+<tr>
+<td>SCADA / OPC-UA adapter</td>
+<td>— (white space)</td>
+<td>n/a</td>
+<td>Rebuild</td>
+<td>Chemicals</td>
+<td>W3</td>
+</tr>
+<tr>
+<td>Group-ERP interface (orders/confirmations/GL)</td>
+<td>— (boundary)</td>
+<td>n/a</td>
+<td>Rebuild</td>
+<td>Boundary</td>
+<td>W3</td>
+</tr>
+<tr>
+<td>Reporting &amp; dashboards</td>
+<td>ERPNext</td>
+<td>Confirmed</td>
+<td>Adopt</td>
+<td>Anchor</td>
+<td>W1–W3</td>
+</tr>
+<tr>
+<td>CMMS / maintenance events</td>
+<td>Qcadoo</td>
+<td>Confirmed (scope Q6)</td>
+<td>Absorb</td>
+<td>Integrity</td>
+<td>W3</td>
+</tr>
+<tr>
+<td>Audit trail / versioning</td>
+<td>ERPNext</td>
+<td>Confirmed</td>
+<td>Adopt</td>
+<td>Anchor</td>
+<td>W0</td>
+</tr>
+<tr>
+<td>Multi-plant / RBAC / i18n</td>
+<td>ERPNext</td>
+<td>Confirmed</td>
+<td>Adopt (+ workflow-state permissions)</td>
+<td>Anchor + Integrity</td>
+<td>W0/W1</td>
+</tr>
+<tr>
+<td>Finance, buying, selling apps</td>
+<td>n/a</td>
+<td>n/a</td>
+<td>Retire → group ERP</td>
+<td>—</td>
+<td>W4</td>
+</tr>
+<tr>
+<td>OFBiz (all manufacturing behaviour)</td>
+<td>none</td>
+<td>Confirmed</td>
+<td>Retire (data-migration source)</td>
+<td>—</td>
+<td>W4</td>
+</tr>
+</tbody>
+</table>
+  <footer class="doc">Rheinwerk Chemie GmbH — MES consolidation programme. Generated from the Markdown source of record in SachetCognition/rheinwerk-mes-core.</footer>
+</main>
+<button id="top-btn" title="Back to top">⇧</button>
+<script>
+const links=[...document.querySelectorAll('#sidebar nav a')];
+const targets=links.map(a=>document.getElementById(decodeURIComponent(a.hash.slice(1)))).filter(Boolean);
+function onScroll(){
+  const y=window.scrollY+90;let cur=targets[0];
+  for(const t of targets){if(t.offsetTop<=y)cur=t;else break}
+  links.forEach(a=>a.classList.toggle('active',cur&&decodeURIComponent(a.hash.slice(1))===cur.id));
+  document.getElementById('top-btn').classList.toggle('show',window.scrollY>500);
+}
+document.addEventListener('scroll',onScroll,{passive:true});onScroll();
+document.getElementById('top-btn').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
+</script>
+</body>
+</html>

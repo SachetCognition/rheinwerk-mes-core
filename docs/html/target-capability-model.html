@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Target Capability Model</title>
+<style>
+:root{--accent:#1f4e79;--accent2:#2e74b5;--bg:#f7f9fb;--card:#ffffff;--text:#24292f;--muted:#6a737d;--border:#e1e6eb;--sidebar-w:300px}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",Calibri,Arial,sans-serif;color:var(--text);background:var(--bg);line-height:1.55;font-size:15px}
+#sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:var(--accent);color:#fff;overflow-y:auto;padding:22px 18px}
+#sidebar .brand{font-size:15px;font-weight:600;letter-spacing:.4px;border-bottom:1px solid rgba(255,255,255,.25);padding-bottom:12px;margin-bottom:12px}
+#sidebar .brand small{display:block;font-weight:400;opacity:.75;margin-top:4px}
+#sidebar nav ul{list-style:none;margin:0;padding-left:0}
+#sidebar nav ul ul{padding-left:14px}
+#sidebar nav a{display:block;color:rgba(255,255,255,.85);text-decoration:none;font-size:12.6px;padding:4px 8px;border-radius:5px;border-left:3px solid transparent}
+#sidebar nav a:hover{background:rgba(255,255,255,.12);color:#fff}
+#sidebar nav a.active{background:rgba(255,255,255,.18);color:#fff;border-left-color:#9cc3e5;font-weight:600}
+#content{margin-left:var(--sidebar-w);padding:42px 56px;max-width:1080px}
+header.doc{border-bottom:3px solid var(--accent);padding-bottom:18px;margin-bottom:30px}
+header.doc h1{color:var(--accent);font-size:30px;margin:0 0 6px}
+header.doc .sub{color:var(--accent2);font-size:15.5px;font-weight:600}
+h1,h2{color:var(--accent);margin-top:2.1em;border-bottom:1px solid var(--border);padding-bottom:.25em}
+h3,h4{color:var(--accent2);margin-top:1.7em}
+a{color:var(--accent2)}
+table{border-collapse:collapse;width:100%;margin:1.1em 0;background:var(--card);font-size:13.2px;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+th{background:var(--accent);color:#fff;text-align:left;padding:8px 10px;font-weight:600}
+td{border:1px solid var(--border);padding:7px 10px;vertical-align:top}
+tr:nth-child(even) td{background:#f2f6fa}
+code{background:#eef2f6;border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:12px;font-family:Consolas,Menlo,monospace;color:#0b3d66}
+pre{background:#0f2a43;color:#dce8f5;padding:14px 16px;border-radius:8px;overflow-x:auto;font-size:12.5px}
+pre code{background:none;border:none;color:inherit;padding:0}
+blockquote{margin:1em 0;padding:10px 16px;background:#eaf1f8;border-left:5px solid var(--accent2);border-radius:0 6px 6px 0;color:#243b53}
+img.diagram,p img{max-width:100%;background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px;box-shadow:0 1px 3px rgba(0,0,0,.08);display:block;margin:1.2em auto}
+#top-btn{position:fixed;right:26px;bottom:26px;background:var(--accent);color:#fff;border:none;border-radius:50%;width:46px;height:46px;font-size:19px;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .25s;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+#top-btn.show{opacity:.92;pointer-events:auto}
+footer.doc{margin-top:60px;border-top:1px solid var(--border);padding-top:14px;color:var(--muted);font-size:12px}
+@media(max-width:900px){#sidebar{display:none}#content{margin-left:0;padding:24px}}
+</style>
+</head>
+<body>
+<aside id="sidebar">
+  <div class="brand">Target Capability Model<small>Stage 2.1 — From
+as-is map to target model</small></div>
+  <nav><ul>
+<li><a href="#target-capability-model" id="toc-target-capability-model">Target capability model</a></li>
+<li><a href="#one-app-vs-two-feed-boundary-summary" id="toc-one-app-vs-two-feed-boundary-summary">One-app-vs-two feed
+(Boundary summary)</a></li>
+<li><a href="#open-questions-register-stage-2-additions" id="toc-open-questions-register-stage-2-additions">Open questions
+register (Stage 2 additions)</a></li>
+</ul></nav>
+</aside>
+<main id="content">
+  <header class="doc"><h1>Target Capability
+Model</h1><div class="sub">Stage 2.1 — From as-is map to target
+model</div></header>
+<p><strong>Input:</strong> as-is 30-capability model in
+<code>docs/dossier/production-systems-dossier.md</code> (Part 4),
+fit-gap (Part 6) and consolidation implications (Part 7).
+<strong>Purpose:</strong> turn the as-is map (describing three systems)
+into the target model (describing the consolidated Rheinwerk MES plus
+the group-ERP boundary).</p>
+<p>Three adjustments were applied to the dossier taxonomy:</p>
+<ol type="1">
+<li><strong>White-space promotion</strong> — chemicals capabilities
+absent in all three sources (dossier §6.3) become first-class target
+capabilities: ISA-88 recipe management, Certificate of Analysis
+generation, hazmat/regulatory data handling, plus e-signatures and
+SCADA/OPC-UA connectivity.</li>
+<li><strong>Retire-only marks</strong> — capabilities present in a
+source but not required in the target. Final confirmation needs the
+operational overlay + business sign-off; candidates are marked
+<code>Retire? (Q#)</code> referencing the open questions register
+below.</li>
+<li><strong>ERP-boundary marks</strong> — capabilities that may belong
+to the group ERP (ADR-002): marked <code>Boundary</code>, feeding the
+one-app-vs-two decision.</li>
+</ol>
+<p>Target homes: <strong>Anchor</strong> (ERPNext substrate as shipped),
+<strong>Integrity</strong> (absorbed semantics re-implemented as the
+integrity layer), <strong>Chemicals</strong> (net-new chemicals layer),
+<strong>Boundary</strong> (interface to group ERP),
+<strong>Retire</strong> (not carried).</p>
+<h2 id="target-capability-model">Target capability model</h2>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Target capability (ISA-95 aligned area)</th>
+<th>Origin</th>
+<th>Target home</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Production execution (ISA-95 L3 — Production
+operations)</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>T1</td>
+<td>Production order lifecycle (explicit, role-gated state machine)</td>
+<td>As-is #1</td>
+<td>Integrity</td>
+<td>Workflow layered over Work Order; Qcadoo semantics</td>
+</tr>
+<tr>
+<td>T2</td>
+<td>Execution gating / hard stops</td>
+<td>As-is #2</td>
+<td>Integrity</td>
+<td>Union of Qcadoo gates + anchor stops</td>
+</tr>
+<tr>
+<td>T3</td>
+<td>Shop-floor execution &amp; recording (job cards, time logs)</td>
+<td>As-is #3, #4</td>
+<td>Anchor</td>
+<td>ERPNext Shop Floor / Job Card</td>
+</tr>
+<tr>
+<td>T4</td>
+<td>Labour &amp; shift tracking</td>
+<td>As-is #4 (+Qcadoo shifts)</td>
+<td>Anchor</td>
+<td>Qcadoo wage groups: Retire? (Q1)</td>
+</tr>
+<tr>
+<td><strong>Recipe / product definition (ISA-95 product definition
+management)</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>T5</td>
+<td>BOM &amp; routing definition</td>
+<td>As-is #5</td>
+<td>Anchor</td>
+<td>ERPNext BOM + Routing</td>
+</tr>
+<tr>
+<td>T6</td>
+<td>Recipe lifecycle governance (approval, immutability, in-use
+locks)</td>
+<td>As-is #6</td>
+<td>Integrity</td>
+<td>Qcadoo technology-state semantics</td>
+</tr>
+<tr>
+<td>T7</td>
+<td><strong>ISA-88 batch recipe management</strong> (master/control
+recipes, phases, formula scaling)</td>
+<td>White space</td>
+<td>Chemicals</td>
+<td>First-class; dossier §6.3</td>
+</tr>
+<tr>
+<td><strong>Traceability (ISA-95 product tracking &amp;
+genealogy)</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>T8</td>
+<td>Batch/lot master data (unified batch object)</td>
+<td>As-is #8</td>
+<td>Integrity</td>
+<td>Canonical entity CDM-01; beyond all three sources</td>
+</tr>
+<tr>
+<td>T9</td>
+<td>Batch genealogy (system-of-record)</td>
+<td>As-is #9</td>
+<td>Integrity</td>
+<td>Qcadoo TrackingRecord semantics</td>
+</tr>
+<tr>
+<td>T10</td>
+<td>Batch QA state &amp; quarantine (blocking with propagation + picking
+exclusion)</td>
+<td>As-is #10</td>
+<td>Integrity</td>
+<td>Absorbed + extended (implication 3)</td>
+</tr>
+<tr>
+<td><strong>Quality (ISA-95 quality operations)</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>T11</td>
+<td>Quality inspection engine (typed, parametric, gated)</td>
+<td>As-is #11, #12</td>
+<td>Anchor</td>
+<td>ERPNext engine</td>
+</tr>
+<tr>
+<td>T12</td>
+<td><strong>Certificate of Analysis generation</strong></td>
+<td>White space</td>
+<td>Chemicals</td>
+<td>Generated from inspection results per batch</td>
+</tr>
+<tr>
+<td>T13</td>
+<td><strong>E-signatures on compliance-critical
+transitions</strong></td>
+<td>White space</td>
+<td>Chemicals</td>
+<td>21 CFR Part 11-style; scope decision Q2</td>
+</tr>
+<tr>
+<td><strong>Inventory / warehouse (ISA-95 material
+handling)</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>T14</td>
+<td>Warehouse structure incl. pallets/handling units &amp; storage
+locations</td>
+<td>As-is #14</td>
+<td>Integrity</td>
+<td>Physical-fidelity extension of anchor warehouse tree</td>
+</tr>
+<tr>
+<td>T15</td>
+<td>FEFO/FIFO picking &amp; disposal algorithms</td>
+<td>As-is #15</td>
+<td>Integrity</td>
+<td>Per-warehouse algorithm; expiry policy decision (implication 6)</td>
+</tr>
+<tr>
+<td>T16</td>
+<td>Stock reservations (order- and document-level)</td>
+<td>As-is #16</td>
+<td>Anchor + Integrity</td>
+<td>Anchor SRE + absorbed draft-reservation semantics</td>
+</tr>
+<tr>
+<td>T17</td>
+<td>Inventory valuation &amp; costing</td>
+<td>As-is #17</td>
+<td>Boundary</td>
+<td>GL postings out to group ERP (ADR-002); valuation stays for stock
+integrity</td>
+</tr>
+<tr>
+<td><strong>Planning (ISA-95 detailed production
+scheduling)</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>T18</td>
+<td>Production planning / MRP</td>
+<td>As-is #18</td>
+<td>Anchor</td>
+<td>Production Plan/MPS; demand signal from group ERP — Boundary
+input</td>
+</tr>
+<tr>
+<td>T19</td>
+<td>Finite-capacity scheduling (line schedules, changeover norms)</td>
+<td>As-is #19</td>
+<td>Integrity</td>
+<td>Qcadoo norms; optimiser remains white space (buy decision Q3)</td>
+</tr>
+<tr>
+<td><strong>Master data &amp; platform</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>T20</td>
+<td>Item/product, work-centre, partner master data</td>
+<td>As-is #20</td>
+<td>Anchor</td>
+<td>Partner (supplier/customer) masters: Boundary — owned by group ERP
+(Q4)</td>
+</tr>
+<tr>
+<td>T21</td>
+<td>UoM &amp; conversions</td>
+<td>As-is #21</td>
+<td>Anchor</td>
+<td></td>
+</tr>
+<tr>
+<td>T22</td>
+<td><strong>Hazmat / regulatory master data</strong> (UN numbers, SDS,
+storage classes, ADR)</td>
+<td>White space</td>
+<td>Chemicals</td>
+<td>On Item + Batch</td>
+</tr>
+<tr>
+<td>T23</td>
+<td><strong>SCADA / OPC-UA / device connectivity</strong></td>
+<td>White space</td>
+<td>Chemicals</td>
+<td>Adapter service; W3</td>
+</tr>
+<tr>
+<td>T24</td>
+<td>External integration (group ERP, WMS)</td>
+<td>As-is #24</td>
+<td>Boundary</td>
+<td>Orders in, confirmations + GL postings out</td>
+</tr>
+<tr>
+<td>T25</td>
+<td>Reporting &amp; analytics</td>
+<td>As-is #25</td>
+<td>Anchor</td>
+<td>Regulatory-required legacy reports to be confirmed (Q5)</td>
+</tr>
+<tr>
+<td>T26</td>
+<td>Maintenance management (CMMS)</td>
+<td>As-is #26</td>
+<td>Integrity</td>
+<td>Qcadoo depth; scope confirmation Q6</td>
+</tr>
+<tr>
+<td>T27</td>
+<td>Audit trail &amp; versioning</td>
+<td>As-is #27</td>
+<td>Anchor</td>
+<td><code>track_changes</code> + immutable ledgers; e-sign in T13</td>
+</tr>
+<tr>
+<td>T28</td>
+<td>Multi-plant operation</td>
+<td>As-is #28</td>
+<td>Anchor</td>
+<td>Multi-company/Company Restriction</td>
+</tr>
+<tr>
+<td>T29</td>
+<td>Localisation (de + en mandatory)</td>
+<td>As-is #29</td>
+<td>Anchor</td>
+<td></td>
+</tr>
+<tr>
+<td>T30</td>
+<td>RBAC incl. workflow-state-level permissions</td>
+<td>As-is #30</td>
+<td>Anchor + Integrity</td>
+<td>Implication 7</td>
+</tr>
+<tr>
+<td><strong>Retire-only (present in sources, not carried)</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>R1</td>
+<td>Finance/accounting beyond stock GL (OFBiz accounting, ERPNext
+accounts as books of record)</td>
+<td>As-is (source-only)</td>
+<td>Retire → group ERP</td>
+<td>ADR-002</td>
+</tr>
+<tr>
+<td>R2</td>
+<td>Buying/procurement &amp; selling/CRM apps</td>
+<td>As-is (source-only)</td>
+<td>Retire → group ERP</td>
+<td>Procurement-adjacent inventory receipt stays (Boundary)</td>
+</tr>
+<tr>
+<td>R3</td>
+<td>OFBiz non-manufacturing suite (party portals, e-commerce hooks,
+content mgmt)</td>
+<td>As-is (source-only)</td>
+<td>Retire</td>
+<td><code>plugins/</code> empty at analysed commit</td>
+</tr>
+<tr>
+<td>R4</td>
+<td>Qcadoo customer-specific plugins/toggles
+(e.g. <code>ziepiwowarski</code>)</td>
+<td>As-is (source-only)</td>
+<td>Retire? (Q7)</td>
+<td>Confirm inactive in Plant A</td>
+</tr>
+<tr>
+<td>R5</td>
+<td>Qcadoo per-language DB dump variants (pl/fr/cn schema dumps)</td>
+<td>As-is (source-only)</td>
+<td>Retire</td>
+<td>Superseded by anchor i18n</td>
+</tr>
+</tbody>
+</table>
+<h2 id="one-app-vs-two-feed-boundary-summary">One-app-vs-two feed
+(Boundary summary)</h2>
+<p>Boundary-marked capabilities (T17 valuation postings, T18 demand
+input, T20 partner masters, T24 integration, R1/R2) all sit on the
+MES↔︎group-ERP seam. Nothing in the target model requires a second
+<em>MES-side</em> application: the recorded one-app outcome (ADR-002)
+stands, with the group ERP as the second system across the boundary.</p>
+<h2 id="open-questions-register-stage-2-additions">Open questions
+register (Stage 2 additions)</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Q#</th>
+<th>Question</th>
+<th>Blocks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Q1</td>
+<td>Are Qcadoo wage groups/labour-cost norms used for payroll or only
+costing?</td>
+<td>T4 retire scope</td>
+</tr>
+<tr>
+<td>Q2</td>
+<td>Which transitions legally require e-signatures (vs audit trail
+only)?</td>
+<td>T13 scope</td>
+</tr>
+<tr>
+<td>Q3</td>
+<td>Build vs buy for finite-capacity optimisation?</td>
+<td>T19</td>
+</tr>
+<tr>
+<td>Q4</td>
+<td>Are supplier/customer masters owned by group ERP (MES holds
+references only)?</td>
+<td>T20 boundary</td>
+</tr>
+<tr>
+<td>Q5</td>
+<td>Which legacy reports are regulatory-required?</td>
+<td>T25</td>
+</tr>
+<tr>
+<td>Q6</td>
+<td>Is CMMS in MES scope or does a group EAM exist?</td>
+<td>T26</td>
+</tr>
+<tr>
+<td>Q7</td>
+<td>Are customer-specific Qcadoo toggles active in Plant A?</td>
+<td>R4</td>
+</tr>
+</tbody>
+</table>
+  <footer class="doc">Rheinwerk Chemie GmbH — MES consolidation programme. Generated from the Markdown source of record in SachetCognition/rheinwerk-mes-core.</footer>
+</main>
+<button id="top-btn" title="Back to top">⇧</button>
+<script>
+const links=[...document.querySelectorAll('#sidebar nav a')];
+const targets=links.map(a=>document.getElementById(decodeURIComponent(a.hash.slice(1)))).filter(Boolean);
+function onScroll(){
+  const y=window.scrollY+90;let cur=targets[0];
+  for(const t of targets){if(t.offsetTop<=y)cur=t;else break}
+  links.forEach(a=>a.classList.toggle('active',cur&&decodeURIComponent(a.hash.slice(1))===cur.id));
+  document.getElementById('top-btn').classList.toggle('show',window.scrollY>500);
+}
+document.addEventListener('scroll',onScroll,{passive:true});onScroll();
+document.getElementById('top-btn').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
+</script>
+</body>
+</html>
