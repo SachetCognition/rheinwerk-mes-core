@@ -1,0 +1,274 @@
+{
+ "actions": [],
+ "allow_import": 0,
+ "allow_rename": 0,
+ "autoname": "hash",
+ "creation": "2026-06-01 09:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 0,
+ "engine": "InnoDB",
+ "field_order": [
+  "tag_address",
+  "event_type",
+  "event_state",
+  "column_break_rw1",
+  "source_system",
+  "equipment_timestamp",
+  "received_at",
+  "is_late",
+  "value_section",
+  "value",
+  "uom",
+  "column_break_rw2",
+  "sequence",
+  "processing_seconds",
+  "attachment_section",
+  "work_centre_code",
+  "production_line",
+  "work_centre",
+  "column_break_rw3",
+  "work_order",
+  "operation",
+  "job_card",
+  "disposition_section",
+  "unmatched_reason",
+  "disposition_note",
+  "column_break_rw4",
+  "dispositioned_by",
+  "dispositioned_at"
+ ],
+ "fields": [
+  {
+   "fieldname": "tag_address",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "OPC-UA-Adresse",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "event_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Ereignisart",
+   "options": "produced-count\noperation-start\noperation-stop",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "event_state",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Verarbeitungszustand",
+   "options": "Verarbeitet\nNicht zugeordnet\nZugeordnet\nVerworfen",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_rw1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "OPC-UA",
+   "description": "Quellsystem des Ereignisses \u2014 nie ein Werker (URS-W3-015).",
+   "fieldname": "source_system",
+   "fieldtype": "Data",
+   "label": "Quellsystem",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "description": "Zeitstempel der Anlage \u2014 bleibt auch bei Nachlieferung unver\u00e4ndert (URS-W3-017).",
+   "fieldname": "equipment_timestamp",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Anlagenzeitstempel",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "received_at",
+   "fieldtype": "Datetime",
+   "label": "Eingang im MES",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "Nachgeliefert nach Verbindungsverlust (URS-W3-017).",
+   "fieldname": "is_late",
+   "fieldtype": "Check",
+   "label": "Nachgeliefert",
+   "read_only": 1
+  },
+  {
+   "fieldname": "value_section",
+   "fieldtype": "Section Break",
+   "label": "Messwert"
+  },
+  {
+   "fieldname": "value",
+   "fieldtype": "Float",
+   "label": "Wert",
+   "precision": "3",
+   "read_only": 1
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "Einheit",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_rw2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Ver\u00f6ffentlichungsz\u00e4hler des Adapters \u2014 die Reihenfolge der Nachlieferung.",
+   "fieldname": "sequence",
+   "fieldtype": "Int",
+   "label": "Folgenummer",
+   "read_only": 1
+  },
+  {
+   "description": "Dauer der Zuordnung in Sekunden (Budget 5 s, URS-W3-015).",
+   "fieldname": "processing_seconds",
+   "fieldtype": "Float",
+   "label": "Zuordnungsdauer (s)",
+   "precision": "3",
+   "read_only": 1
+  },
+  {
+   "fieldname": "attachment_section",
+   "fieldtype": "Section Break",
+   "label": "Zuordnung"
+  },
+  {
+   "fieldname": "work_centre_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Arbeitsplatz-Schl\u00fcssel",
+   "read_only": 1
+  },
+  {
+   "fieldname": "production_line",
+   "fieldtype": "Link",
+   "label": "Produktionslinie",
+   "options": "Production Line",
+   "read_only": 1
+  },
+  {
+   "fieldname": "work_centre",
+   "fieldtype": "Link",
+   "label": "Arbeitsplatz",
+   "options": "Workstation",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_rw3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "work_order",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Fertigungsauftrag",
+   "options": "Work Order",
+   "read_only": 1
+  },
+  {
+   "fieldname": "operation",
+   "fieldtype": "Link",
+   "label": "Arbeitsgang",
+   "options": "Operation",
+   "read_only": 1
+  },
+  {
+   "fieldname": "job_card",
+   "fieldtype": "Link",
+   "label": "Arbeitsgangkarte",
+   "options": "Job Card",
+   "read_only": 1
+  },
+  {
+   "fieldname": "disposition_section",
+   "fieldtype": "Section Break",
+   "label": "Kl\u00e4rung"
+  },
+  {
+   "fieldname": "unmatched_reason",
+   "fieldtype": "Small Text",
+   "label": "Grund der Nichtzuordnung",
+   "read_only": 1
+  },
+  {
+   "fieldname": "disposition_note",
+   "fieldtype": "Small Text",
+   "label": "Kl\u00e4rungsvermerk",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_rw4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "dispositioned_by",
+   "fieldtype": "Link",
+   "label": "Gekl\u00e4rt von",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "dispositioned_at",
+   "fieldtype": "Datetime",
+   "label": "Gekl\u00e4rt am",
+   "read_only": 1
+  }
+ ],
+ "in_create": 1,
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-06-01 09:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Integration",
+ "name": "OPC UA Tracking Event",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Rheinwerk Planner",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Rheinwerk Technologist"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing User"
+  }
+ ],
+ "search_fields": "tag_address,work_centre_code,work_order",
+ "sort_field": "equipment_timestamp",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 0
+}

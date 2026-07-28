@@ -1419,6 +1419,66 @@ def seed_pallets() -> list[str]:
 	return seeded
 
 
+def scada_tag_mappings() -> tuple[dict, ...]:
+	"""W3-5 OPC-UA tag mappings for LINE-1/MIX-01 and LINE-1/FILL-01 — the addresses the
+	committed plant simulator publishes on (URS-W3-016 AC-1)."""
+	_ = frappe._
+	return (
+		{
+			"tag_address": "ns=2;s=Line1.Mix01.ProducedKg",
+			"work_centre_code": "LINE-1/MIX-01",
+			"event_type": "produced-count",
+			"operation": None,
+			"description": _("Gutmenge des Mischers in kg"),
+		},
+		{
+			"tag_address": "ns=2;s=Line1.Mix01.OperationStart",
+			"work_centre_code": "LINE-1/MIX-01",
+			"event_type": "operation-start",
+			"operation": None,
+			"description": _("Startsignal des Mischers"),
+		},
+		{
+			"tag_address": "ns=2;s=Line1.Mix01.OperationStop",
+			"work_centre_code": "LINE-1/MIX-01",
+			"event_type": "operation-stop",
+			"operation": None,
+			"description": _("Stoppsignal des Mischers"),
+		},
+		{
+			"tag_address": "ns=2;s=Line1.Fill01.ProducedKg",
+			"work_centre_code": "LINE-1/FILL-01",
+			"event_type": "produced-count",
+			"operation": None,
+			"description": _("Gutmenge der Abfüllung in kg"),
+		},
+	)
+
+
+def seed_scada_tag_mappings() -> list[str]:
+	"""W3-5 OPC-UA tag mappings; safe to re-run (URS-W3-016)."""
+	if not frappe.db.exists("DocType", "OPC UA Tag Mapping"):
+		return []
+	# Imported here, not at module scope: this shared seeder is extended append-only by every
+	# wave child, so no child's import lands above another's.
+	from rheinwerk_mes.integration.scada.mapping import upsert_mapping
+
+	seeded = []
+	for spec in scada_tag_mappings():
+		line, workstation = spec["work_centre_code"].split("/")
+		if not (frappe.db.exists("Production Line", line) and frappe.db.exists("Workstation", workstation)):
+			continue
+		upsert_mapping(
+			tag_address=spec["tag_address"],
+			work_centre_code=spec["work_centre_code"],
+			event_type=spec["event_type"],
+			operation=spec["operation"],
+			description=spec["description"],
+		)
+		seeded.append(spec["tag_address"])
+	return seeded
+
+
 def seed_all() -> dict:
 	"""Seed every programme fixture; safe to re-run."""
 	summary = {
@@ -1458,6 +1518,8 @@ def seed_all() -> dict:
 	summary["inspection_template"] = seed_inspection_template()
 	# W2-7: hazmat master data on the item masters and their batches (URS-W2-023/024).
 	summary["hazmat_profiles"] = seed_hazmat_profiles()
+	# W3-5: the OPC-UA tag mappings the plant simulator publishes on (URS-W3-016).
+	summary["scada_tag_mappings"] = seed_scada_tag_mappings()
 	summary["legacy_refs"] = seed_legacy_refs()
 	summary["pallets"] = seed_pallets()
 	summary["personas"] = seed_personas()

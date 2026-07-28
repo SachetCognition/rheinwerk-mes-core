@@ -76,6 +76,9 @@ after_install = [
 	# W2 fan-in: the business viewer's cross-module read surface (URS-W2-036 AC-2) — after
 	# W1 roles, which creates the role, and after every W2 child installed its DocTypes.
 	"rheinwerk_mes.setup.w2_rbac.setup_w2_rbac",
+	# W3-5: the SCADA/OPC-UA adapter's service account, adapter role and permissions
+	# (URS-W3-015 … URS-W3-017, URS-W3-021) — after the W0/W1 roles it grants against.
+	"rheinwerk_mes.setup.w3_scada.setup_w3_scada",
 ]
 
 # Client-side additions to anchor forms; W1-4 renders the recipe's `gov_state` pill on the

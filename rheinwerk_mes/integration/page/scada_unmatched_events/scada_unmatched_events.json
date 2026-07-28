@@ -1,0 +1,22 @@
+{
+ "content": null,
+ "creation": "2026-06-01 09:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Page",
+ "modified": "2026-06-01 09:00:00.000000",
+ "module": "Integration",
+ "name": "scada-unmatched-events",
+ "owner": "Administrator",
+ "page_name": "scada-unmatched-events",
+ "roles": [
+  {"role": "Rheinwerk Planner"},
+  {"role": "Rheinwerk Technologist"},
+  {"role": "Manufacturing User"},
+  {"role": "System Manager"}
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Nicht zugeordnete OPC-UA-Ereignisse"
+}
