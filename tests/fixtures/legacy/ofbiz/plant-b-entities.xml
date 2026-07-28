@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Plant B (OFBiz) master-data export subset — Product, GoodIdentification,
+  FixedAsset machine group and Facility. Entity definitions:
+  applications/product/entitydef/product-entitymodel.xml and
+  applications/accounting/entitydef/accounting-entitymodel.xml (FixedAsset).
+
+  RHEINOL-40-LB carries an unmappable quantityUomId (WT_lb): it must be reported in
+  the exceptions report, not defaulted (URS-W0-010 AC-2).
+-->
+<entity-engine-xml>
+	<Product productId="RHEINOL-40-BASE" productTypeId="RAW_MATERIAL" productName="Rheinol 40 Basisharz" description="Basisharz für Rheinol 40" quantityUomId="WT_kg"/>
+	<GoodIdentification productId="RHEINOL-40-BASE" goodIdentificationTypeId="SKU" idValue="RW-CHM-0001"/>
+	<Product productId="RHEINOL-40-CMPD" productTypeId="FINISHED_GOOD" productName="Rheinol 40 Compound" description="Fertigcompound Rheinol 40" quantityUomId="WT_kg"/>
+	<GoodIdentification productId="RHEINOL-40-CMPD" goodIdentificationTypeId="SKU" idValue="RW-CHM-0003"/>
+	<Product productId="RHEINOL-40-LB" productTypeId="RAW_MATERIAL" productName="Rheinol 40 Basisharz (US-Gebinde)" description="Exportgebinde" quantityUomId="WT_lb"/>
+	<GoodIdentification productId="RHEINOL-40-LB" goodIdentificationTypeId="SKU" idValue="RW-CHM-0009"/>
+	<ProductPrice productId="RHEINOL-40-BASE" productPriceTypeId="AVERAGE_COST" currencyUomId="EUR" price="2.45"/>
+	<FixedAsset fixedAssetId="EXTRUDER-01" fixedAssetTypeId="PRODUCTION_EQUIPMENT" fixedAssetName="Extruder 01" productionCapacity="450" uomId="WT_kg" purchaseCost="185000" accountingClassId="MACHINERY"/>
+	<FixedAsset fixedAssetId="BUERO-NORD" fixedAssetTypeId="PROPERTY" fixedAssetName="Bürogebäude Nord" purchaseCost="920000" accountingClassId="BUILDING"/>
+	<Facility facilityId="WH-WEST" facilityTypeId="WAREHOUSE" facilityName="Lager West" ownerPartyId="RHEINWERK"/>
+	<Facility facilityId="PLANT-B" facilityTypeId="PLANT" facilityName="Werk Süd" ownerPartyId="RHEINWERK"/>
+</entity-engine-xml>
