@@ -1,0 +1,89 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-04-01 09:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "unit_procedure",
+  "phase_name",
+  "phase_type",
+  "sequence",
+  "column_break_rw1",
+  "material",
+  "quantity",
+  "uom",
+  "duration_min"
+ ],
+ "fields": [
+  {
+   "fieldname": "unit_procedure",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Teilanlage (Unit Procedure)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "phase_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Phase",
+   "reqd": 1
+  },
+  {
+   "default": "Dosieren",
+   "fieldname": "phase_type",
+   "fieldtype": "Select",
+   "label": "Phasenart",
+   "options": "Dosieren\nVerarbeiten\nAbf\u00fcllen\nSonstige"
+  },
+  {
+   "fieldname": "sequence",
+   "fieldtype": "Int",
+   "label": "Reihenfolge"
+  },
+  {
+   "fieldname": "column_break_rw1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "material",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Material",
+   "options": "Item"
+  },
+  {
+   "fieldname": "quantity",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Menge",
+   "precision": "3"
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "Mengeneinheit",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "duration_min",
+   "fieldtype": "Float",
+   "label": "Dauer (min)",
+   "precision": "2"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-04-01 09:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Recipe ISA88",
+ "name": "ISA88 Phase",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "idx",
+ "sort_order": "ASC",
+ "states": []
+}

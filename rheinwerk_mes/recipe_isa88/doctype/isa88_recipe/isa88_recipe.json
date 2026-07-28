@@ -1,0 +1,175 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 0,
+ "autoname": "field:bom",
+ "creation": "2026-04-01 09:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "recipe_name",
+  "bom",
+  "item",
+  "column_break_rw1",
+  "routing",
+  "batch_size",
+  "batch_uom",
+  "rw_scaling_section",
+  "source_recipe",
+  "scale_factor",
+  "column_break_rw2",
+  "rounding_confirmation_required",
+  "rw_structure_section",
+  "unit_procedures",
+  "phases"
+ ],
+ "fields": [
+  {
+   "fieldname": "recipe_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Rezeptbezeichnung",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "St\u00fcckliste",
+   "options": "BOM",
+   "reqd": 1,
+   "set_only_once": 1,
+   "unique": 1
+  },
+  {
+   "fetch_from": "bom.item",
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Erzeugnis",
+   "options": "Item",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_rw1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "routing",
+   "fieldtype": "Link",
+   "label": "Arbeitsplan",
+   "options": "Routing"
+  },
+  {
+   "fieldname": "batch_size",
+   "fieldtype": "Float",
+   "label": "Nennchargengr\u00f6\u00dfe",
+   "precision": "3",
+   "reqd": 1
+  },
+  {
+   "fieldname": "batch_uom",
+   "fieldtype": "Link",
+   "label": "Mengeneinheit",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rw_scaling_section",
+   "fieldtype": "Section Break",
+   "label": "Skalierung"
+  },
+  {
+   "fieldname": "source_recipe",
+   "fieldtype": "Link",
+   "label": "Ausgangsrezept",
+   "options": "ISA88 Recipe",
+   "read_only": 1,
+   "set_only_once": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "scale_factor",
+   "fieldtype": "Float",
+   "label": "Skalierungsfaktor",
+   "precision": "6",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_rw2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Gesetzt, wenn eine skalierte Menge unter die Mengengenauigkeit f\u00e4llt und vom Technologen best\u00e4tigt werden muss.",
+   "fieldname": "rounding_confirmation_required",
+   "fieldtype": "Check",
+   "label": "Rundung best\u00e4tigen erforderlich",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rw_structure_section",
+   "fieldtype": "Section Break",
+   "label": "ISA-88 Struktur"
+  },
+  {
+   "fieldname": "unit_procedures",
+   "fieldtype": "Table",
+   "label": "Teilanlagen (Unit Procedures)",
+   "options": "ISA88 Unit Procedure"
+  },
+  {
+   "fieldname": "phases",
+   "fieldtype": "Table",
+   "label": "Phasen",
+   "options": "ISA88 Phase"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-04-01 09:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Recipe ISA88",
+ "name": "ISA88 Recipe",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Rheinwerk Technologist",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Rheinwerk Planner"
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "recipe_name",
+ "track_changes": 1
+}
