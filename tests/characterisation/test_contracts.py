@@ -11,7 +11,9 @@ resolving parametrisation ids:
 A contract that declares a `Divergence` (W1: the expiry policy, URS-W1-030) is expected to
 *fail* against the target for every fixture case flagged `diverges`: the case runs as a
 strict xfail, so the suite fails both if the divergence disappears (xpass) and if a case
-that should still hold breaks.
+that should still hold breaks. The mark applies only while the contract resolves to the
+target entrypoint — against the fixture-encoded fallback the legacy verdict must still
+hold, divergence or not.
 """
 
 from __future__ import annotations
@@ -26,7 +28,7 @@ _CASES = [(contract, case) for contract in all_contracts() for case in contract.
 def _params():
 	for contract, case in _CASES:
 		marks = []
-		if contract.divergence and case.get("diverges"):
+		if contract.divergence and case.get("diverges") and contract.resolution().is_target_implementation:
 			marks.append(
 				pytest.mark.xfail(
 					strict=True,

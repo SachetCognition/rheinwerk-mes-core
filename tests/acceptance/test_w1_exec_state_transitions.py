@@ -67,7 +67,11 @@ def test_characterisation_harness_still_passes_against_the_implementation():
 	assert contracts, "characterisation registry is empty"
 	for contract in contracts:
 		for case in contract.cases():
-			if contract.divergence and case.get("diverges"):
+			if (
+				contract.divergence
+				and case.get("diverges")
+				and contract.resolution().is_target_implementation
+			):
 				# A signed-off divergence (URS-W1-030) must *not* match the legacy verdict;
 				# the behaviour record proves it instead (tools/behaviour).
 				with pytest.raises(AssertionError):

@@ -12,11 +12,20 @@ Two kinds of test run from this tree:
 from __future__ import annotations
 
 import os
+import sys
 from pathlib import Path
 
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+
+# `pytest tests/characterisation` puts only `tests/` on `sys.path` (the suites are
+# packages), and the bare `pytest` entrypoint — unlike `python -m pytest` — does not add the
+# working directory. Without this the harness would silently fall back to its
+# fixture-encoded legacy rules instead of resolving the `rheinwerk_mes` entrypoints, which
+# is the difference between checking production code and checking the fixtures.
+if str(REPO_ROOT) not in sys.path:
+	sys.path.insert(0, str(REPO_ROOT))
 
 
 def bench_path() -> Path:
