@@ -9,7 +9,9 @@ from __future__ import annotations
 
 import pytest
 
-from rheinwerk_mes.recipe_isa88 import governance
+# Site-backed suite: skip (never fail) when the Frappe substrate is absent.
+pytest.importorskip("frappe")
+governance = pytest.importorskip("rheinwerk_mes.recipe_isa88.governance")
 
 BOM_NAME = "BOM-RW-CHM-0003-001"
 ROUTING = "RT-COMPOUND-01"
