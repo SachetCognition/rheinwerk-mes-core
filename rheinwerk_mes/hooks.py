@@ -57,7 +57,20 @@ fixtures = [
 	},
 ]
 
-after_install = "rheinwerk_mes.install.after_install"
+after_install = [
+	"rheinwerk_mes.install.after_install",
+	# W1-4: recipe governance (URS-W1-014 … URS-W1-017).
+	"rheinwerk_mes.setup.w1_recipe_gov.setup_w1_recipe_gov",
+	# W1-8: role gating runs last so it can also stamp the governance workflow's
+	# transitions (URS-W1-029).
+	"rheinwerk_mes.setup.w1_roles.setup_w1_roles",
+]
+
+# Client-side additions to anchor forms; W1-4 renders the recipe's `gov_state` pill on the
+# anchor BOM without forking it.
+doctype_js = {
+	"BOM": "recipe_isa88/bom_gov_state.js",
+}
 
 # W1-7: Desk/Terminal density tokens and status pills for the shop-floor screens.
 app_include_css = "/assets/rheinwerk_mes/css/shopfloor.css"
@@ -68,6 +81,13 @@ doc_events = {
 	"Item": {
 		"validate": "rheinwerk_mes.manufacturing_core.uom.validate_uom_conversions",
 	},
+	# W1-6: draft outbound Stock Entries make/release reservations (URS-W1-023/024).
+	"Stock Entry": {
+		"on_update": "rheinwerk_mes.warehouse.reservations.on_stock_entry_update",
+		"on_submit": "rheinwerk_mes.warehouse.reservations.on_stock_entry_submit",
+		"on_cancel": "rheinwerk_mes.warehouse.reservations.on_stock_entry_cancel",
+		"on_trash": "rheinwerk_mes.warehouse.reservations.on_stock_entry_trash",
+	},
 	# W1-1: every `exec_state` change funnels through one validator (URS-W1-001…004).
 	"Work Order": {
 		"before_insert": "rheinwerk_mes.manufacturing_core.exec_state.set_default_exec_state",
@@ -77,6 +97,13 @@ doc_events = {
 	# W1-7: the job card's own name is the barcode the terminal scans (URS-W1-028).
 	"Job Card": {
 		"validate": "rheinwerk_mes.setup.w1_shopfloor.set_job_card_scan_code",
+	},
+	# W1-4: Accepted recipes are immutable and in-use recipes are locked
+	# (URS-W1-016, URS-W1-017); changes need a new BOM version.
+	"BOM": {
+		"validate": "rheinwerk_mes.recipe_isa88.governance.enforce_recipe_change_control",
+		"before_update_after_submit": "rheinwerk_mes.recipe_isa88.governance.enforce_recipe_change_control",
+		"before_cancel": "rheinwerk_mes.recipe_isa88.governance.enforce_recipe_change_control",
 	},
 }
 

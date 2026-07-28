@@ -5,8 +5,8 @@ from frappe import _
 
 from rheinwerk_mes.setup.w0 import setup_w0
 from rheinwerk_mes.setup.w1_exec_state import setup_w1_exec_state
-from rheinwerk_mes.setup.w1_roles import setup_w1_roles
 from rheinwerk_mes.setup.w1_shopfloor import setup_w1_shopfloor
+from rheinwerk_mes.setup.w1_warehouse import setup_w1_warehouse
 
 MODULES = (
 	"Manufacturing Core",
@@ -28,4 +28,4 @@ def after_install() -> None:
 	setup_w0()
 	setup_w1_exec_state()
 	setup_w1_shopfloor()
-	setup_w1_roles()
+	setup_w1_warehouse()
