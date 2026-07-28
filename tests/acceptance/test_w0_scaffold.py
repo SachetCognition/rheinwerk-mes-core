@@ -1,6 +1,8 @@
 """W0-1 scaffold acceptance — TC-W0-001, TC-W0-002 (URS-W0-001).
 
-TC-W0-001: the app installs and registers all eight module skeletons.
+TC-W0-001: the app installs and registers all eight W0 module skeletons; later waves may add
+modules of their own (W3 adds `Compliance` for the DEC-W2-029 signatures), which must be
+registered the same way — hence the split between the W0 floor and the shipped set.
 TC-W0-002: no anchor DocType is forked — `rheinwerk_mes` ships no copy of an
 anchor DocType schema; extensions may only exist as Custom Field / Property
 Setter / linked DocType records.
@@ -10,7 +12,8 @@ from __future__ import annotations
 
 ANCHOR_DOCTYPES = ("Item", "Workstation", "BOM", "Work Order", "Warehouse", "UOM")
 
-MODULES = (
+#: The eight modules W0 defines — the floor every later wave keeps.
+W0_MODULES = (
 	"Manufacturing Core",
 	"Execution Gating",
 	"Genealogy",
@@ -21,13 +24,19 @@ MODULES = (
 	"Integration",
 )
 
+#: Modules added by later waves, each with the wave that introduced it.
+LATER_MODULES = ("Compliance",)
 
-def test_modules_txt_lists_eight_modules(repo_root):
+MODULES = W0_MODULES + LATER_MODULES
+
+
+def test_modules_txt_lists_every_module_of_the_app(repo_root):
 	listed = [
 		line.strip()
 		for line in (repo_root / "rheinwerk_mes" / "modules.txt").read_text().splitlines()
 		if line.strip()
 	]
+	assert set(W0_MODULES) <= set(listed)
 	assert set(listed) == set(MODULES)
 	assert len(listed) == len(MODULES)
 

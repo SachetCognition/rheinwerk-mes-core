@@ -16,6 +16,7 @@ Source paths below are relative to the `Chem_mes` repository root:
 
 from __future__ import annotations
 
+import math
 from collections.abc import Mapping, Sequence
 from typing import Any
 
@@ -278,3 +279,73 @@ def pickable_candidates(resources: Sequence[Mapping[str, Any]]) -> tuple[str, ..
 	candidate list. Quarantine has no legacy counterpart: quarantined stock is offered.
 	"""
 	return tuple(str(resource["batch"]) for resource in resources if resource.get("qa_state") != "Blocked")
+
+
+# --------------------------------------------------------------------------------------
+# W3-2 — line schedules and TJ/TPZ realization times
+# --------------------------------------------------------------------------------------
+
+SCHEDULE_ILLEGAL_TRANSITION = "orders.schedule.state.error.illegalTransition"
+
+#: `ScheduleState.canChangeTo` as the legacy file writes it — DRAFT → APPROVED | REJECTED
+#: and, additionally, APPROVED → REJECTED (`ScheduleState.java:8-24`). The target narrows the
+#: last edge on purpose (URS-W3-005 AC-3); the fixture flags that case `new_behaviour`.
+LEGACY_SCHEDULE_TRANSITIONS: dict[str, frozenset[str]] = {
+	"Draft": frozenset({"Approved", "Rejected"}),
+	"Approved": frozenset({"Rejected"}),
+	"Rejected": frozenset(),
+}
+
+
+def evaluate_schedule_state_transition(transition: Mapping[str, Any]) -> Verdict:
+	"""Plant A's schedule state machine — `ScheduleState.java:8-24` (URS-W3-005 baseline).
+
+	`ScheduleState` has three constants: DRAFT may change to APPROVED or REJECTED, APPROVED
+	may still change to REJECTED, and REJECTED is terminal. `transition` carries `from_state`
+	and `to_state` in canonical names so the same fixture drives legacy rule and target.
+	"""
+	from_state = transition.get("from_state") or "Draft"
+	to_state = transition["to_state"]
+	if to_state in LEGACY_SCHEDULE_TRANSITIONS.get(from_state, frozenset()):
+		return Verdict(allowed=True)
+	return Verdict(allowed=False, errors=(SCHEDULE_ILLEGAL_TRANSITION,))
+
+
+def realization_time(inputs: Mapping[str, Any]) -> int:
+	"""Plant A's realization time — `OrderRealizationTimeServiceImpl.java:156-186`.
+
+	`evaluateOperationDurationOutOfCycles`: the cycles are spread over the work centre's
+	workstation count when `maxForWorkstation` is set and rounded **up** for a non-divisible
+	TJ (`:167-171`); the product `cycles × TJ × staffFactor` is **truncated** to whole
+	minutes by `BigDecimal.intValue()` (`:176`); TPZ and the optional next-operation
+	surcharge are added once per work centre, or once per workstation without
+	`maxForWorkstation` (`:178-186`). A null norm counts as 0 (`getIntegerValue`, `:188-190`).
+
+	With `operations` present the mapping is a whole routed order and the per-operation
+	times are summed — the sequential-routing case URS-W3-006 AC-1 fixes at 495 min.
+	"""
+	if "operations" in inputs:
+		quantity = inputs.get("quantity", 0)
+		return sum(
+			realization_time({**operation, "quantity": operation.get("quantity", quantity)})
+			for operation in inputs["operations"]
+		)
+
+	workstations = max(int(inputs.get("workstations_count") or 1), 1)
+	max_for_workstation = bool(inputs.get("max_for_workstation", True))
+	cycles = float(inputs.get("quantity") or 0)
+	if max_for_workstation:
+		cycles = cycles / workstations
+		if not bool(inputs.get("tj_divisible", True)):
+			cycles = float(math.ceil(cycles))
+
+	duration = int(
+		cycles * float(inputs.get("tj_min_per_unit") or 0) * float(inputs.get("staff_factor") or 1)
+	)
+	if bool(inputs.get("include_tpz", True)):
+		tpz = int(inputs.get("tpz_min") or 0)
+		duration += tpz if max_for_workstation else tpz * workstations
+	if bool(inputs.get("include_additional_time", False)):
+		additional = int(inputs.get("additional_time_min") or 0)
+		duration += additional if max_for_workstation else additional * workstations
+	return duration

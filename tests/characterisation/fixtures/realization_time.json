@@ -1,0 +1,150 @@
+{
+	"contract": "CHAR-REALIZATION-TIME-01",
+	"urs": ["URS-W3-006"],
+	"test_cases": ["TC-W3-009"],
+	"legacy_source": "mes-plugins/mes-plugins-production-scheduling/src/main/java/com/qcadoo/mes/productionScheduling/OrderRealizationTimeServiceImpl.java:156-186",
+	"notes": "TJ/TPZ matrix recorded off the legacy calculator (evaluateOperationDurationOutOfCycles): cycles are divided by the workstation count under maxForWorkstation and rounded up for a non-divisible TJ (:167-171), the product cycles × TJ × staffFactor is truncated to whole minutes by BigDecimal.intValue() (:176) — it is never rounded — and TPZ plus the optional next-operation surcharge are added once per work centre, or once per workstation without maxForWorkstation (:178-186). Edge values qty = 1 and TPZ = 0 are included as TST-W3 TC-W3-009 requires. Quantities are kg, times whole minutes.",
+	"cases": [
+		{
+			"id": "RT-01-mix-500kg",
+			"description": "MIX on 500 kg: 30 + 500 × 0,6 = 330 min (URS-W3-006 AC-1)",
+			"inputs": {"operation": "MIX", "quantity": 500, "tpz_min": 30, "tj_min_per_unit": 0.6},
+			"expected": {"minutes": 330}
+		},
+		{
+			"id": "RT-02-fill-500kg",
+			"description": "FILL on 500 kg: 15 + 500 × 0,3 = 165 min (URS-W3-006 AC-1)",
+			"inputs": {"operation": "FILL", "quantity": 500, "tpz_min": 15, "tj_min_per_unit": 0.3},
+			"expected": {"minutes": 165}
+		},
+		{
+			"id": "RT-03-order-total-sequential-routing",
+			"description": "PO-2026-0001: MIX + FILL on the sequential routing = 495 min (URS-W3-006 AC-1)",
+			"inputs": {
+				"quantity": 500,
+				"operations": [
+					{"operation": "MIX", "tpz_min": 30, "tj_min_per_unit": 0.6},
+					{"operation": "FILL", "tpz_min": 15, "tj_min_per_unit": 0.3}
+				]
+			},
+			"expected": {"minutes": 495}
+		},
+		{
+			"id": "RT-04-single-unit-truncates-run-time",
+			"description": "edge value qty = 1: 1 × 0,6 truncates to 0, so only TPZ remains",
+			"inputs": {"operation": "MIX", "quantity": 1, "tpz_min": 30, "tj_min_per_unit": 0.6},
+			"expected": {"minutes": 30}
+		},
+		{
+			"id": "RT-05-zero-setup-time",
+			"description": "edge value TPZ = 0: the run time alone",
+			"inputs": {"operation": "MIX", "quantity": 500, "tpz_min": 0, "tj_min_per_unit": 0.6},
+			"expected": {"minutes": 300}
+		},
+		{
+			"id": "RT-06-fractional-run-time-truncated-not-rounded",
+			"description": "7 kg × 0,3 = 2,1 min truncates to 2, plus TPZ 15",
+			"inputs": {"operation": "FILL", "quantity": 7, "tpz_min": 15, "tj_min_per_unit": 0.3},
+			"expected": {"minutes": 17}
+		},
+		{
+			"id": "RT-07-zero-quantity-keeps-setup",
+			"description": "no quantity: the work centre is still set up",
+			"inputs": {"operation": "MIX", "quantity": 0, "tpz_min": 30, "tj_min_per_unit": 0.6},
+			"expected": {"minutes": 30}
+		},
+		{
+			"id": "RT-08-two-workstations-share-the-cycles",
+			"description": "maxForWorkstation with 2 workstations halves the cycles; TPZ counts once",
+			"inputs": {
+				"operation": "MIX",
+				"quantity": 500,
+				"tpz_min": 30,
+				"tj_min_per_unit": 0.6,
+				"workstations_count": 2
+			},
+			"expected": {"minutes": 180}
+		},
+		{
+			"id": "RT-09-non-divisible-tj-rounds-cycles-up",
+			"description": "a non-divisible TJ rounds 2,5 cycles up to 3 (:167-171)",
+			"inputs": {
+				"operation": "MIX",
+				"quantity": 5,
+				"tpz_min": 0,
+				"tj_min_per_unit": 10,
+				"workstations_count": 2,
+				"tj_divisible": false
+			},
+			"expected": {"minutes": 30}
+		},
+		{
+			"id": "RT-10-without-max-for-workstation-tpz-per-workstation",
+			"description": "without maxForWorkstation the cycles stay whole and TPZ counts per workstation",
+			"inputs": {
+				"operation": "FILL",
+				"quantity": 100,
+				"tpz_min": 15,
+				"tj_min_per_unit": 0.3,
+				"workstations_count": 2,
+				"max_for_workstation": false
+			},
+			"expected": {"minutes": 60}
+		},
+		{
+			"id": "RT-11-setup-excluded-on-request",
+			"description": "includeTpz = false yields the pure run time",
+			"inputs": {
+				"operation": "MIX",
+				"quantity": 500,
+				"tpz_min": 30,
+				"tj_min_per_unit": 0.6,
+				"include_tpz": false
+			},
+			"expected": {"minutes": 300}
+		},
+		{
+			"id": "RT-12-next-operation-surcharge",
+			"description": "the time-for-next-operation surcharge is added like TPZ (:183-186)",
+			"inputs": {
+				"operation": "MIX",
+				"quantity": 200,
+				"tpz_min": 30,
+				"tj_min_per_unit": 0.6,
+				"additional_time_min": 20,
+				"include_additional_time": true
+			},
+			"expected": {"minutes": 170}
+		},
+		{
+			"id": "RT-13-staff-factor-halves-the-run-time",
+			"description": "the staff factor scales the run time before truncation",
+			"inputs": {
+				"operation": "MIX",
+				"quantity": 500,
+				"tpz_min": 30,
+				"tj_min_per_unit": 0.6,
+				"staff_factor": 0.5
+			},
+			"expected": {"minutes": 180}
+		},
+		{
+			"id": "RT-14-order-total-200kg",
+			"description": "PO-2026-0002 on 200 kg: 150 + 75 = 225 min",
+			"inputs": {
+				"quantity": 200,
+				"operations": [
+					{"operation": "MIX", "tpz_min": 30, "tj_min_per_unit": 0.6},
+					{"operation": "FILL", "tpz_min": 15, "tj_min_per_unit": 0.3}
+				]
+			},
+			"expected": {"minutes": 225}
+		},
+		{
+			"id": "RT-15-sub-minute-run-time-truncates-to-one",
+			"description": "3 kg × 0,6 = 1,8 min truncates to 1 with no setup time",
+			"inputs": {"operation": "MIX", "quantity": 3, "tpz_min": 0, "tj_min_per_unit": 0.6},
+			"expected": {"minutes": 1}
+		}
+	]
+}

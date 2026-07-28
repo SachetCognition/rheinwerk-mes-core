@@ -70,12 +70,18 @@ after_install = [
 	"rheinwerk_mes.setup.w2_quality.setup_w2_quality",
 	# W2-7: hazmat / regulatory master data on Item and Batch (URS-W2-023/024).
 	"rheinwerk_mes.setup.w2_hazmat.setup_w2_hazmat",
+	# W3-6: ADR transport data on the hazmat profile at the shipping boundary (URS-W3-018).
+	"rheinwerk_mes.setup.w3_hazmat.setup_w3_hazmat",
 	# W1-8: role gating runs last so it can also stamp the governance workflow's
 	# transitions (URS-W1-029).
 	"rheinwerk_mes.setup.w1_roles.setup_w1_roles",
 	# W2 fan-in: the business viewer's cross-module read surface (URS-W2-036 AC-2) — after
 	# W1 roles, which creates the role, and after every W2 child installed its DocTypes.
 	"rheinwerk_mes.setup.w2_rbac.setup_w2_rbac",
+	# W3: the read-only permission surface of the e-signature evidence (DEC-W2-029).
+	"rheinwerk_mes.setup.w3_esignature.setup_w3_esignature",
+	# W3-2: line-schedule governance workflow and work-centre capacity (URS-W3-005/008).
+	"rheinwerk_mes.setup.w3_scheduling.setup_w3_scheduling",
 ]
 
 # Client-side additions to anchor forms; W1-4 renders the recipe's `gov_state` pill on the
@@ -96,12 +102,18 @@ app_include_css = [
 	"/assets/rheinwerk_mes/css/inspection_queue.css",
 	# W2-7: the hazmat chip's signal tone and icons (URS-W2-024).
 	"/assets/rheinwerk_mes/css/hazmat.css",
+	# W3-2: the planner's virtualized schedule board (URS-W3-005, URS-W3-020).
+	"/assets/rheinwerk_mes/css/schedule_board.css",
+	# W3-6: the dispatch-station label preview (URS-W3-018).
+	"/assets/rheinwerk_mes/css/hazmat_dispatch.css",
 ]
 
 # W2-7: one hazmat chip component shared by the Item/Batch forms, stock views and the
 # Trace Ribbon (URS-W2-024).
 app_include_js = [
 	"/assets/rheinwerk_mes/js/hazmat.js",
+	# W3: the German-first signing dialog for the four dispositive acts (DEC-W2-029).
+	"/assets/rheinwerk_mes/js/esignature.js",
 ]
 
 # W2-7: the Trace Ribbon page fetches its model from `genealogy.ribbon.ribbon`; the hazmat
@@ -134,6 +146,9 @@ doc_events = {
 			# quarantine location without the QA/clerk role (URS-W2-011, URS-W2-012).
 			"rheinwerk_mes.genealogy.blocking.enforce_blocked_batch_consumption",
 			"rheinwerk_mes.genealogy.quarantine.enforce_quarantine_exit",
+			# W3-6: a hazmat batch may not be dispatched while its ADR transport data is
+			# incomplete (URS-W3-018 AC-2) — outward dispatch purposes only.
+			"rheinwerk_mes.regulatory_hazmat.dispatch.enforce_adr_completeness",
 		],
 		"on_update": "rheinwerk_mes.warehouse.reservations.on_stock_entry_update",
 		"on_submit": [
@@ -175,6 +190,10 @@ doc_events = {
 		"validate": "rheinwerk_mes.genealogy.qa_state.validate_qa_state_change",
 		"on_update": "rheinwerk_mes.genealogy.blocking.on_batch_update",
 	},
+	# W3-6: the delivery half of the dispatch boundary — the same one rule (URS-W3-018 AC-2).
+	"Delivery Note": {
+		"validate": "rheinwerk_mes.regulatory_hazmat.dispatch.enforce_adr_completeness",
+	},
 	# W2-4: an Accepted inspection releases its batch through the genealogy API
 	# (URS-W2-014 AC-3).
 	"Quality Inspection": {
@@ -182,6 +201,14 @@ doc_events = {
 	},
 	# W1-4: Accepted recipes are immutable and in-use recipes are locked
 	# (URS-W1-016, URS-W1-017); changes need a new BOM version.
+	# W3: the two remaining dispositive acts of DEC-W2-029 — issuing a certificate and
+	# accepting a recipe — intercepted on their own documents.
+	"CoA Certificate": {
+		"before_insert": "rheinwerk_mes.compliance.gates.coa_issue_signature_gate",
+	},
+	"Recipe Governance": {
+		"validate": "rheinwerk_mes.compliance.gates.recipe_accept_signature_gate",
+	},
 	"BOM": {
 		"validate": "rheinwerk_mes.recipe_isa88.governance.enforce_recipe_change_control",
 		"before_update_after_submit": "rheinwerk_mes.recipe_isa88.governance.enforce_recipe_change_control",
@@ -217,4 +244,8 @@ rheinwerk_qa_state_gates = [
 	# W2-4: a Rejected inspection must be dispositioned before its batch can be released
 	# (URS-W2-016).
 	"rheinwerk_mes.quality.gates.rejected_inspection_gate",
+	# W3: release and block are dispositive acts and need an electronic signature once
+	# enforcement is switched on (DEC-W2-029 · URS-W2-029 AC-2). Registered last, so a
+	# transition that fails a cheaper gate is refused before anyone is asked to sign.
+	"rheinwerk_mes.compliance.gates.qa_state_signature_gate",
 ]

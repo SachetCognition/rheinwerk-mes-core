@@ -26,6 +26,7 @@ and custom fields land.
 from __future__ import annotations
 
 import frappe
+from frappe import _
 from frappe.model.naming import NamingSeries
 
 from rheinwerk_mes.setup.naming import WORK_ORDER_SERIES
@@ -91,6 +92,44 @@ WORK_CENTRES = (
 OPERATIONS = (
 	{"operation": "MIX", "workstation": "MIX-01", "time_in_mins": 90.0},
 	{"operation": "FILL", "workstation": "FILL-01", "time_in_mins": 45.0},
+)
+
+# W3-2: TJ/TPZ norms behind the realization times (URS-W3-006 AC-1). For the 500 kg
+# PO-2026-0001 they give MIX = 30 + 500 × 0,6 = 330 min and FILL = 15 + 500 × 0,3 = 165 min,
+# i.e. 495 min for the sequential routing.
+TIME_NORMS = (
+	{
+		"operation": "MIX",
+		"workstation": "MIX-01",
+		"production_line": "LINE-1",
+		"tpz_min": 30.0,
+		"tj_min_per_unit": 0.6,
+	},
+	{
+		"operation": "FILL",
+		"workstation": "FILL-01",
+		"production_line": "LINE-1",
+		"tpz_min": 15.0,
+		"tj_min_per_unit": 0.3,
+	},
+)
+
+# W3-2: the LINE-1 changeover norm sequencing inserts between two orders (URS-W3-007 AC-1) —
+# the 45-minute intermediate cleaning between two Rheinol 40 batches.
+CHANGEOVER_NORMS = (
+	{
+		"production_line": "LINE-1",
+		"from_item": "RW-CHM-0003",
+		"to_item": "RW-CHM-0003",
+		"changeover_min": 45.0,
+	},
+)
+
+# W3-2: the anchor's capacity ceiling per work centre (`Workstation.production_capacity`) —
+# one job at a time, so a second order in the same window is refused (URS-W3-008 AC-1).
+WORK_CENTRE_CAPACITY = (
+	{"workstation": "MIX-01", "production_capacity": 1},
+	{"workstation": "FILL-01", "production_capacity": 1},
 )
 
 ROUTING = "RT-COMPOUND-01"
@@ -887,6 +926,81 @@ def seed_workstation_limits() -> None:
 			)
 
 
+def seed_time_norms() -> list[str]:
+	"""W3-2: TJ/TPZ norms per operation and work centre (URS-W3-006 AC-1).
+
+	Idempotent; skipped when the `Operation Time Norm` DocType is not installed yet.
+	"""
+	if not frappe.db.exists("DocType", "Operation Time Norm"):
+		return []
+	seeded = []
+	for spec in TIME_NORMS:
+		existing = frappe.db.get_value(
+			"Operation Time Norm",
+			{"operation": spec["operation"], "workstation": spec["workstation"]},
+			"name",
+		)
+		if existing:
+			_backfill(
+				"Operation Time Norm",
+				existing,
+				{"tpz_min": spec["tpz_min"], "tj_min_per_unit": spec["tj_min_per_unit"]},
+			)
+			seeded.append(existing)
+			continue
+		description = _("Rüstzeit (TPZ) und Stückzeit (TJ) nach Qcadoo-Norm für {0} auf {1}.").format(
+			spec["operation"], spec["workstation"]
+		)
+		doc = frappe.get_doc({"doctype": "Operation Time Norm", **spec, "description": description}).insert(
+			ignore_permissions=True
+		)
+		seeded.append(doc.name)
+	return seeded
+
+
+def seed_changeover_norms() -> list[str]:
+	"""W3-2: the LINE-1 changeover norms used when sequencing (URS-W3-007 AC-1).
+
+	Idempotent; skipped when the `Line Changeover Norm` DocType is not installed yet.
+	"""
+	if not frappe.db.exists("DocType", "Line Changeover Norm"):
+		return []
+	seeded = []
+	for spec in CHANGEOVER_NORMS:
+		existing = frappe.db.get_value(
+			"Line Changeover Norm",
+			{
+				"production_line": spec["production_line"],
+				"from_item": spec["from_item"],
+				"to_item": spec["to_item"],
+			},
+			"name",
+		)
+		if existing:
+			_backfill("Line Changeover Norm", existing, {"changeover_min": spec["changeover_min"]})
+			seeded.append(existing)
+			continue
+		description = _("Zwischenreinigung {0} beim Produktwechsel {1} → {2}.").format(
+			spec["production_line"], spec["from_item"], spec["to_item"]
+		)
+		doc = frappe.get_doc({"doctype": "Line Changeover Norm", **spec, "description": description}).insert(
+			ignore_permissions=True
+		)
+		seeded.append(doc.name)
+	return seeded
+
+
+def seed_work_centre_capacity() -> None:
+	"""W3-2: the anchor capacity ceiling the slot search reads (URS-W3-008 AC-1)."""
+	for spec in WORK_CENTRE_CAPACITY:
+		if not frappe.db.exists("Workstation", spec["workstation"]):
+			continue
+		if not frappe.db.get_value("Workstation", spec["workstation"], "production_capacity"):
+			frappe.db.set_value(
+				"Workstation", spec["workstation"], "production_capacity", spec["production_capacity"]
+			)
+
+
 def seed_isa88_recipe(bom_no: str) -> str | None:
 	"""W2-6: the ISA-88 structured variant of BOM-RW-CHM-0003-001 (URS-W2-020 AC-1).
 
@@ -1419,6 +1533,207 @@ def seed_pallets() -> list[str]:
 	return seeded
 
 
+# --------------------------------------------------------------------------------------
+# W3-6: ADR transport data and the two dispatch fixtures (URS-W3-018)
+# --------------------------------------------------------------------------------------
+
+#: ADR transport data completing the W2-7 profiles (URS-W3-018 AC-1). UN 1263 "FARBE" is the
+#: ADR entry the URS names for RW-CHM-0003; UN 1866 "HARZLÖSUNG" is its counterpart for the
+#: base resin. Proper shipping names are carried as ADR 3.1.2 spells them (upper case on
+#: documents); both are class 3, packing group III, tunnel restriction code D/E.
+ADR_TRANSPORT_DATA = (
+	{
+		"profile": "HAZ-RW-CHM-0001",
+		"proper_shipping_name": "HARZLÖSUNG",
+		"adr_class": "3",
+		"adr_packing_group": "III",
+		"adr_tunnel_code": "D/E",
+		"adr_label_numbers": "3",
+	},
+	{
+		"profile": "HAZ-RW-CHM-0003",
+		"proper_shipping_name": "FARBE",
+		"adr_class": "3",
+		"adr_packing_group": "III",
+		"adr_tunnel_code": "D/E",
+		"adr_label_numbers": "3",
+	},
+)
+
+#: The AC-2 counter-fixture: a hazmat item whose profile carries the storage-class and SDS
+#: data but **no UN number and no ADR classification**, so dispatching its batch is refused
+#: (URS-W3-018 AC-2, TC-W3-022). Such a profile cannot be *created* through the form — the
+#: W2-7 controller requires the UN number — but it is exactly what a migrated or
+#: half-maintained record looks like, so the fixture writes the gap at database level.
+INCOMPLETE_ADR_ITEM = {
+	"item_code": "RW-CHM-0004",
+	"item_name": "Rheinol Reiniger R2",
+	"item_group": "Products",
+	"stock_uom": "Kg",
+	"profile_name": "HAZ-RW-CHM-0004",
+	"storage_class": "3",
+	"water_hazard_class": "2",
+	"signal_word": "Gefahr",
+	"sds_reference": "SDS-RW-0004",
+	"sds_version": "0.9",
+	"sds_revision_date": "2026-03-05",
+	"batch_id": "BATCH-D-0001",
+	"expiry_date": "2027-09-30",
+	"manufacturing_date": "2026-03-05",
+	"warehouse": "FG Lager Süd",
+	"qty": 60.0,
+}
+
+#: A dispatch handling unit at the finished-goods warehouse, so the dispatch station's
+#: scanner path has something to scan (URS-W3-018 design conformance, URS-W3-020 AC-2). Like
+#: every W2-8 handling unit it is a *reference* over the ledger, never a second quantity store.
+DISPATCH_PALLET = {
+	"barcode": "HU-000125",
+	"hu_type": "Palette",
+	"warehouse": "FG Lager Süd",
+	"contents": (("RW-CHM-0003", "BATCH-C-1001", 200.0),),
+}
+
+
+def seed_adr_transport_data() -> list[str]:
+	"""W3-6: complete the hazmat profiles with their ADR transport data (URS-W3-018 AC-1)."""
+	if not frappe.db.exists("DocType", "Hazmat Profile") or not _has_field("Hazmat Profile", "adr_class"):
+		return []
+	seeded: list[str] = []
+	for spec in ADR_TRANSPORT_DATA:
+		if not frappe.db.exists("Hazmat Profile", spec["profile"]):
+			continue
+		doc = frappe.get_doc("Hazmat Profile", spec["profile"])
+		values = {key: value for key, value in spec.items() if key != "profile"}
+		if all(doc.get(key) == value for key, value in values.items()):
+			seeded.append(doc.name)
+			continue
+		doc.update(values)
+		doc.save(ignore_permissions=True)
+		seeded.append(doc.name)
+	return seeded
+
+
+def seed_incomplete_adr_item() -> str | None:
+	"""W3-6: the hazmat item whose profile lacks its UN number (URS-W3-018 AC-2)."""
+	if not frappe.db.exists("DocType", "Hazmat Profile"):
+		return None
+	from rheinwerk_mes.regulatory_hazmat.profiles import ITEM_MANDATORY_FIELD, ITEM_PROFILE_FIELD
+
+	if not _has_field("Item", ITEM_PROFILE_FIELD):
+		return None
+	spec = INCOMPLETE_ADR_ITEM
+	warehouse = f"{spec['warehouse']} - {COMPANY_ABBR}"
+	if not frappe.db.exists("Warehouse", warehouse):
+		return None
+	if not frappe.db.exists("Item", spec["item_code"]):
+		frappe.get_doc(
+			{
+				"doctype": "Item",
+				"item_code": spec["item_code"],
+				"item_name": spec["item_name"],
+				"item_group": spec["item_group"],
+				"stock_uom": spec["stock_uom"],
+				"has_batch_no": 1,
+				"has_expiry_date": 1,
+				"shelf_life_in_days": 540,
+				"is_stock_item": 1,
+			}
+		).insert(ignore_permissions=True)
+	if not frappe.db.exists("Hazmat Profile", spec["profile_name"]):
+		# Inserted with a placeholder UN number (the controller requires one) and then
+		# emptied at database level: the fixture is the *gap*, not a way around the rule.
+		frappe.get_doc(
+			{
+				"doctype": "Hazmat Profile",
+				"profile_name": spec["profile_name"],
+				"un_number": "UN 1993",
+				"storage_class": spec["storage_class"],
+				"water_hazard_class": spec["water_hazard_class"],
+				"signal_word": spec["signal_word"],
+				"sds_reference": spec["sds_reference"],
+				"sds_version": spec["sds_version"],
+				"sds_revision_date": spec["sds_revision_date"],
+			}
+		).insert(ignore_permissions=True)
+	frappe.db.set_value(
+		"Hazmat Profile",
+		spec["profile_name"],
+		{"un_number": None, "adr_dispatch_ready": 0},
+		update_modified=False,
+	)
+	frappe.db.set_value(
+		"Item",
+		spec["item_code"],
+		{ITEM_PROFILE_FIELD: spec["profile_name"], ITEM_MANDATORY_FIELD: 1},
+		update_modified=False,
+	)
+	if not frappe.db.exists("Batch", spec["batch_id"]):
+		frappe.get_doc(
+			{
+				"doctype": "Batch",
+				"batch_id": spec["batch_id"],
+				"item": spec["item_code"],
+				"expiry_date": spec["expiry_date"],
+				"manufacturing_date": spec["manufacturing_date"],
+				"qty_original": spec["qty"],
+			}
+		).insert(ignore_permissions=True)
+	if _never_received(spec["batch_id"]):
+		receipt = frappe.get_doc(
+			{
+				"doctype": "Stock Entry",
+				"stock_entry_type": "Material Receipt",
+				"company": COMPANY,
+				"set_posting_time": 1,
+				"posting_date": spec["manufacturing_date"],
+				"posting_time": "06:00:00",
+				"items": [
+					{
+						"item_code": spec["item_code"],
+						"qty": spec["qty"],
+						"t_warehouse": warehouse,
+						"uom": spec["stock_uom"],
+						"basic_rate": 4.0,
+						"use_serial_batch_fields": 1,
+						"batch_no": spec["batch_id"],
+					}
+				],
+			}
+		)
+		receipt.insert(ignore_permissions=True)
+		receipt.submit()
+	return spec["item_code"]
+
+
+def seed_dispatch_pallet() -> str | None:
+	"""W3-6: the finished-goods handling unit the dispatch station scans (URS-W3-018)."""
+	if not frappe.db.exists("DocType", "Handling Unit"):
+		return None
+	spec = DISPATCH_PALLET
+	warehouse = f"{spec['warehouse']} - {COMPANY_ABBR}"
+	if not frappe.db.exists("Warehouse", warehouse):
+		return None
+	existing = frappe.db.get_value("Handling Unit", {"barcode": spec["barcode"]})
+	if existing:
+		return existing
+	unit = frappe.get_doc(
+		{
+			"doctype": "Handling Unit",
+			"barcode": spec["barcode"],
+			"hu_type": spec["hu_type"],
+			"warehouse": warehouse,
+			"company": COMPANY,
+			"contents": [
+				{"item": item, "batch_no": batch, "qty": qty, "uom": "Kg"}
+				for item, batch, qty in spec["contents"]
+			],
+		}
+	)
+	unit.insert(ignore_permissions=True)
+	return unit.name
+
+
 def seed_all() -> dict:
 	"""Seed every programme fixture; safe to re-run."""
 	summary = {
@@ -1436,6 +1751,11 @@ def seed_all() -> dict:
 	summary["work_centres"] = seed_work_centres()
 	seed_workstation_limits()
 	summary["operations"] = seed_operations()
+	# W3-2: TJ/TPZ norms, LINE-1 changeover norms and the work-centre capacity ceilings
+	# (URS-W3-006/007/008) — after the operations and work centres they reference.
+	summary["time_norms"] = seed_time_norms()
+	summary["changeover_norms"] = seed_changeover_norms()
+	seed_work_centre_capacity()
 	summary["routing"] = seed_routing()
 	summary["bom"] = seed_bom()
 	summary["recipe_governance"] = seed_recipe_governance(summary["bom"])
@@ -1458,8 +1778,13 @@ def seed_all() -> dict:
 	summary["inspection_template"] = seed_inspection_template()
 	# W2-7: hazmat master data on the item masters and their batches (URS-W2-023/024).
 	summary["hazmat_profiles"] = seed_hazmat_profiles()
+	# W3-6: ADR transport data at the shipping boundary plus its two dispatch fixtures
+	# (URS-W3-018).
+	summary["adr_transport_data"] = seed_adr_transport_data()
+	summary["incomplete_adr_item"] = seed_incomplete_adr_item()
 	summary["legacy_refs"] = seed_legacy_refs()
 	summary["pallets"] = seed_pallets()
+	summary["dispatch_pallet"] = seed_dispatch_pallet()
 	summary["personas"] = seed_personas()
 	# W1-8: the personas only exist now, so their transition roles are granted here as well
 	# as from the installer (URS-W1-029).

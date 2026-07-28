@@ -1,0 +1,191 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "naming_series:",
+ "creation": "2026-07-01 09:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 0,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "signer",
+  "signer_full_name",
+  "column_break_rw1",
+  "meaning",
+  "signed_at",
+  "section_break_rw2",
+  "document_type",
+  "document_name",
+  "column_break_rw3",
+  "act",
+  "transition",
+  "section_break_rw4",
+  "reason",
+  "section_break_rw5",
+  "payload_hash",
+  "consumed_by",
+  "consumed_at"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Nummernkreis",
+   "options": "ESIG-.YYYY.-",
+   "default": "ESIG-.YYYY.-",
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "signer",
+   "fieldtype": "Link",
+   "options": "User",
+   "label": "Unterzeichner",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "signer_full_name",
+   "fieldtype": "Data",
+   "label": "Name des Unterzeichners",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_rw1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "meaning",
+   "fieldtype": "Select",
+   "label": "Bedeutung",
+   "options": "Freigegeben\nGesperrt\nZertifiziert\nRezeptur genehmigt",
+   "in_list_view": 1,
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "signed_at",
+   "fieldtype": "Datetime",
+   "label": "Unterzeichnet am",
+   "in_list_view": 1,
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_rw2",
+   "fieldtype": "Section Break",
+   "label": "Unterzeichnete Handlung"
+  },
+  {
+   "fieldname": "document_type",
+   "fieldtype": "Link",
+   "options": "DocType",
+   "label": "Dokumenttyp",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "document_name",
+   "fieldtype": "Dynamic Link",
+   "options": "document_type",
+   "label": "Dokument",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_rw3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "act",
+   "fieldtype": "Data",
+   "label": "Handlung",
+   "in_standard_filter": 1,
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "transition",
+   "fieldtype": "Data",
+   "label": "Übergang",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_rw4",
+   "fieldtype": "Section Break",
+   "label": "Begründung"
+  },
+  {
+   "fieldname": "reason",
+   "fieldtype": "Small Text",
+   "label": "Begründung",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_rw5",
+   "fieldtype": "Section Break",
+   "label": "Nachweis"
+  },
+  {
+   "fieldname": "payload_hash",
+   "fieldtype": "Data",
+   "label": "Prüfsumme",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "consumed_by",
+   "fieldtype": "Data",
+   "label": "Verbraucht durch",
+   "read_only": 1
+  },
+  {
+   "fieldname": "consumed_at",
+   "fieldtype": "Datetime",
+   "label": "Verbraucht am",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "is_submittable": 0,
+ "links": [],
+ "modified": "2026-07-01 09:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Compliance",
+ "name": "Electronic Signature",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "print": 1,
+   "email": 1,
+   "export": 1,
+   "report": 1,
+   "share": 1
+  },
+  {
+   "role": "Quality Manager",
+   "read": 1,
+   "print": 1,
+   "export": 1,
+   "report": 1
+  },
+  {
+   "role": "Rheinwerk Business Viewer",
+   "read": 1,
+   "print": 1,
+   "report": 1
+  }
+ ],
+ "search_fields": "signer,document_name,act",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "document_name",
+ "track_changes": 0
+}
