@@ -106,6 +106,67 @@ BOM_SPEC = {
 	),
 }
 
+# W2-6: the ISA-88 structured variant of BOM-RW-CHM-0003-001 (URS-W2-020 AC-1). The recipe
+# declares its own 500 kg nominal master batch (480 kg Basisharz + 20 kg Additiv K7); the
+# anchor BOM stays the per-`quantity` material master (decision D2, docs/design/W2-isa88.md).
+ISA88_RECIPE_SPEC = {
+	"recipe_name": "Rheinol 40 Compound – Standardrezept",
+	"batch_size": 500.0,
+	"unit_procedures": (
+		{
+			"unit_procedure_id": "MISCHEN",
+			"unit_procedure_name": "Mischen",
+			"sequence": 10,
+			"operation": "MIX",
+			"workstation": "MIX-01",
+		},
+		{
+			"unit_procedure_id": "ABFUELLEN",
+			"unit_procedure_name": "Abfüllen",
+			"sequence": 20,
+			"operation": "FILL",
+			"workstation": "FILL-01",
+		},
+	),
+	"phases": (
+		{
+			"unit_procedure": "MISCHEN",
+			"phase_name": "Dosieren Basisharz",
+			"phase_type": "Dosieren",
+			"sequence": 10,
+			"material": "RW-CHM-0001",
+			"quantity": 480.0,
+			"uom": "Kg",
+		},
+		{
+			"unit_procedure": "MISCHEN",
+			"phase_name": "Dosieren Additiv",
+			"phase_type": "Dosieren",
+			"sequence": 20,
+			"material": "RW-CHM-0002",
+			"quantity": 20.0,
+			"uom": "Kg",
+		},
+		{
+			"unit_procedure": "MISCHEN",
+			"phase_name": "Mischen 30 min",
+			"phase_type": "Verarbeiten",
+			"sequence": 30,
+			"duration_min": 30.0,
+		},
+		{
+			"unit_procedure": "ABFUELLEN",
+			"phase_name": "Abfüllen Gebinde",
+			"phase_type": "Abfüllen",
+			"sequence": 10,
+		},
+	),
+}
+
+# W2-6: MIX-01 declares a 600 kg working-volume ceiling (URS-W2-021 AC-2), enough for the
+# 500 kg master batch but not for a 750 kg scale.
+WORKSTATION_LIMITS = ({"workstation": "MIX-01", "max_working_qty": 600.0},)
+
 PRODUCTION_ORDER = {
 	"name": "PO-2026-0001",
 	"production_item": "RW-CHM-0003",
@@ -746,6 +807,46 @@ def seed_batches() -> list[str]:
 	return seeded
 
 
+def seed_workstation_limits() -> None:
+	"""W2-6: set the work centre working-volume ceilings (URS-W2-021 AC-2)."""
+	if not _has_field("Workstation", "rw_max_working_qty"):
+		return
+	for spec in WORKSTATION_LIMITS:
+		if frappe.db.exists("Workstation", spec["workstation"]) and not frappe.db.get_value(
+			"Workstation", spec["workstation"], "rw_max_working_qty"
+		):
+			frappe.db.set_value(
+				"Workstation", spec["workstation"], "rw_max_working_qty", spec["max_working_qty"]
+			)
+
+
+def seed_isa88_recipe(bom_no: str) -> str | None:
+	"""W2-6: the ISA-88 structured variant of BOM-RW-CHM-0003-001 (URS-W2-020 AC-1).
+
+	Idempotent; skipped when the `ISA88 Recipe` DocType is not installed yet.
+	"""
+	if not frappe.db.exists("DocType", "ISA88 Recipe"):
+		return None
+	existing = frappe.db.get_value("ISA88 Recipe", {"bom": bom_no}, "name")
+	if existing:
+		return existing
+	doc = frappe.get_doc(
+		{
+			"doctype": "ISA88 Recipe",
+			"recipe_name": ISA88_RECIPE_SPEC["recipe_name"],
+			"bom": bom_no,
+			"routing": ROUTING,
+			"batch_size": ISA88_RECIPE_SPEC["batch_size"],
+		}
+	)
+	for up in ISA88_RECIPE_SPEC["unit_procedures"]:
+		doc.append("unit_procedures", dict(up))
+	for phase in ISA88_RECIPE_SPEC["phases"]:
+		doc.append("phases", dict(phase))
+	doc.insert(ignore_permissions=True)
+	return doc.name
+
+
 def seed_personas() -> list[str]:
 	seeded = []
 	for spec in PERSONAS:
@@ -1112,10 +1213,12 @@ def seed_all() -> dict:
 	summary["divisions"] = seed_divisions()
 	summary["production_lines"] = seed_production_lines()
 	summary["work_centres"] = seed_work_centres()
+	seed_workstation_limits()
 	summary["operations"] = seed_operations()
 	summary["routing"] = seed_routing()
 	summary["bom"] = seed_bom()
 	summary["recipe_governance"] = seed_recipe_governance(summary["bom"])
+	summary["isa88_recipe"] = seed_isa88_recipe(summary["bom"])
 	summary["production_order"] = seed_production_order(summary["bom"])
 	summary["second_production_order"] = seed_second_production_order(summary["bom"])
 	# W2-1/2/3: canonical-batch dispositions, quarantine place and the genealogy chain.

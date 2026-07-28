@@ -7,6 +7,7 @@ from rheinwerk_mes.setup.w0 import setup_w0
 from rheinwerk_mes.setup.w1_exec_state import setup_w1_exec_state
 from rheinwerk_mes.setup.w1_shopfloor import setup_w1_shopfloor
 from rheinwerk_mes.setup.w1_warehouse import setup_w1_warehouse
+from rheinwerk_mes.setup.w2_isa88 import setup_w2_isa88
 
 MODULES = (
 	"Manufacturing Core",
@@ -29,3 +30,4 @@ def after_install() -> None:
 	setup_w1_exec_state()
 	setup_w1_shopfloor()
 	setup_w1_warehouse()
+	setup_w2_isa88()
