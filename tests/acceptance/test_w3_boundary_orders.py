@@ -48,7 +48,7 @@ def test_tc_w3_013_step_1_playing_erp_in_001_creates_the_sales_input(clean_bound
 	assert demand.quantity == 500.0
 	assert demand.uom == "Kg"
 	assert demand.warehouse == "FG Lager Süd - RWC"
-	assert demand.status == "Offen"
+	assert demand.demand_state == "Offen"
 	assert demand.external_order_kind == "sales-order"
 
 	stored = messages(site, contracts.ORDERS_IN)
