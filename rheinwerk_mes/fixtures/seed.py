@@ -745,20 +745,40 @@ def seed_storage_locations() -> list[str]:
 	return seeded
 
 
+def _never_received(batch: str) -> bool:
+	"""True when no opening receipt was ever booked for `batch`.
+
+	The guard asks whether the batch was ever *received*, not whether it currently holds
+	stock: a batch consumed down to zero — the expired lot, or the supplier lot the
+	genealogy chain consumes in full — reads as empty and would be received again on every
+	re-seed, inflating the warehouse fixtures without bound.
+	"""
+	# An inward row carries its batch either on the ledger entry itself or, when the anchor
+	# bundled it, on the `Serial and Batch Bundle` of that entry — both are checked.
+	received = frappe.db.sql(
+		"""
+		select 1
+		from `tabStock Ledger Entry` sle
+		left join `tabSerial and Batch Entry` sbe on sbe.parent = sle.serial_and_batch_bundle
+		where sle.is_cancelled = 0
+			and sle.actual_qty > 0
+			and (sle.batch_no = %(batch)s or sbe.batch_no = %(batch)s)
+		limit 1
+		""",
+		{"batch": batch},
+	)
+	return not received
+
+
 def seed_batches() -> list[str]:
 	"""Batch fixtures plus opening stock booked as batch-aware Material Receipts (URS-W1-021).
 
-	The opening receipt posts only when the batch has no ledger balance yet, so re-seeding
-	never double-books. The anchor ledger stays the single quantity truth.
+	The opening receipt posts only for a batch never received before, so re-seeding never
+	double-books. The anchor ledger stays the single quantity truth.
 	"""
 	if not frappe.db.exists("DocType", "Storage Location"):
 		# W1 warehouse schema not installed yet; nothing to seed.
 		return []
-	# The opening-balance guard reads the ledger directly rather than the anchor's
-	# `get_batch_qty`, which hides expired batches: an expired fixture batch would otherwise
-	# look empty on every re-seed and be received again, inflating its stock without bound.
-	from rheinwerk_mes.warehouse.availability import ledger_balance
-
 	frappe.db.set_single_value("Stock Settings", "enable_serial_and_batch_no_for_item", 1)
 	seeded = []
 	for spec in BATCHES:
@@ -778,7 +798,7 @@ def seed_batches() -> list[str]:
 			if spec.get("storage_location") and _has_field("Batch", "storage_location"):
 				batch.storage_location = spec["storage_location"]
 			batch.insert(ignore_permissions=True)
-		if ledger_balance(spec["item"], warehouse, spec["batch_id"], consider_expired=True) <= 0:
+		if _never_received(spec["batch_id"]):
 			row = {
 				"item_code": spec["item"],
 				"qty": spec["qty"],
@@ -935,8 +955,6 @@ def seed_supplier_batch() -> str | None:
 	"""Supplier lot SUP-K7-0001 incl. its supplier batch number (URS-W2-005)."""
 	if not _has_field("Batch", "qa_state"):
 		return None
-	from rheinwerk_mes.warehouse.availability import ledger_balance
-
 	spec = SUPPLIER_BATCH
 	warehouse = f"{spec['warehouse']} - {COMPANY_ABBR}"
 	if not frappe.db.exists("Batch", spec["batch_id"]):
@@ -954,7 +972,7 @@ def seed_supplier_batch() -> str | None:
 		if _has_field("Batch", "storage_location"):
 			batch.storage_location = spec["storage_location"]
 		batch.insert(ignore_permissions=True)
-	if ledger_balance(spec["item"], warehouse, spec["batch_id"], consider_expired=True) <= 0:
+	if _never_received(spec["batch_id"]):
 		se = frappe.get_doc(
 			{
 				"doctype": "Stock Entry",
