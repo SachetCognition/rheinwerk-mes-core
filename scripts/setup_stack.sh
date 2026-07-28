@@ -97,7 +97,10 @@ if [ -d "sites/$SITE" ] && ! site_usable; then
 	rm -rf "sites/$SITE"
 fi
 if [ ! -d "sites/$SITE" ]; then
+	# `--db-root-username` is passed explicitly: without it this bench prompts for the
+	# MariaDB super user and a non-interactive run (CI, nohup) hangs on stdin.
 	bench new-site "$SITE" \
+		--db-root-username root \
 		--db-root-password "$DB_ROOT_PASSWORD" \
 		--admin-password "$ADMIN_PASSWORD" \
 		--mariadb-user-host-login-scope='%'

@@ -1,0 +1,23 @@
+/* Hazmat chip styling (W2-7 · URS-W2-024).
+ *
+ * Additive to the shop-floor and Trace Ribbon tokens: only the signal tone and the two
+ * icon glyphs the hazmat chip needs and the sibling stylesheets do not already define.
+ * Colour is never the sole carrier — every chip also renders its icon and its label.
+ */
+
+.rw-ribbon .rw-pill--blue {
+	color: var(--rw-signal-blue);
+}
+
+.rw-pill__icon[data-icon="alert-octagon"]::before {
+	content: "⛔";
+}
+.rw-pill__icon[data-icon="info"]::before {
+	content: "ℹ";
+}
+
+/* Hazmat identifiers (UN number, Lagerklasse, SDB reference) are identifiers: mono. */
+.rw-hazmat-id {
+	font-family: var(--rw-font-mono, ui-monospace, "SFMono-Regular", monospace);
+	font-variant-numeric: tabular-nums;
+}

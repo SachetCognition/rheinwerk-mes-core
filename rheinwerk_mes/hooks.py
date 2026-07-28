@@ -68,6 +68,8 @@ after_install = [
 	# W2-4/W2-5: Quality Inspection extensions, disposition fields and the CoA
 	# (URS-W2-013 … URS-W2-019).
 	"rheinwerk_mes.setup.w2_quality.setup_w2_quality",
+	# W2-7: hazmat / regulatory master data on Item and Batch (URS-W2-023/024).
+	"rheinwerk_mes.setup.w2_hazmat.setup_w2_hazmat",
 	# W1-8: role gating runs last so it can also stamp the governance workflow's
 	# transitions (URS-W1-029).
 	"rheinwerk_mes.setup.w1_roles.setup_w1_roles",
@@ -80,6 +82,9 @@ after_install = [
 # anchor BOM without forking it.
 doctype_js = {
 	"BOM": "recipe_isa88/bom_gov_state.js",
+	# W2-7: the hazmat chip on the anchor Item and anchor Batch forms (URS-W2-024).
+	"Item": "regulatory_hazmat/item_hazmat.js",
+	"Batch": "regulatory_hazmat/batch_hazmat.js",
 }
 
 # W1-7: Desk/Terminal density tokens and status pills for the shop-floor screens.
@@ -89,13 +94,32 @@ app_include_css = [
 	"/assets/rheinwerk_mes/css/trace_ribbon.css",
 	# W2-4: the inspector's Work Queue → Detail screen.
 	"/assets/rheinwerk_mes/css/inspection_queue.css",
+	# W2-7: the hazmat chip's signal tone and icons (URS-W2-024).
+	"/assets/rheinwerk_mes/css/hazmat.css",
 ]
+
+# W2-7: one hazmat chip component shared by the Item/Batch forms, stock views and the
+# Trace Ribbon (URS-W2-024).
+app_include_js = [
+	"/assets/rheinwerk_mes/js/hazmat.js",
+]
+
+# W2-7: the Trace Ribbon page fetches its model from `genealogy.ribbon.ribbon`; the hazmat
+# decoration is layered on through this additive override rather than by editing the
+# genealogy package, so the ribbon shows Lagerklasse and UN number as chips (URS-W2-024)
+# while `genealogy.ribbon.ribbon` itself stays the single producer of the trace model.
+override_whitelisted_methods = {
+	"rheinwerk_mes.genealogy.ribbon.ribbon": "rheinwerk_mes.regulatory_hazmat.views.ribbon",
+}
 
 doc_events = {
 	# W0-2: item-level UoM conversion invariants (URS-W0-004).
 	# W1: execution-gating hooks are appended here.
 	"Item": {
 		"validate": "rheinwerk_mes.manufacturing_core.uom.validate_uom_conversions",
+		# W2-7: a changed item hazmat profile refreshes the derived batch mirrors
+		# (URS-W2-024); the profile link stays the single source of truth.
+		"on_update": "rheinwerk_mes.regulatory_hazmat.profiles.refresh_item_batches",
 	},
 	# W1-6: draft outbound Stock Entries make/release reservations (URS-W1-023/024).
 	# W1-3: consuming a batch past its expiry is refused (URS-W1-013, policy URS-W1-030) —
@@ -140,6 +164,13 @@ doc_events = {
 	# W2-2/W2-3: every `qa_state` change funnels through one validator, and the executed
 	# transition propagates blocked-ancestor advisories (URS-W2-006, URS-W2-009).
 	"Batch": {
+		# W2-7: the hazmat-mandatory gate refuses an unprofiled batch, and the read-only
+		# UN-number/Lagerklasse mirrors are refreshed from the effective profile
+		# (URS-W2-023 AC-2, URS-W2-024).
+		"before_validate": [
+			"rheinwerk_mes.regulatory_hazmat.profiles.enforce_hazmat_profile",
+			"rheinwerk_mes.regulatory_hazmat.profiles.sync_batch_hazmat_fields",
+		],
 		"before_insert": "rheinwerk_mes.genealogy.qa_state.set_default_qa_state",
 		"validate": "rheinwerk_mes.genealogy.qa_state.validate_qa_state_change",
 		"on_update": "rheinwerk_mes.genealogy.blocking.on_batch_update",
