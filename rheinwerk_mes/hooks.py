@@ -75,6 +75,13 @@ doc_events = {
 	"Item": {
 		"validate": "rheinwerk_mes.manufacturing_core.uom.validate_uom_conversions",
 	},
+	# W1-6: draft outbound Stock Entries make/release reservations (URS-W1-023/024).
+	"Stock Entry": {
+		"on_update": "rheinwerk_mes.warehouse.reservations.on_stock_entry_update",
+		"on_submit": "rheinwerk_mes.warehouse.reservations.on_stock_entry_submit",
+		"on_cancel": "rheinwerk_mes.warehouse.reservations.on_stock_entry_cancel",
+		"on_trash": "rheinwerk_mes.warehouse.reservations.on_stock_entry_trash",
+	},
 	# W1-1: every `exec_state` change funnels through one validator (URS-W1-001…004).
 	"Work Order": {
 		"before_insert": "rheinwerk_mes.manufacturing_core.exec_state.set_default_exec_state",

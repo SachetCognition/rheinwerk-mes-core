@@ -17,8 +17,11 @@ import sys
 
 import pytest
 
-from rheinwerk_mes.manufacturing_core import contracts
-from rheinwerk_mes.recipe_isa88 import governance, validators
+# Site-backed suite: skip (never fail) when the Frappe substrate is absent.
+pytest.importorskip("frappe")
+contracts = pytest.importorskip("rheinwerk_mes.manufacturing_core.contracts")
+governance = pytest.importorskip("rheinwerk_mes.recipe_isa88.governance")
+validators = pytest.importorskip("rheinwerk_mes.recipe_isa88.validators")
 
 BOM_NAME = "BOM-RW-CHM-0003-001"
 ROUTING = "RT-COMPOUND-01"

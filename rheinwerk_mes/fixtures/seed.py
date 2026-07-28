@@ -179,6 +179,62 @@ LEGACY_REFS = (
 	},
 )
 
+# W1-5: warehouse-scoped storage locations (URS-W1-019). Warehouse names carry the
+# company abbreviation suffix once seeded.
+STORAGE_LOCATIONS = ({"storage_location_name": "NORD-A-01-01", "warehouse": "RM Lager Nord", "is_group": 0},)
+
+# W1-5: batch fixtures with expiries (FEFO/FIFO parity) and intake dates for FIFO/LIFO.
+# BATCH-A-0001/0002 are RW-CHM-0001 resources exactly as the frozen FEFO characterisation
+# fixture (`tests/characterisation/fixtures/warehouse_picking.json`) encodes them, so the
+# site disposal path and the offline CHAR-FEFO-PICK-01 contract agree.
+BATCHES = (
+	{
+		"batch_id": "BATCH-A-0001",
+		"item": "RW-CHM-0001",
+		"expiry_date": "2026-12-31",
+		"manufacturing_date": "2026-01-05",
+		"warehouse": "RM Lager Nord",
+		"storage_location": "NORD-A-01-01",
+		"qty": 500.0,
+	},
+	{
+		"batch_id": "BATCH-A-0002",
+		"item": "RW-CHM-0001",
+		"expiry_date": "2026-06-30",
+		"manufacturing_date": "2026-03-12",
+		"warehouse": "RM Lager Nord",
+		"storage_location": "NORD-A-01-01",
+		"qty": 50.0,
+	},
+	{
+		"batch_id": "BATCH-B-0001",
+		"item": "RW-CHM-0002",
+		"expiry_date": "2026-09-30",
+		"manufacturing_date": "2026-02-10",
+		"warehouse": "RM Lager Nord",
+		"storage_location": None,
+		"qty": 100.0,
+	},
+	{
+		"batch_id": "BATCH-C-1001",
+		"item": "RW-CHM-0003",
+		"expiry_date": "2027-06-30",
+		"manufacturing_date": "2026-03-01",
+		"warehouse": "FG Lager Süd",
+		"storage_location": None,
+		"qty": 200.0,
+	},
+	{
+		"batch_id": "BATCH-C-1002",
+		"item": "RW-CHM-0003",
+		"expiry_date": "2027-07-31",
+		"manufacturing_date": "2026-04-15",
+		"warehouse": "FG Lager Süd",
+		"storage_location": None,
+		"qty": 150.0,
+	},
+)
+
 PERSONAS = (
 	{
 		"email": "t.schmid@rheinwerk-chemie.example",
@@ -587,6 +643,100 @@ def seed_legacy_refs() -> list[str]:
 	return seeded
 
 
+def seed_warehouse_reservation_flags() -> None:
+	"""Enable "draft makes reservation" on the fixture warehouses (URS-W1-023)."""
+	if not _has_field("Warehouse", "draft_makes_reservation"):
+		return
+	for spec in WAREHOUSES:
+		name = f"{spec['warehouse_name']} - {COMPANY_ABBR}"
+		if frappe.db.exists("Warehouse", name) and not frappe.db.get_value(
+			"Warehouse", name, "draft_makes_reservation"
+		):
+			frappe.db.set_value("Warehouse", name, "draft_makes_reservation", 1)
+
+
+def seed_storage_locations() -> list[str]:
+	"""Warehouse-scoped storage-location tree (URS-W1-019, e.g. NORD-A-01-01)."""
+	if not frappe.db.exists("DocType", "Storage Location"):
+		return []
+	seeded = []
+	for spec in STORAGE_LOCATIONS:
+		warehouse = f"{spec['warehouse']} - {COMPANY_ABBR}"
+		if not frappe.db.exists("Warehouse", warehouse):
+			continue
+		if not frappe.db.exists("Storage Location", spec["storage_location_name"]):
+			frappe.get_doc(
+				{
+					"doctype": "Storage Location",
+					"storage_location_name": spec["storage_location_name"],
+					"warehouse": warehouse,
+					"is_group": spec["is_group"],
+					"company": COMPANY,
+				}
+			).insert(ignore_permissions=True)
+		seeded.append(spec["storage_location_name"])
+	return seeded
+
+
+def seed_batches() -> list[str]:
+	"""Batch fixtures plus opening stock booked as batch-aware Material Receipts (URS-W1-021).
+
+	The opening receipt posts only when the batch has no ledger balance yet, so re-seeding
+	never double-books. The anchor ledger stays the single quantity truth.
+	"""
+	if not frappe.db.exists("DocType", "Storage Location"):
+		# W1 warehouse schema not installed yet; nothing to seed.
+		return []
+	from erpnext.stock.doctype.batch.batch import get_batch_qty
+
+	frappe.db.set_single_value("Stock Settings", "enable_serial_and_batch_no_for_item", 1)
+	seeded = []
+	for spec in BATCHES:
+		warehouse = f"{spec['warehouse']} - {COMPANY_ABBR}"
+		if not frappe.db.exists("Warehouse", warehouse):
+			continue
+		if not frappe.db.exists("Batch", spec["batch_id"]):
+			batch = frappe.get_doc(
+				{
+					"doctype": "Batch",
+					"batch_id": spec["batch_id"],
+					"item": spec["item"],
+					"expiry_date": spec["expiry_date"],
+					"manufacturing_date": spec["manufacturing_date"],
+				}
+			)
+			if spec.get("storage_location") and _has_field("Batch", "storage_location"):
+				batch.storage_location = spec["storage_location"]
+			batch.insert(ignore_permissions=True)
+		if not get_batch_qty(batch_no=spec["batch_id"], warehouse=warehouse, item_code=spec["item"]):
+			row = {
+				"item_code": spec["item"],
+				"qty": spec["qty"],
+				"t_warehouse": warehouse,
+				"uom": frappe.db.get_value("Item", spec["item"], "stock_uom"),
+				"basic_rate": 2.0,
+				"use_serial_batch_fields": 1,
+				"batch_no": spec["batch_id"],
+			}
+			if spec.get("storage_location") and _has_field("Stock Entry Detail", "storage_location"):
+				row["storage_location"] = spec["storage_location"]
+			se = frappe.get_doc(
+				{
+					"doctype": "Stock Entry",
+					"stock_entry_type": "Material Receipt",
+					"company": COMPANY,
+					"set_posting_time": 1,
+					"posting_date": spec["manufacturing_date"],
+					"posting_time": "06:00:00",
+					"items": [row],
+				}
+			)
+			se.insert(ignore_permissions=True)
+			se.submit()
+		seeded.append(spec["batch_id"])
+	return seeded
+
+
 def seed_personas() -> list[str]:
 	seeded = []
 	for spec in PERSONAS:
@@ -619,6 +769,9 @@ def seed_all() -> dict:
 	seed_item_groups()
 	summary["items"] = seed_items()
 	summary["warehouses"] = seed_warehouses()
+	seed_warehouse_reservation_flags()
+	summary["storage_locations"] = seed_storage_locations()
+	summary["batches"] = seed_batches()
 	summary["divisions"] = seed_divisions()
 	summary["production_lines"] = seed_production_lines()
 	summary["work_centres"] = seed_work_centres()
