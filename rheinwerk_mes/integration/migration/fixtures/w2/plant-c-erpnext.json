@@ -1,0 +1,21 @@
+{
+	"description": "Plant C (ERPNext) W2 migration pilot extract — anchor Batch records with the legacy `disabled` flag and the Stock-Ledger-derived production history (SLE + Serial and Batch Bundle joins, docs/canonical-model/README.md CDM-01 genealogy_links row). ERPNext batches carry qa_state `disabled`->Blocked, else Released; no parametric quality backfill (CDM-07).",
+	"plant": "C",
+	"source": "erpnext",
+	"trace_boundary_date": null,
+	"batches": [
+		{"batch_no": "BATCH-C-MIG-01", "item": "RW-CHM-0001", "expiry_date": "2026-12-31", "disabled": false, "quantity": 150.0, "supplier_batch": "SUP-BH-C1"},
+		{"batch_no": "BATCH-C-MIG-02", "item": "RW-CHM-0002", "expiry_date": "2026-10-31", "disabled": true, "quantity": 30.0, "supplier_batch": "SUP-K7-C2"},
+		{"batch_no": "BATCH-C-MIG-90", "item": "RW-CHM-0003", "expiry_date": "2027-09-30", "disabled": false, "quantity": 200.0, "supplier_batch": null}
+	],
+	"production_history": [
+		{
+			"producedBatch": "BATCH-C-MIG-90",
+			"order": "WO-C-001",
+			"used": [
+				{"batch": "BATCH-C-MIG-01", "product": "RW-CHM-0001", "quantity": 160.0, "uom": "Kg"},
+				{"batch": "BATCH-C-MIG-02", "product": "RW-CHM-0002", "quantity": 40.0, "uom": "Kg"}
+			]
+		}
+	]
+}
