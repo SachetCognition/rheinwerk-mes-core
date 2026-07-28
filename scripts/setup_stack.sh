@@ -28,9 +28,19 @@ log() { printf '\n=== %s\n' "$1"; }
 
 log "MariaDB + Redis"
 sudo service mariadb start >/dev/null 2>&1 || true
-sudo service redis-server start >/dev/null 2>&1 || true
 
 cd "$BENCH_PATH"
+
+# Frappe talks to the bench's own redis instances (ports from
+# sites/common_site_config.json, typically 11000/13000), not to the distro
+# redis-server on 6379 — bench install-app fails hard without them.
+for conf in config/redis_queue.conf config/redis_cache.conf; do
+	[ -f "$conf" ] || continue
+	port="$(awk '$1 == "port" { print $2 }' "$conf")"
+	if ! redis-cli -p "$port" ping >/dev/null 2>&1; then
+		redis-server "$conf" --daemonize yes
+	fi
+done
 
 log "ERPNext substrate"
 if [ ! -d "apps/erpnext" ]; then
@@ -46,7 +56,12 @@ if [ ! -e "apps/rheinwerk_mes" ]; then
 	ln -s "$APP_SRC" apps/rheinwerk_mes
 	./env/bin/python -m pip install --quiet -e apps/rheinwerk_mes
 fi
-grep -qx "rheinwerk_mes" sites/apps.txt || printf 'rheinwerk_mes\n' >> sites/apps.txt
+if ! grep -qx "rheinwerk_mes" sites/apps.txt; then
+	# `bench get-app` leaves apps.txt without a trailing newline, so a naive
+	# append would concatenate onto the previous app name.
+	[ -s sites/apps.txt ] && [ -n "$(tail -c1 sites/apps.txt)" ] && printf '\n' >> sites/apps.txt
+	printf 'rheinwerk_mes\n' >> sites/apps.txt
+fi
 
 log "node dependencies + asset build prerequisites"
 ( cd apps/frappe && yarn install --check-files >/dev/null )
@@ -60,8 +75,13 @@ if [ ! -d "sites/$SITE" ]; then
 		--admin-password "$ADMIN_PASSWORD" \
 		--mariadb-user-host-login-scope='%'
 fi
-bench --site "$SITE" install-app erpnext || true
-bench --site "$SITE" install-app rheinwerk_mes || true
+# Install what is missing (installing twice exits non-zero) and always migrate, so
+# re-runs pick up new DocTypes, custom fields and patches from the working tree.
+installed="$(bench --site "$SITE" list-apps 2>/dev/null | awk 'NF { print $1 }')"
+for app in erpnext rheinwerk_mes; do
+	printf '%s\n' "$installed" | grep -qx "$app" || bench --site "$SITE" install-app "$app"
+done
+bench --site "$SITE" migrate
 
 log "assets"
 bench build

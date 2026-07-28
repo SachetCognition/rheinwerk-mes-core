@@ -59,4 +59,10 @@ fixtures = [
 
 after_install = "rheinwerk_mes.install.after_install"
 
-# doc_events = {}  # W1: execution-gating hooks land here
+doc_events = {
+	# W0-2: item-level UoM conversion invariants (URS-W0-004).
+	# W1: execution-gating hooks are appended here.
+	"Item": {
+		"validate": "rheinwerk_mes.manufacturing_core.uom.validate_uom_conversions",
+	},
+}

@@ -8,7 +8,11 @@ from the same data:
 * UoMs kg / sack / pail with item-level conversions
 * items RW-CHM-0001 … RW-CHM-0003
 * warehouses "RM Lager Nord" (FEFO) and "FG Lager Süd" (FIFO)
+* plant-area divisions and production line LINE-1
 * work centres LINE-1/MIX-01 and LINE-1/FILL-01
+* routing RT-COMPOUND-01 and BOM-RW-CHM-0003-001
+* production order PO-2026-0001 (500 kg RW-CHM-0003 on LINE-1)
+* `legacy_refs` source-identifier examples incl. the Qcadoo trigger number 000123/2025
 * personas T. Schmid, P. Krüger, W. Braun, Q. Fischer, O. Weber, B. Vogel
 
 Run with::
@@ -22,6 +26,9 @@ and custom fields land.
 from __future__ import annotations
 
 import frappe
+from frappe.model.naming import NamingSeries
+
+from rheinwerk_mes.setup.naming import WORK_ORDER_SERIES
 
 COMPANY = "Rheinwerk Chemie GmbH"
 COMPANY_ABBR = "RWC"
@@ -67,9 +74,98 @@ WAREHOUSES = (
 	{"warehouse_name": "FG Lager Süd", "disposal_method": "FIFO"},
 )
 
+DIVISIONS = (
+	{"division_name": "Werk Nord", "parent_division": None, "is_group": 1},
+	{"division_name": "Mischerei", "parent_division": "Werk Nord", "is_group": 0},
+	{"division_name": "Abfüllung", "parent_division": "Werk Nord", "is_group": 0},
+)
+
+PRODUCTION_LINES = ({"production_line_name": "LINE-1", "division": "Werk Nord"},)
+
 WORK_CENTRES = (
-	{"workstation_name": "MIX-01", "production_line": "LINE-1"},
-	{"workstation_name": "FILL-01", "production_line": "LINE-1"},
+	{"workstation_name": "MIX-01", "production_line": "LINE-1", "division": "Mischerei"},
+	{"workstation_name": "FILL-01", "production_line": "LINE-1", "division": "Abfüllung"},
+)
+
+OPERATIONS = (
+	{"operation": "MIX", "workstation": "MIX-01", "time_in_mins": 90.0},
+	{"operation": "FILL", "workstation": "FILL-01", "time_in_mins": 45.0},
+)
+
+ROUTING = "RT-COMPOUND-01"
+
+# 100 kg of compound = 80 kg base resin + 20 kg additive (docs/test/TST-W0-foundation.md §1).
+BOM_SPEC = {
+	"item": "RW-CHM-0003",
+	"quantity": 100.0,
+	"routing": ROUTING,
+	"items": (
+		{"item_code": "RW-CHM-0001", "qty": 80.0},
+		{"item_code": "RW-CHM-0002", "qty": 20.0},
+	),
+}
+
+PRODUCTION_ORDER = {
+	"name": "PO-2026-0001",
+	"production_item": "RW-CHM-0003",
+	"qty": 500.0,
+	"production_line": "LINE-1",
+	"wip_warehouse": "RM Lager Nord",
+	"fg_warehouse": "FG Lager Süd",
+	"planned_start_date": "2026-02-02 06:00:00",
+}
+
+# Source-system identifiers preserved out of the primary key (URS-W0-003, URS-W0-014).
+LEGACY_REFS = (
+	{
+		"doctype": "Item",
+		"name": "RW-CHM-0001",
+		"refs": (
+			{
+				"source_system": "Qcadoo",
+				"source_entity": "basic_product",
+				"source_identifier": "P-000123",
+			},
+			{
+				"source_system": "OFBiz",
+				"source_entity": "Product",
+				"source_identifier": "RHEINOL-40-BASE",
+			},
+		),
+	},
+	{
+		"doctype": "Item",
+		"name": "RW-CHM-0002",
+		"refs": (
+			{
+				"source_system": "Qcadoo",
+				"source_entity": "basic_product",
+				"source_identifier": "P-000124",
+			},
+		),
+	},
+	{
+		"doctype": "Item",
+		"name": "RW-CHM-0003",
+		"refs": (
+			{
+				"source_system": "ERPNext Legacy",
+				"source_entity": "Item",
+				"source_identifier": "COMPOUND-40",
+			},
+		),
+	},
+	{
+		"doctype": "Work Order",
+		"name": PRODUCTION_ORDER["name"],
+		"refs": (
+			{
+				"source_system": "Qcadoo",
+				"source_entity": "orders_order",
+				"source_identifier": "000123/2025",
+			},
+		),
+	},
 )
 
 PERSONAS = (
@@ -77,19 +173,21 @@ PERSONAS = (
 		"email": "t.schmid@rheinwerk-chemie.example",
 		"first_name": "T.",
 		"last_name": "Schmid",
-		"roles": ["Item Manager", "Manufacturing Manager"],
+		"roles": ["Rheinwerk Technologist", "Item Manager", "Manufacturing Manager"],
 	},
 	{
 		"email": "p.krueger@rheinwerk-chemie.example",
 		"first_name": "P.",
 		"last_name": "Krüger",
-		"roles": ["Manufacturing User"],
+		# Planner: read-only on master data, owns production orders (URS-W0-017).
+		"roles": ["Rheinwerk Planner"],
 	},
 	{
 		"email": "w.braun@rheinwerk-chemie.example",
 		"first_name": "W.",
 		"last_name": "Braun",
-		"roles": ["Stock User"],
+		# Warehouse clerk: read-only on master data (URS-W0-017).
+		"roles": ["Rheinwerk Warehouse Clerk", "Stock User"],
 	},
 	{
 		"email": "q.fischer@rheinwerk-chemie.example",
@@ -114,6 +212,24 @@ PERSONAS = (
 
 def _has_field(doctype: str, fieldname: str) -> bool:
 	return bool(frappe.get_meta(doctype).get_field(fieldname))
+
+
+def _backfill(doctype: str, name: str, values: dict[str, str]) -> None:
+	"""Fill still-empty extension fields on a record seeded before they existed.
+
+	Seeding is idempotent but must not silently leave a record without the
+	extension values a later wave's custom fields introduced.
+	"""
+	pending = {
+		fieldname: value
+		for fieldname, value in values.items()
+		if _has_field(doctype, fieldname) and not frappe.db.get_value(doctype, name, fieldname)
+	}
+	if not pending:
+		return
+	doc = frappe.get_doc(doctype, name)
+	doc.update(pending)
+	doc.save(ignore_permissions=True)
 
 
 def _complete_setup_wizard() -> None:
@@ -226,7 +342,48 @@ def seed_warehouses() -> list[str]:
 				doc.disposal_method = spec["disposal_method"]
 			doc.insert(ignore_permissions=True)
 			name = doc.name
+		else:
+			_backfill("Warehouse", name, {"disposal_method": spec["disposal_method"]})
 		seeded.append(name)
+	return seeded
+
+
+def seed_divisions() -> list[str]:
+	"""Plant-area tree backing the Work Centre `division` link (CDM-08)."""
+	if not frappe.db.exists("DocType", "Division"):
+		return []
+	seeded = []
+	for spec in DIVISIONS:
+		if not frappe.db.exists("Division", spec["division_name"]):
+			frappe.get_doc(
+				{
+					"doctype": "Division",
+					"division_name": spec["division_name"],
+					"parent_division": spec["parent_division"],
+					"is_group": spec["is_group"],
+					"company": COMPANY,
+				}
+			).insert(ignore_permissions=True)
+		seeded.append(spec["division_name"])
+	return seeded
+
+
+def seed_production_lines() -> list[str]:
+	"""Line grouping addressed by planners (CDM-08)."""
+	if not frappe.db.exists("DocType", "Production Line"):
+		return []
+	seeded = []
+	for spec in PRODUCTION_LINES:
+		if not frappe.db.exists("Production Line", spec["production_line_name"]):
+			frappe.get_doc(
+				{
+					"doctype": "Production Line",
+					"production_line_name": spec["production_line_name"],
+					"division": spec["division"],
+					"company": COMPANY,
+				}
+			).insert(ignore_permissions=True)
+		seeded.append(spec["production_line_name"])
 	return seeded
 
 
@@ -243,8 +400,132 @@ def seed_work_centres() -> list[str]:
 			)
 			if _has_field("Workstation", "production_line"):
 				doc.production_line = spec["production_line"]
+			if _has_field("Workstation", "division"):
+				doc.division = spec["division"]
 			doc.insert(ignore_permissions=True)
+		else:
+			_backfill(
+				"Workstation",
+				spec["workstation_name"],
+				{"production_line": spec["production_line"], "division": spec["division"]},
+			)
 		seeded.append(spec["workstation_name"])
+	return seeded
+
+
+def seed_operations() -> list[str]:
+	"""Routing operations MIX and FILL on the LINE-1 work centres."""
+	seeded = []
+	for spec in OPERATIONS:
+		if not frappe.db.exists("Operation", spec["operation"]):
+			frappe.get_doc(
+				{
+					"doctype": "Operation",
+					"__newname": spec["operation"],
+					"workstation": spec["workstation"],
+				}
+			).insert(ignore_permissions=True)
+		seeded.append(spec["operation"])
+	return seeded
+
+
+def seed_routing() -> str:
+	"""Anchor `Routing` RT-COMPOUND-01: mix at MIX-01, then fill at FILL-01."""
+	if frappe.db.exists("Routing", ROUTING):
+		return ROUTING
+	doc = frappe.get_doc({"doctype": "Routing", "routing_name": ROUTING, "disabled": 0})
+	for spec in OPERATIONS:
+		doc.append(
+			"operations",
+			{
+				"operation": spec["operation"],
+				"workstation": spec["workstation"],
+				"time_in_mins": spec["time_in_mins"],
+			},
+		)
+	doc.insert(ignore_permissions=True)
+	return doc.name
+
+
+def seed_bom() -> str:
+	"""Anchor `BOM` for the compound; anchor naming yields BOM-RW-CHM-0003-001."""
+	existing = frappe.db.get_value("BOM", {"item": BOM_SPEC["item"], "docstatus": 1}, "name", order_by="name")
+	if existing:
+		return existing
+	doc = frappe.get_doc(
+		{
+			"doctype": "BOM",
+			"item": BOM_SPEC["item"],
+			"company": COMPANY,
+			"quantity": BOM_SPEC["quantity"],
+			"currency": "EUR",
+			"is_active": 1,
+			"is_default": 1,
+			"with_operations": 1,
+			"routing": BOM_SPEC["routing"],
+			"rm_cost_as_per": "Valuation Rate",
+		}
+	)
+	for row in BOM_SPEC["items"]:
+		doc.append("items", {"item_code": row["item_code"], "qty": row["qty"]})
+	doc.insert(ignore_permissions=True)
+	doc.submit()
+	return doc.name
+
+
+def seed_production_order(bom_no: str) -> str:
+	"""Anchor `Work Order` PO-2026-0001 with the CDM-02 extension fields populated."""
+	if frappe.db.exists("Work Order", PRODUCTION_ORDER["name"]):
+		return PRODUCTION_ORDER["name"]
+	_reset_work_order_series()
+	doc = frappe.get_doc(
+		{
+			"doctype": "Work Order",
+			"naming_series": WORK_ORDER_SERIES,
+			"company": COMPANY,
+			"production_item": PRODUCTION_ORDER["production_item"],
+			"bom_no": bom_no,
+			"qty": PRODUCTION_ORDER["qty"],
+			# Mass in kg on every W0 screen (URS-W0-016); the anchor default is Nos.
+			"stock_uom": frappe.db.get_value("Item", PRODUCTION_ORDER["production_item"], "stock_uom"),
+			"wip_warehouse": f"{PRODUCTION_ORDER['wip_warehouse']} - {COMPANY_ABBR}",
+			"fg_warehouse": f"{PRODUCTION_ORDER['fg_warehouse']} - {COMPANY_ABBR}",
+			"planned_start_date": PRODUCTION_ORDER["planned_start_date"],
+		}
+	)
+	if _has_field("Work Order", "production_line"):
+		doc.production_line = PRODUCTION_ORDER["production_line"]
+	doc.insert(ignore_permissions=True)
+	return doc.name
+
+
+def _reset_work_order_series() -> None:
+	"""Make the first seeded order land on PO-2026-0001 on a fresh site; a site that
+	already issued numbers from this prefix keeps its counter."""
+	series = NamingSeries(WORK_ORDER_SERIES)
+	prefix = series.get_prefix()
+	if not frappe.db.exists("Work Order", {"name": ("like", f"{prefix}%")}):
+		series.update_counter(0)
+
+
+def seed_legacy_refs() -> list[str]:
+	"""Attach source-system identifiers, incl. the Qcadoo trigger number 000123/2025."""
+	seeded = []
+	for spec in LEGACY_REFS:
+		if not _has_field(spec["doctype"], "legacy_refs"):
+			continue
+		if not frappe.db.exists(spec["doctype"], spec["name"]):
+			continue
+		doc = frappe.get_doc(spec["doctype"], spec["name"])
+		known = {row.source_identifier for row in doc.get("legacy_refs") or []}
+		missing = [ref for ref in spec["refs"] if ref["source_identifier"] not in known]
+		if not missing:
+			seeded.append(spec["name"])
+			continue
+		for ref in missing:
+			doc.append("legacy_refs", ref)
+		doc.save(ignore_permissions=True)
+		seeded.append(spec["name"])
 	return seeded
 
 
@@ -263,9 +544,10 @@ def seed_personas() -> list[str]:
 				}
 			)
 			doc.insert(ignore_permissions=True)
-			for role in spec["roles"]:
-				if frappe.db.exists("Role", role):
-					doc.add_roles(role)
+		doc = frappe.get_doc("User", spec["email"])
+		for role in spec["roles"]:
+			if frappe.db.exists("Role", role):
+				doc.add_roles(role)
 		seeded.append(spec["email"])
 	return seeded
 
@@ -279,7 +561,14 @@ def seed_all() -> dict:
 	seed_item_groups()
 	summary["items"] = seed_items()
 	summary["warehouses"] = seed_warehouses()
+	summary["divisions"] = seed_divisions()
+	summary["production_lines"] = seed_production_lines()
 	summary["work_centres"] = seed_work_centres()
+	summary["operations"] = seed_operations()
+	summary["routing"] = seed_routing()
+	summary["bom"] = seed_bom()
+	summary["production_order"] = seed_production_order(summary["bom"])
+	summary["legacy_refs"] = seed_legacy_refs()
 	summary["personas"] = seed_personas()
 	frappe.db.commit()
 	print(frappe.as_json(summary))
