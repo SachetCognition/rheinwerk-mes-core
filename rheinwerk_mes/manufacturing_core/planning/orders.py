@@ -39,12 +39,33 @@ def generate_orders(plan: object) -> list[str]:
 	defaults = get_default_warehouse(plan.company)
 	created: list[str] = []
 	for line in plan.po_items:
+		if _already_ordered(plan, line):
+			continue
 		qty = Decimal(str(flt(line.planned_qty) - flt(line.ordered_qty)))
 		if qty <= 0:
 			continue
 		assert_plannable(line.bom_no)
 		created.append(_create_order(plan, line, qty, defaults))
 	return created
+
+
+def _already_ordered(plan: object, line: object) -> bool:
+	"""A non-cancelled Work Order already links this plan line — generation stays idempotent.
+
+	Generated orders are inserted as drafts, so the anchor never bumps the line's
+	`ordered_qty`; the `planned_qty - ordered_qty` guard alone would regenerate every order on
+	a re-run. The `production_plan` / `production_plan_item` back-link is the durable marker.
+	"""
+	return bool(
+		frappe.db.exists(
+			"Work Order",
+			{
+				"production_plan": plan.name,
+				"production_plan_item": line.name,
+				"docstatus": ["<", 2],
+			},
+		)
+	)
 
 
 def _create_order(plan: object, line: object, qty: Decimal, defaults: dict) -> str:

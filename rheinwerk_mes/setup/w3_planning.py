@@ -59,6 +59,7 @@ def setup_w3_planning() -> None:
 	"""Create the W3-1 planning Custom Fields; safe to re-run."""
 	create_custom_fields(custom_field_definitions(), ignore_validate=True)
 	frappe.clear_cache()
+	frappe.db.commit()
 
 
 def execute() -> None:

@@ -89,8 +89,17 @@ def generate_material_requests(plan: object, warehouse: str | None = None) -> li
 	Nothing is requested when stock covers every requirement; otherwise one Purchase
 	Material Request is created (Draft), each row carrying the `production_plan` back-link
 	the anchor keeps (`material_request.py:118`). Returns the created request names.
+
+	A raw material that already has a non-cancelled Material Request line for this plan is
+	skipped, so a re-run never re-requests the same shortage — the W2 availability predicate
+	excludes inbound Material Requests, so netting alone would otherwise keep flagging it.
 	"""
-	shortages = [row for row in net_requirements(plan, warehouse) if row.is_short]
+	already_requested = _already_requested_items(plan)
+	shortages = [
+		row
+		for row in net_requirements(plan, warehouse)
+		if row.is_short and row.item_code not in already_requested
+	]
 	if not shortages:
 		return []
 
@@ -113,6 +122,17 @@ def generate_material_requests(plan: object, warehouse: str | None = None) -> li
 	request.flags.ignore_permissions = True
 	request.insert(ignore_permissions=True)
 	return [request.name]
+
+
+def _already_requested_items(plan: object) -> set[str]:
+	"""Items with a non-cancelled Material Request line already linked to this plan."""
+	return set(
+		frappe.get_all(
+			"Material Request Item",
+			filters={"production_plan": plan.name, "docstatus": ["<", 2]},
+			pluck="item_code",
+		)
+	)
 
 
 def _raw_warehouse(plan: object) -> str:

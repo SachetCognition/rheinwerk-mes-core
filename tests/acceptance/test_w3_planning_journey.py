@@ -186,3 +186,22 @@ def test_tc_w3_005_order_generation_pending_with_pill(site):
 	assert pill["label"] == "Pending"
 	assert pill["icon"], "the pill carries an icon (never colour-only)"
 	assert order_row["qty_display"].endswith("kg"), "mass rendered in kg"
+
+
+def test_tc_w3_004_005_generation_is_idempotent(site):
+	"""URS-W3-003/004 · TC-W3-004/005 — re-running generation never duplicates demand.
+
+	Generated Work Orders stay Draft, so the anchor never bumps the plan line's `ordered_qty`
+	and the W2 availability predicate excludes inbound Material Requests; a second call must
+	still produce no extra orders or requests for the same plan.
+	"""
+	bom_no = accepted_compound_recipe(site)
+	receive_released_stock(site, ITEM_A, 600)
+	assert block_all_stock(site, ITEM_B) >= 1
+	plan = _plan(site, bom_no)
+
+	assert len(planning.generate_orders(plan)) == 1
+	assert planning.generate_orders(plan) == [], "re-run generates no duplicate order"
+
+	assert len(planning.generate_material_requests(plan)) == 1
+	assert planning.generate_material_requests(plan) == [], "re-run re-requests no shortage"
