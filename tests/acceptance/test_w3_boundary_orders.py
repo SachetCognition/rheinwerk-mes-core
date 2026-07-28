@@ -155,3 +155,19 @@ def test_tc_w3_013_the_carried_master_order_sync_is_processed_too(clean_boundary
 	demand = site.get_doc("ERP Sales Input", result.demand)
 	assert demand.external_order_kind == "master-order"
 	assert demand.quantity == 1200.0
+
+
+def test_tc_w3_013_an_unknown_partner_reference_is_carried_not_resolved(clean_boundary):
+	"""TC-W3-013 (URS-W3-010 AC-1, DEC-W3-020/D5): the group ERP owns partner masters, so the
+	MES stores `customer_ref` as an opaque key — an unknown customer is no rejection reason,
+	unlike an unknown item."""
+	site = clean_boundary
+	payload = schema.fixture(HAPPY)
+	payload = {**payload, "demand": {**payload["demand"], "customer_ref": "KD-UNBEKANNT-9999"}}
+
+	result = inbound.process(payload)
+
+	assert result.accepted
+	demand = site.get_doc("ERP Sales Input", result.demand)
+	assert demand.customer_ref == "KD-UNBEKANNT-9999"
+	assert not site.db.exists("Customer", "KD-UNBEKANNT-9999"), "the MES must not master partners"

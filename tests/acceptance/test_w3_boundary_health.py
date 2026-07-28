@@ -133,7 +133,7 @@ def test_tc_w3_017_step_2_an_unauthorised_replay_is_refused_and_audited(site, re
 
 	with pytest.raises(frappe.PermissionError) as refused:
 		health.replay(rejected_message.message)
-	assert "Rheinwerk Planner" in str(refused.value)
+	assert health.REPLAY_ROLES[0] in str(refused.value)
 
 	trail = health.audit_trail(rejected_message.message)
 	refusals = [

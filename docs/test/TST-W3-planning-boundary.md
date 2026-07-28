@@ -257,12 +257,35 @@ Boundary (W3-3/W3-4), SCADA (W3-5) and hazmat (W3-6) are Rebuild/white-space —
 
 Executable form of the URS-W3 §6 exit criteria; this checklist closes the W3 Epic.
 
-| Exit check | Verified by | Status gate |
+| Exit check | Verified by | Status gate | Result |
+|---|---|---|---|
+| EXIT-W3-1 planning journey end-to-end | TC-W3-001…011 all pass in one chained staging run (GRP-SO-77001 → approved LINE-1 schedule) | All green | ☑ |
+| EXIT-W3-2 contract v1.0 frozen + fixtures in CI | TC-W3-013, TC-W3-014, TC-W3-015, TC-W3-016 | All green, CI link in evidence pack | ☑ |
+| EXIT-W3-3 external-sync register dispositioned | TC-W3-023 | Green + §8.2 #6 answered | ☑ |
+| EXIT-W3-4 SCADA path incl. outage replay | TC-W3-018, TC-W3-019, TC-W3-020 | All green | ☑ |
+| EXIT-W3-5 hazmat dispatch demonstrated | TC-W3-021, TC-W3-022 | Both green | ☑ |
+| EXIT-W3-6 NFR evidence | TC-W3-024, TC-W3-025, TC-W3-026, TC-W3-027 | All green, measurements attached | ☑ |
+| EXIT-W3-7 Won't-scope confirmed (no optimiser; D4 recorded) | TC-W3-012 | Green | ☑ |
+
+Confirmed at W3 fan-in on the merged wave branch, against the live `dev.localhost` site: the full
+suite runs green (`pytest tests` — 656 collected: 655 passed, one strict xfail carrying the W1
+expiry divergence),
+lint and format are clean, and `python -m tools.evidence.generate --wave W3` reports **8/8** backlog
+items complete with zero unlinked and zero evidence-incomplete items (W3-8 was added at fan-in so the
+wave's NFRs hang off a backlog item rather than floating free).
+
+Measurements attached for EXIT-W3-6 (same site, warm caches):
+
+| Budget | Requirement | Measured |
 |---|---|---|
-| EXIT-W3-1 planning journey end-to-end | TC-W3-001…011 all pass in one chained staging run (GRP-SO-77001 → approved LINE-1 schedule) | All green |
-| EXIT-W3-2 contract v1.0 frozen + fixtures in CI | TC-W3-013, TC-W3-014, TC-W3-015, TC-W3-016 | All green, CI link in evidence pack |
-| EXIT-W3-3 external-sync register dispositioned | TC-W3-023 | Green + §8.2 #6 answered |
-| EXIT-W3-4 SCADA path incl. outage replay | TC-W3-018, TC-W3-019, TC-W3-020 | All green |
-| EXIT-W3-5 hazmat dispatch demonstrated | TC-W3-021, TC-W3-022 | Both green |
-| EXIT-W3-6 NFR evidence | TC-W3-024, TC-W3-025, TC-W3-026, TC-W3-027 | All green, measurements attached |
-| EXIT-W3-7 Won't-scope confirmed (no optimiser; D4 recorded) | TC-W3-012 | Green |
+| Schedule board, 200 orders (TC-W3-024 step 1) | < 2 s for head + both 100-row pages | 0,01 s (`test_two_hundred_orders_are_served_in_pages_inside_the_budget`) |
+| Dispatch scan → server confirmation (step 3) | ≤ 300 ms p95 | 15 ms p95 / 10 ms median over 30 scans |
+| Orders-in end to end (step 4) | ≤ 10 s | 41 ms per message |
+| Planner action feedback (step 2) | progress on the pressed control beyond 100 ms | asserted by contract against `schedule_board.js` (`busy($control, …)`); wall-clock on terminal hardware stays a manual check |
+
+Two conformance gaps found at fan-in and closed here rather than deferred: message replay was open to
+the planner role (URS-W3-023 AC-2 requires a separate permission), so the installer now creates
+`Rheinwerk Interface Admin` and grants it to P. Krüger, who replays in TC-W3-017 as an interface
+administrator and no longer as a planner; and D5 (partner-master ownership) was unrecorded although
+contract v1.0 carries `customer_ref` — now settled in `docs/decisions/DEC-W3-020-partner-master-ownership.md`
+and pinned by a test.

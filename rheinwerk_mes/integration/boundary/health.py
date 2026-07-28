@@ -21,13 +21,10 @@ from frappe.utils import format_datetime, time_diff_in_hours
 from rheinwerk_mes.execution_gating import audit
 from rheinwerk_mes.integration.boundary import contracts, gl, inbound, outbound, queues
 
-# TC-W3-017 step 2 has P. Krüger (planner) replay a corrected message, while TC-W3-027 step 3
-# foresees a separate interface-admin permission. Both readings are served by naming the
-# dedicated role here as well: as long as it does not exist, the planner is the authorised
-# replayer; once the W3 permission-matrix child creates `Rheinwerk Interface Admin` and takes
-# the planner out of this tuple, the stricter reading applies without touching the boundary.
+# Replay is a permission of its own (URS-W3-023 AC-2): planning a line does not authorise
+# pushing a message across the boundary. P. Krüger replays in TC-W3-017 because the installer
+# grants her the interface-admin role at Plant C, not because a planner may replay.
 REPLAY_ROLES: tuple[str, ...] = (
-	"Rheinwerk Planner",
 	"Rheinwerk Interface Admin",
 	"System Manager",
 )

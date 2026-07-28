@@ -19,8 +19,10 @@ TC_ID = re.compile(r"TC-W\d+-\d+")
 #: A URS section heading names the backlog item(s) it implements in parentheses. A heading
 #: may carry more than one parenthesised group — "3.9 Trace demonstration (W2-9) and
 #: e-signature decision (W2-10)" — so every group is collected, not only a trailing one.
+#: The group may be written bare ("(W2-9)") or spelled out with the wave's own wording
+#: ("(backlog W3-3, W3-4; ADR-002)"), and may carry trailing notes after the ids.
 SECTION_HEADING = re.compile(r"^#{2,4}\s")
-SECTION_ITEMS = re.compile(r"\((?P<items>W\d+-\d+(?:\s*[,/]\s*W\d+-\d+)*)\)")
+SECTION_ITEMS = re.compile(r"\((?:backlog\s+)?(?P<items>W\d+-\d+(?:\s*[,/]\s*W\d+-\d+)*)")
 URS_HEADING = re.compile(r"^####\s+(?P<urs>URS-W\d+-\d+)\s*[—-]\s*(?P<title>.+?)\s*$")
 
 

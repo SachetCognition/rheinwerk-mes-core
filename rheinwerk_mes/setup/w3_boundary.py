@@ -32,6 +32,12 @@ PAGE_ROLES: tuple[str, ...] = (
 	"System Manager",
 )
 
+#: URS-W3-023 AC-2 separates message replay from planning: a planner without this role is
+#: refused. P. Krüger holds it at Plant C (TC-W3-017 has her replay a corrected message), so
+#: the persona is granted it here rather than the permission being folded into the planner role.
+INTERFACE_ADMIN = "Rheinwerk Interface Admin"
+INTERFACE_ADMINS: tuple[str, ...] = ("p.krueger@rheinwerk-chemie.example",)
+
 
 def custom_field_definitions() -> dict[str, list[dict]]:
 	"""The single Custom Field the boundary needs on the anchor `Work Order`."""
@@ -63,8 +69,28 @@ def custom_field_definitions() -> dict[str, list[dict]]:
 def setup_w3_boundary() -> None:
 	"""Create every W3 boundary site artefact; idempotent."""
 	create_custom_fields(custom_field_definitions(), ignore_validate=True)
+	_install_interface_admin_role()
 	_grant_page_roles()
 	frappe.clear_cache()
+
+
+def _install_interface_admin_role() -> None:
+	"""Create the replay permission's own role and give it to the interface administrators."""
+	if not frappe.db.exists("Role", INTERFACE_ADMIN):
+		role = frappe.new_doc("Role")
+		role.role_name = INTERFACE_ADMIN
+		role.desk_access = 1
+		role.flags.ignore_permissions = True
+		role.insert(ignore_permissions=True)
+	for email in INTERFACE_ADMINS:
+		if not frappe.db.exists("User", email):
+			continue
+		user = frappe.get_doc("User", email)
+		if any(row.role == INTERFACE_ADMIN for row in user.roles):
+			continue
+		user.append("roles", {"role": INTERFACE_ADMIN})
+		user.flags.ignore_permissions = True
+		user.save(ignore_permissions=True)
 
 
 def _grant_page_roles() -> None:

@@ -133,16 +133,16 @@ Total indicative duration: **20 sprints** (~40 weeks) with one blended team; wav
 
 ### Dependencies (external)
 
-| # | Dependency | Source | Needed by |
-|---|---|---|---|
-| D1 | Group-ERP interface availability (orders in, confirmations out, GL postings out) — external contract needed before W3-3 can be fixture-tested | External / group ERP | W3 |
-| D2 | Business sign-off Q1: Qcadoo wage groups/labour-cost norms used for payroll or only costing? | target-capability-model Q1 | W1 (T4 retire scope) |
-| D3 | Business sign-off Q2: which transitions legally require e-signatures (vs audit trail only)? | target-capability-model Q2 | W2 (W2-10) |
-| D4 | Business sign-off Q3: build vs buy for finite-capacity optimisation? | target-capability-model Q3 | W3 (W3-2) |
-| D5 | Business sign-off Q4: are supplier/customer masters owned by group ERP (MES holds references only)? | target-capability-model Q4 | W3 (W3-3) |
-| D6 | Business sign-off Q5: which legacy reports are regulatory-required? | target-capability-model Q5 | W1–W3 reporting scope |
-| D7 | Business sign-off Q6: is CMMS in MES scope or does a group EAM exist? | target-capability-model Q6 | W3 |
-| D8 | Business sign-off Q7: are customer-specific Qcadoo toggles active in Plant A? | target-capability-model Q7 | W1 |
+| # | Dependency | Source | Needed by | Resolution |
+|---|---|---|---|---|
+| D1 | Group-ERP interface availability (orders in, confirmations out, GL postings out) — external contract needed before W3-3 can be fixture-tested | External / group ERP | W3 | Closed at W3: contract v1.0 frozen app-side with an injectable transport, fixtures in CI (`docs/design/W3-erp-boundary.md`) |
+| D2 | Business sign-off Q1: Qcadoo wage groups/labour-cost norms used for payroll or only costing? | target-capability-model Q1 | W1 (T4 retire scope) | Open |
+| D3 | Business sign-off Q2: which transitions legally require e-signatures (vs audit trail only)? | target-capability-model Q2 | W2 (W2-10) | `DEC-W2-029` (signed 28.07.2026); enforced in W3 |
+| D4 | Business sign-off Q3: build vs buy for finite-capacity optimisation? | target-capability-model Q3 | W3 (W3-2) | `DEC-W3-009` — neither in W3 (signed 28.07.2026) |
+| D5 | Business sign-off Q4: are supplier/customer masters owned by group ERP (MES holds references only)? | target-capability-model Q4 | W3 (W3-3) | `DEC-W3-020` — group ERP owns, MES references (signed 28.07.2026) |
+| D6 | Business sign-off Q5: which legacy reports are regulatory-required? | target-capability-model Q5 | W1–W3 reporting scope | Open |
+| D7 | Business sign-off Q6: is CMMS in MES scope or does a group EAM exist? | target-capability-model Q6 | W3 | Open — no CMMS capability delivered in W3; carried to W4 scope review |
+| D8 | Business sign-off Q7: are customer-specific Qcadoo toggles active in Plant A? | target-capability-model Q7 | W1 | Open |
 
 ### Open questions register (dossier §8.2)
 
