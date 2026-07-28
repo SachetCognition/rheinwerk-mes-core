@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "rheinwerk-mes/boundary/v1.0/orders-in",
+  "title": "Bedarf eingehend (orders in) — Vertrag v1.0",
+  "description": "Bedarfsübergabe des Gruppen-ERP an das MES (URS-W3-010, ADR-002). Der Bedarf wird über external_order_ref identifiziert; eine erneute Zustellung derselben Referenz erzeugt keinen zweiten Bedarf.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "message_type",
+    "message_id",
+    "sender",
+    "issued_at",
+    "external_order_ref",
+    "demand"
+  ],
+  "properties": {
+    "contract_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "message_type": {
+      "type": "string",
+      "const": "orders-in"
+    },
+    "message_id": {
+      "type": "string",
+      "pattern": "[A-Z0-9][A-Z0-9-]{2,63}"
+    },
+    "sender": {
+      "type": "string",
+      "minLength": 1
+    },
+    "issued_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "external_order_ref": {
+      "type": "string",
+      "pattern": "[A-Z0-9][A-Z0-9-]{2,63}"
+    },
+    "external_order_kind": {
+      "type": "string",
+      "enum": ["sales-order", "master-order", "forecast"]
+    },
+    "demand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["item_code", "quantity", "uom", "warehouse", "required_by"],
+      "properties": {
+        "item_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "quantity": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "uom": {
+          "type": "string",
+          "minLength": 1
+        },
+        "warehouse": {
+          "type": "string",
+          "minLength": 1
+        },
+        "required_by": {
+          "type": "string",
+          "format": "date"
+        },
+        "customer_ref": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

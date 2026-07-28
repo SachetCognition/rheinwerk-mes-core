@@ -1,0 +1,96 @@
+{
+  "contract_version": "1.0",
+  "description": "Fixturekatalog des eingefrorenen Grenzvertrags v1.0 (URS-W3-013). Je Nachrichtentyp mindestens ein Gutfall, ein Duplikat und eine Ablehnung; die Ablehnungsfälle sind entweder schemawidrig oder scheitern an einer Geschäftsregel mit maschinenlesbarem Grund.",
+  "fixtures": [
+    {
+      "fixture": "erp-in-001-happy.json",
+      "message_type": "orders-in",
+      "case": "happy",
+      "schema_valid": true,
+      "reason_code": null,
+      "description": "500 kg RW-CHM-0003 mit externer Referenz GRP-SO-77001 werden zur Planungseingabe (TC-W3-013 Schritt 1).",
+      "register_ids": ["XS-01"]
+    },
+    {
+      "fixture": "erp-in-001-duplicate.json",
+      "message_type": "orders-in",
+      "case": "duplicate",
+      "schema_valid": true,
+      "reason_code": "DUPLICATE",
+      "description": "Erneute Zustellung von ERP-IN-001: kein zweiter Bedarf, Duplikat mit GRP-SO-77001 protokolliert (TC-W3-013 Schritt 2).",
+      "register_ids": ["XS-01"]
+    },
+    {
+      "fixture": "erp-in-002-unknown-item.json",
+      "message_type": "orders-in",
+      "case": "rejection",
+      "schema_valid": true,
+      "reason_code": "UNKNOWN_ITEM",
+      "description": "Unbekannter Artikel RW-CHM-9999: Ablehnung in die Fehlerwarteschlange, kein Teilschreibvorgang (TC-W3-013 Schritt 3).",
+      "register_ids": ["XS-01"]
+    },
+    {
+      "fixture": "erp-in-003-master-order.json",
+      "message_type": "orders-in",
+      "case": "happy",
+      "schema_valid": true,
+      "reason_code": null,
+      "description": "Sammelauftrag GRP-MO-88001 über 1.200 kg — der übernommene Qcadoo-Sammelauftrags-Sync XS-02 als Vertragsfixture.",
+      "register_ids": ["XS-02"]
+    },
+    {
+      "fixture": "conf-out-001-happy.json",
+      "message_type": "confirmation-out",
+      "case": "happy",
+      "schema_valid": true,
+      "reason_code": null,
+      "description": "PO-2026-0001 abgeschlossen: 500 kg RW-CHM-0003 in BATCH-C-1001, verknüpft mit GRP-SO-77001 (TC-W3-014 Schritt 1).",
+      "register_ids": ["XS-18"]
+    },
+    {
+      "fixture": "conf-out-001-duplicate.json",
+      "message_type": "confirmation-out",
+      "case": "duplicate",
+      "schema_valid": true,
+      "reason_code": "DUPLICATE",
+      "description": "Wiederholte Fertigmeldung derselben Fertigstellung: genau eine Zustellung, kein Duplikat auf dem Kanal (TC-W3-014 Schritt 2).",
+      "register_ids": ["XS-18"]
+    },
+    {
+      "fixture": "conf-out-002-missing-batch.json",
+      "message_type": "confirmation-out",
+      "case": "rejection",
+      "schema_valid": false,
+      "reason_code": "CONTRACT_VIOLATION",
+      "description": "Fertigmeldung ohne FG-Chargenkennung: schemawidrig (batches minItems 1), wird nicht emittiert.",
+      "register_ids": ["XS-18"]
+    },
+    {
+      "fixture": "gl-out-001-happy.json",
+      "message_type": "gl-posting-out",
+      "case": "happy",
+      "schema_valid": true,
+      "reason_code": null,
+      "description": "500 kg zu 4,20 €/kg = 2.100,00 € Soll/Haben auf die zugeordneten Gruppen-ERP-Konten von FG Lager Süd (TC-W3-015 Schritt 1).",
+      "register_ids": ["XS-17"]
+    },
+    {
+      "fixture": "gl-out-001-duplicate.json",
+      "message_type": "gl-posting-out",
+      "case": "duplicate",
+      "schema_valid": true,
+      "reason_code": "DUPLICATE",
+      "description": "Erneute Emission derselben Lagerbuchung: dieselbe Nachrichtenkennung, keine doppelte Buchung im Gruppen-ERP.",
+      "register_ids": ["XS-17"]
+    },
+    {
+      "fixture": "gl-out-002-unmapped-warehouse.json",
+      "message_type": "gl-posting-out",
+      "case": "rejection",
+      "schema_valid": false,
+      "reason_code": "UNMAPPED_WAREHOUSE",
+      "description": "Buchung für RM Lager Nord ohne Kontenzuordnung: das Sollkonto bleibt leer, die Nachricht ist damit auch schemawidrig — sie wird zurückgehalten statt falsch emittiert (TC-W3-015 Schritt 2).",
+      "register_ids": ["XS-17"]
+    }
+  ]
+}

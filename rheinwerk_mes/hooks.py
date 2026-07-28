@@ -140,6 +140,9 @@ doc_events = {
 			"rheinwerk_mes.warehouse.reservations.on_stock_entry_submit",
 			# W2-1: genealogy links are written from the posting (URS-W2-001).
 			"rheinwerk_mes.genealogy.links.on_stock_entry_submit",
+			# W3-4: the posting's stock ledger entries become boundary GL postings, or are
+			# held when the warehouse has no group-ERP account map (URS-W3-012).
+			"rheinwerk_mes.integration.boundary.gl.on_stock_entry_submit",
 		],
 		"on_cancel": [
 			"rheinwerk_mes.warehouse.reservations.on_stock_entry_cancel",
@@ -154,8 +157,17 @@ doc_events = {
 		"before_update_after_submit": "rheinwerk_mes.manufacturing_core.exec_state.validate_exec_state_change",
 		# W1-2: post-transition side effects — reservations released on Declined/Abandoned
 		# (URS-W1-009) and the executed transition logged immutably (URS-W1-033).
-		"on_update": "rheinwerk_mes.execution_gating.side_effects.on_work_order_update",
-		"on_update_after_submit": "rheinwerk_mes.execution_gating.side_effects.on_work_order_update",
+		# W3-3: a completed order emits exactly one confirmation across the group-ERP
+		# boundary (URS-W3-011). The emitter is idempotent on the message store, so
+		# registering it at both hook points cannot duplicate a confirmation.
+		"on_update": [
+			"rheinwerk_mes.execution_gating.side_effects.on_work_order_update",
+			"rheinwerk_mes.integration.boundary.outbound.on_work_order_update",
+		],
+		"on_update_after_submit": [
+			"rheinwerk_mes.execution_gating.side_effects.on_work_order_update",
+			"rheinwerk_mes.integration.boundary.outbound.on_work_order_update",
+		],
 	},
 	# W1-7: the job card's own name is the barcode the terminal scans (URS-W1-028).
 	"Job Card": {
@@ -217,4 +229,12 @@ rheinwerk_qa_state_gates = [
 	# W2-4: a Rejected inspection must be dispositioned before its batch can be released
 	# (URS-W2-016).
 	"rheinwerk_mes.quality.gates.rejected_inspection_gate",
+]
+
+# W3-3: the group-ERP boundary transport (URS-W3-011). The group ERP does not exist in this
+# environment, so the default is the loopback transport that records what would have been
+# sent; W4 appends its own factory here and points the boundary at the real endpoint without
+# touching `integration/boundary/outbound.py`. Last entry wins.
+rheinwerk_boundary_transport = [
+	"rheinwerk_mes.integration.boundary.transport.LoopbackTransport",
 ]
