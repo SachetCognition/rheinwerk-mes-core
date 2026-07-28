@@ -16,7 +16,11 @@ from pathlib import Path
 BACKLOG_ID = re.compile(r"^W\d+-\d+$")
 URS_ID = re.compile(r"URS-W\d+-\d+")
 TC_ID = re.compile(r"TC-W\d+-\d+")
-WAVE_SECTION = re.compile(r"^#{2,4}\s.*\((?P<items>W\d+-\d+(?:\s*[,/]\s*W\d+-\d+)*)\)\s*$")
+#: A URS section heading names the backlog item(s) it implements in parentheses. A heading
+#: may carry more than one parenthesised group — "3.9 Trace demonstration (W2-9) and
+#: e-signature decision (W2-10)" — so every group is collected, not only a trailing one.
+SECTION_HEADING = re.compile(r"^#{2,4}\s")
+SECTION_ITEMS = re.compile(r"\((?P<items>W\d+-\d+(?:\s*[,/]\s*W\d+-\d+)*)\)")
 URS_HEADING = re.compile(r"^####\s+(?P<urs>URS-W\d+-\d+)\s*[—-]\s*(?P<title>.+?)\s*$")
 
 
@@ -76,9 +80,14 @@ def parse_urs_by_backlog_item(path: Path) -> tuple[dict[str, list[str]], dict[st
 	titles: dict[str, str] = {}
 	current: list[str] = []
 	for line in path.read_text(encoding="utf-8").splitlines():
-		section = WAVE_SECTION.match(line)
-		if section:
-			current = re.findall(r"W\d+-\d+", section.group("items"))
+		if SECTION_HEADING.match(line) and not URS_HEADING.match(line):
+			# A heading naming no backlog item ends the previous grouping rather than
+			# inheriting it — requirements would otherwise be credited to the wrong item.
+			current = [
+				item
+				for match in SECTION_ITEMS.finditer(line)
+				for item in re.findall(r"W\d+-\d+", match.group("items"))
+			]
 			for item_id in current:
 				by_item.setdefault(item_id, [])
 			continue
@@ -93,18 +102,23 @@ def parse_urs_by_backlog_item(path: Path) -> tuple[dict[str, list[str]], dict[st
 
 
 def parse_traceability(path: Path) -> dict[str, list[str]]:
-	"""Map URS ID → mapped TC IDs from the traceability matrix of a TST document."""
+	"""Map URS ID → mapped TC IDs from the traceability matrix of a TST document.
+
+	A matrix row may carry several URS/TC pairs side by side (the W2 matrix is laid out in two
+	columns), so every cell that holds a URS ID is read with the cell following it.
+	"""
 	mapping: dict[str, list[str]] = {}
 	for line in path.read_text(encoding="utf-8").splitlines():
 		cells = split_table_row(line)
-		if len(cells) < 2 or not URS_ID.fullmatch(cells[0]):
-			continue
-		tcs = TC_ID.findall(cells[1])
-		if tcs:
-			mapping.setdefault(cells[0], [])
-			for tc in tcs:
-				if tc not in mapping[cells[0]]:
-					mapping[cells[0]].append(tc)
+		for index, cell in enumerate(cells[:-1]):
+			if not URS_ID.fullmatch(cell):
+				continue
+			tcs = TC_ID.findall(cells[index + 1])
+			if tcs:
+				mapping.setdefault(cell, [])
+				for tc in tcs:
+					if tc not in mapping[cell]:
+						mapping[cell].append(tc)
 	return mapping
 
 

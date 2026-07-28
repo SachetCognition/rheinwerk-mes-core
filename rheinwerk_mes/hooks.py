@@ -71,6 +71,9 @@ after_install = [
 	# W1-8: role gating runs last so it can also stamp the governance workflow's
 	# transitions (URS-W1-029).
 	"rheinwerk_mes.setup.w1_roles.setup_w1_roles",
+	# W2 fan-in: the business viewer's cross-module read surface (URS-W2-036 AC-2) — after
+	# W1 roles, which creates the role, and after every W2 child installed its DocTypes.
+	"rheinwerk_mes.setup.w2_rbac.setup_w2_rbac",
 ]
 
 # Client-side additions to anchor forms; W1-4 renders the recipe's `gov_state` pill on the

@@ -66,21 +66,40 @@ rheinwerk.TraceRibbon = class TraceRibbon {
 		return frappe.utils.escape_html(value == null ? "" : String(value));
 	}
 
+	// Progress belongs on the control that was pressed, not in a global bar (URS-W2-033
+	// AC-1): beyond 100 ms the button disables itself and says it is working, so a wide
+	// trace never reads as a dead screen and never invites a second request.
+	set_busy(busy) {
+		const $button = this.$body.find('[data-action="load"]');
+		$button.prop("disabled", busy);
+		$button.text(busy ? __("Spur wird geladen …") : __("Spur anzeigen"));
+		this.$band.attr("aria-busy", busy ? "true" : "false");
+	}
+
 	load(batch) {
 		if (!batch) {
 			return;
 		}
 		// The batch in focus stays expanded across recentres (URS-W2-003 AC-3).
 		this.expanded.add(batch);
+		const progress = setTimeout(() => this.set_busy(true), 100);
+		const settled = () => {
+			clearTimeout(progress);
+			this.set_busy(false);
+		};
 		frappe
 			.call("rheinwerk_mes.genealogy.ribbon.ribbon", { batch })
 			.then((response) => {
+				settled();
 				this.model = response.message;
 				this.selected = this.chips().findIndex((chip) => chip.side === "focus");
 				this.$batch.val(batch);
 				this.render();
 			})
-			.catch(() => frappe.msgprint(__("Charge {0} wurde nicht gefunden.", [batch])));
+			.catch(() => {
+				settled();
+				frappe.msgprint(__("Charge {0} wurde nicht gefunden.", [batch]));
+			});
 	}
 
 	chips() {

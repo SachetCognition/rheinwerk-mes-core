@@ -24,11 +24,16 @@ import frappe
 from frappe import _
 from frappe.utils import flt, formatdate, get_url_to_form, today
 
+from rheinwerk_mes.execution_gating import audit
 from rheinwerk_mes.genealogy import qa_state, ribbon
 from rheinwerk_mes.quality import inspections
 from rheinwerk_mes.quality.doctype.coa_certificate.coa_certificate import ISSUED, SUPERSEDED
 
 DOCTYPE = "CoA Certificate"
+
+#: Issuing a certificate is a gated quality act and is audited as one (URS-W2-034).
+ISSUE_GATE = "coa_issue"
+ISSUE_RULE = "URS-W2-017"
 
 #: Jinja body of the certificate — also the PDF source (design decision D3).
 TEMPLATE = "rheinwerk_mes/quality/templates/coa_certificate.html"
@@ -127,6 +132,16 @@ def issue(batch: str, inspection: str | None = None, attach_pdf: bool = True) ->
 		}
 	)
 	doc.insert()
+	audit.log_transition(
+		gate=ISSUE_GATE,
+		rule=ISSUE_RULE,
+		document=doc,
+		from_state=None,
+		to_state=ISSUED,
+		detail=_("Zertifikat {0} für Charge {1} aus Prüfung {2} ausgestellt.").format(
+			doc.name, batch, qi.name
+		),
+	)
 	if previous:
 		frappe.db.set_value(DOCTYPE, previous, {"certificate_status": SUPERSEDED, "superseded_by": doc.name})
 	if attach_pdf:

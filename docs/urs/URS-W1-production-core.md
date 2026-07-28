@@ -413,7 +413,7 @@ The system shall document, for every gate delivered in W1 (acceptance gate, reci
   - **AC-3** Given a harness contract failure without a recorded divergence, When the record is generated, Then generation fails, blocking W1 exit.
 - **Dependencies:** URS-W1-002, URS-W1-005, URS-W1-007, URS-W1-008, URS-W1-015, URS-W1-030.
 
-## 4. Non-functional requirements
+## 4. Non-functional requirements (W1-10)
 
 #### URS-W1-032 — Shop-floor interaction latency
 

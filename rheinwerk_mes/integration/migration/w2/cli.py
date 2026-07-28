@@ -16,6 +16,7 @@ from typing import Any
 
 import frappe
 
+from rheinwerk_mes.execution_gating import audit
 from rheinwerk_mes.integration.migration.importer import JOURNAL_DIRECTORY
 from rheinwerk_mes.integration.migration.w2 import extract as w2_extract
 from rheinwerk_mes.integration.migration.w2 import loaders, reconcile
@@ -23,6 +24,12 @@ from rheinwerk_mes.integration.migration.w2 import rollback as w2_rollback
 from rheinwerk_mes.integration.migration.w2.model import W2Extract
 
 REPORT_FILENAME = "w2-pilot-reconciliation.md"
+
+#: A migration run is a gated, audited act like any other quality-relevant transition
+#: (URS-W2-034): the audit entry cites the run ids and the reconciliation verdict, and
+#: references the report artefact so the entry is followable years later.
+MIGRATION_GATE = "w2_migration_run"
+MIGRATION_RULE = "URS-W2-030…032"
 
 #: Reverse order used when a whole run is torn down: links → state → batches, so a produced
 #: batch's links are gone before the batch itself is deleted.
@@ -75,6 +82,7 @@ def run_w2_migration(fixture_directory: str | None = None, keep_on_fail: bool = 
 
 	path = report_path()
 	Path(path).write_text(report.to_markdown(), encoding="utf-8")
+	_audit_run(report, run_ids, rolled_back)
 
 	summary = {
 		"status": report.status,
@@ -85,6 +93,31 @@ def run_w2_migration(fixture_directory: str | None = None, keep_on_fail: bool = 
 	}
 	print(f"W2 migration {report.status} — report at {path}")  # noqa: T201 (bench console)
 	return summary
+
+
+def _audit_run(report: Any, run_ids: dict[str, dict[str, str]], rolled_back: bool) -> str:
+	"""Write the audit entry of one pilot run (URS-W2-034 / TC-W2-048)."""
+	artefact = frappe.get_doc(
+		{
+			"doctype": "File",
+			"file_name": REPORT_FILENAME,
+			"is_private": 1,
+			"content": report.to_markdown(),
+		}
+	).insert(ignore_permissions=True)
+	steps = ", ".join(
+		f"{source}: {'/'.join(sorted(ids.values()))}" for source, ids in sorted(run_ids.items())
+	)
+	return audit.log_transition(
+		gate=MIGRATION_GATE,
+		rule=MIGRATION_RULE,
+		document=artefact,
+		from_state=None,
+		to_state=report.status,
+		detail=f"W2-Pilotmigration {report.status}"
+		+ (" (zurückgerollt)" if rolled_back else "")
+		+ f" — Läufe: {steps}",
+	)
 
 
 def rollback_step(run_id: str) -> dict[str, int]:

@@ -257,9 +257,16 @@ def import_extract(extract: CanonicalExtract, *, run_id: str | None = None) -> I
 
 
 def write_journal(result: ImportResult) -> str:
+	"""Persist the rollback journal of one run.
+
+	A journalled *previous* field value comes straight out of the database, so it can be a
+	`date`, `datetime` or `Decimal` — none of which the JSON encoder knows. They are written
+	in their ISO/decimal string form, which is exactly what the rollback assigns back through
+	`db.set_value`, and which `read_journal` reads without conversion.
+	"""
 	path = journal_path(result.run_id)
 	with open(path, "w", encoding="utf-8") as handle:
-		json.dump(result.as_dict(), handle, indent="\t", sort_keys=True, ensure_ascii=False)
+		json.dump(result.as_dict(), handle, indent="\t", sort_keys=True, ensure_ascii=False, default=str)
 	return path
 
 
