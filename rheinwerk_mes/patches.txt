@@ -14,3 +14,4 @@ rheinwerk_mes.setup.w2_quality
 rheinwerk_mes.setup.w2_warehouse
 rheinwerk_mes.setup.w2_rbac
 rheinwerk_mes.setup.w2_hazmat
+rheinwerk_mes.setup.w3_planning
