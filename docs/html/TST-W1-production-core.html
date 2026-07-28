@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TST W1 — Production Core</title>
+<style>
+:root{--accent:#1f4e79;--accent2:#2e74b5;--bg:#f7f9fb;--card:#ffffff;--text:#24292f;--muted:#6a737d;--border:#e1e6eb;--sidebar-w:300px}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",Calibri,Arial,sans-serif;color:var(--text);background:var(--bg);line-height:1.55;font-size:15px}
+#sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:var(--accent);color:#fff;overflow-y:auto;padding:22px 18px}
+#sidebar .brand{font-size:15px;font-weight:600;letter-spacing:.4px;border-bottom:1px solid rgba(255,255,255,.25);padding-bottom:12px;margin-bottom:12px}
+#sidebar .brand small{display:block;font-weight:400;opacity:.75;margin-top:4px}
+#sidebar nav ul{list-style:none;margin:0;padding-left:0}
+#sidebar nav ul ul{padding-left:14px}
+#sidebar nav a{display:block;color:rgba(255,255,255,.85);text-decoration:none;font-size:12.6px;padding:4px 8px;border-radius:5px;border-left:3px solid transparent}
+#sidebar nav a:hover{background:rgba(255,255,255,.12);color:#fff}
+#sidebar nav a.active{background:rgba(255,255,255,.18);color:#fff;border-left-color:#9cc3e5;font-weight:600}
+#content{margin-left:var(--sidebar-w);padding:42px 56px;max-width:1080px}
+header.doc{border-bottom:3px solid var(--accent);padding-bottom:18px;margin-bottom:30px}
+header.doc h1{color:var(--accent);font-size:30px;margin:0 0 6px}
+header.doc .sub{color:var(--accent2);font-size:15.5px;font-weight:600}
+h1,h2{color:var(--accent);margin-top:2.1em;border-bottom:1px solid var(--border);padding-bottom:.25em}
+h3,h4{color:var(--accent2);margin-top:1.7em}
+a{color:var(--accent2)}
+table{border-collapse:collapse;width:100%;margin:1.1em 0;background:var(--card);font-size:13.2px;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+th{background:var(--accent);color:#fff;text-align:left;padding:8px 10px;font-weight:600}
+td{border:1px solid var(--border);padding:7px 10px;vertical-align:top}
+tr:nth-child(even) td{background:#f2f6fa}
+code{background:#eef2f6;border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:12px;font-family:Consolas,Menlo,monospace;color:#0b3d66}
+pre{background:#0f2a43;color:#dce8f5;padding:14px 16px;border-radius:8px;overflow-x:auto;font-size:12.5px}
+pre code{background:none;border:none;color:inherit;padding:0}
+blockquote{margin:1em 0;padding:10px 16px;background:#eaf1f8;border-left:5px solid var(--accent2);border-radius:0 6px 6px 0;color:#243b53}
+img.diagram,p img{max-width:100%;background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px;box-shadow:0 1px 3px rgba(0,0,0,.08);display:block;margin:1.2em auto}
+#top-btn{position:fixed;right:26px;bottom:26px;background:var(--accent);color:#fff;border:none;border-radius:50%;width:46px;height:46px;font-size:19px;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .25s;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+#top-btn.show{opacity:.92;pointer-events:auto}
+footer.doc{margin-top:60px;border-top:1px solid var(--border);padding-top:14px;color:var(--muted);font-size:12px}
+@media(max-width:900px){#sidebar{display:none}#content{margin-left:0;padding:24px}}
+</style>
+</head>
+<body>
+<aside id="sidebar">
+  <div class="brand">TST W1 — Production Core<small>Rheinwerk MES
+Consolidation — Test &amp; Verification</small></div>
+  <nav><ul>
+<li><a href="#test-strategy" id="toc-test-strategy">1. Test
+strategy</a></li>
+<li><a href="#traceability-matrix" id="toc-traceability-matrix">2.
+Traceability matrix</a></li>
+<li><a href="#test-cases" id="toc-test-cases">3. Test cases</a>
+<ul>
+<li><a href="#tc-w1-001-exec_state-workflow-lifecycle-integration" id="toc-tc-w1-001-exec_state-workflow-lifecycle-integration">TC-W1-001 —
+<code>exec_state</code> workflow lifecycle
+<em>(Integration)</em></a></li>
+<li><a href="#tc-w1-002-illegal-transitions-refused-integration" id="toc-tc-w1-002-illegal-transitions-refused-integration">TC-W1-002 —
+Illegal transitions refused <em>(Integration)</em></a></li>
+<li><a href="#tc-w1-003-state_history-audit-with-mandatory-reasons-integration" id="toc-tc-w1-003-state_history-audit-with-mandatory-reasons-integration">TC-W1-003
+— <code>state_history</code> audit with mandatory reasons
+<em>(Integration)</em></a></li>
+<li><a href="#tc-w1-004-anchor-reconciliation-accept-requires-submit-shortfall-completion-integration" id="toc-tc-w1-004-anchor-reconciliation-accept-requires-submit-shortfall-completion-integration">TC-W1-004
+— Anchor reconciliation: accept requires submit; shortfall completion
+<em>(Integration)</em></a></li>
+<li><a href="#tc-w1-005-no-unqualified-status-integration" id="toc-tc-w1-005-no-unqualified-status-integration">TC-W1-005 — No
+unqualified “status” <em>(Integration)</em></a></li>
+<li><a href="#tc-w1-006-acceptance-gate-dateslinerecipe-integration-design-conformance" id="toc-tc-w1-006-acceptance-gate-dateslinerecipe-integration-design-conformance">TC-W1-006
+— Acceptance gate: dates/line/recipe <em>(Integration +
+Design-conformance)</em></a></li>
+<li><a href="#tc-w1-007-recipe-accepted-gate-integration" id="toc-tc-w1-007-recipe-accepted-gate-integration">TC-W1-007 —
+Recipe-Accepted gate <em>(Integration)</em></a></li>
+<li><a href="#tc-w1-008-completion-gate-output-0-integration" id="toc-tc-w1-008-completion-gate-output-0-integration">TC-W1-008 —
+Completion gate: output &gt; 0 <em>(Integration)</em></a></li>
+<li><a href="#tc-w1-009-material-availability-gate-at-start-integration" id="toc-tc-w1-009-material-availability-gate-at-start-integration">TC-W1-009
+— Material-availability gate at start <em>(Integration)</em></a></li>
+<li><a href="#tc-w1-010-reservations-cleared-on-declineabandon-integration" id="toc-tc-w1-010-reservations-cleared-on-declineabandon-integration">TC-W1-010
+— Reservations cleared on decline/abandon
+<em>(Integration)</em></a></li>
+<li><a href="#tc-w1-011-over-production-hard-stop-integration" id="toc-tc-w1-011-over-production-hard-stop-integration">TC-W1-011 —
+Over-production hard stop <em>(Integration)</em></a></li>
+<li><a href="#tc-w1-012-stopped-order-freeze-integration" id="toc-tc-w1-012-stopped-order-freeze-integration">TC-W1-012 —
+Stopped-order freeze <em>(Integration)</em></a></li>
+<li><a href="#tc-w1-013-closed-order-terminal-integration" id="toc-tc-w1-013-closed-order-terminal-integration">TC-W1-013 — Closed
+order terminal <em>(Integration)</em></a></li>
+<li><a href="#tc-w1-014-expired-batch-consumption-and-picking-stops-integration-design-conformance" id="toc-tc-w1-014-expired-batch-consumption-and-picking-stops-integration-design-conformance">TC-W1-014
+— Expired-batch consumption and picking stops <em>(Integration +
+Design-conformance)</em></a></li>
+<li><a href="#tc-w1-015-gov_state-workflow-transitions-integration" id="toc-tc-w1-015-gov_state-workflow-transitions-integration">TC-W1-015
+— <code>gov_state</code> workflow transitions
+<em>(Integration)</em></a></li>
+<li><a href="#tc-w1-016-structural-validators-at-acceptance-integration" id="toc-tc-w1-016-structural-validators-at-acceptance-integration">TC-W1-016
+— Structural validators at acceptance <em>(Integration)</em></a></li>
+<li><a href="#tc-w1-017-accepted-immutability-and-outdated-versioning-integration" id="toc-tc-w1-017-accepted-immutability-and-outdated-versioning-integration">TC-W1-017
+— Accepted immutability and Outdated versioning
+<em>(Integration)</em></a></li>
+<li><a href="#tc-w1-018-in-use-lock-integration" id="toc-tc-w1-018-in-use-lock-integration">TC-W1-018 — In-use lock
+<em>(Integration)</em></a></li>
+<li><a href="#tc-w1-019-handling-unit-as-reference-layer-integration" id="toc-tc-w1-019-handling-unit-as-reference-layer-integration">TC-W1-019
+— Handling Unit as reference layer <em>(Integration)</em></a></li>
+<li><a href="#tc-w1-020-storage-location-warehouse-scoping-integration" id="toc-tc-w1-020-storage-location-warehouse-scoping-integration">TC-W1-020
+— Storage Location warehouse scoping <em>(Integration)</em></a></li>
+<li><a href="#tc-w1-021-per-warehouse-disposal-algorithms-integration" id="toc-tc-w1-021-per-warehouse-disposal-algorithms-integration">TC-W1-021
+— Per-warehouse disposal algorithms <em>(Integration)</em></a></li>
+<li><a href="#tc-w1-022-batch-aware-stock-entries-with-purpose-mapping-integration" id="toc-tc-w1-022-batch-aware-stock-entries-with-purpose-mapping-integration">TC-W1-022
+— Batch-aware Stock Entries with purpose mapping
+<em>(Integration)</em></a></li>
+<li><a href="#tc-w1-023-legacy-bridge-affordance-design-conformance" id="toc-tc-w1-023-legacy-bridge-affordance-design-conformance">TC-W1-023
+— Legacy bridge affordance <em>(Design-conformance)</em></a></li>
+<li><a href="#tc-w1-024-draft-makes-reservation-integration" id="toc-tc-w1-024-draft-makes-reservation-integration">TC-W1-024 — Draft
+makes reservation <em>(Integration)</em></a></li>
+<li><a href="#tc-w1-025-draft-deletion-releases-reservation-integration" id="toc-tc-w1-025-draft-deletion-releases-reservation-integration">TC-W1-025
+— Draft deletion releases reservation <em>(Integration)</em></a></li>
+<li><a href="#tc-w1-026-order-level-sre-auto-reserve-integration" id="toc-tc-w1-026-order-level-sre-auto-reserve-integration">TC-W1-026 —
+Order-level SRE auto-reserve <em>(Integration)</em></a></li>
+<li><a href="#tc-w1-027-operator-job-card-execution-journey" id="toc-tc-w1-027-operator-job-card-execution-journey">TC-W1-027 —
+Operator job-card execution <em>(Journey)</em></a></li>
+<li><a href="#tc-w1-028-pauseresume-with-log-split-journey" id="toc-tc-w1-028-pauseresume-with-log-split-journey">TC-W1-028 —
+Pause/resume with log split <em>(Journey)</em></a></li>
+<li><a href="#tc-w1-029-scanner-first-identification-design-conformance" id="toc-tc-w1-029-scanner-first-identification-design-conformance">TC-W1-029
+— Scanner-first identification <em>(Design-conformance)</em></a></li>
+<li><a href="#tc-w1-030-characterisation-parity-suite-vs-w1-gates-parity" id="toc-tc-w1-030-characterisation-parity-suite-vs-w1-gates-parity">TC-W1-030
+— Characterisation-parity suite vs W1 gates <em>(Parity)</em></a></li>
+<li><a href="#tc-w1-031-per-transition-role-gating-nfrintegration" id="toc-tc-w1-031-per-transition-role-gating-nfrintegration">TC-W1-031 —
+Per-transition role gating <em>(NFR/Integration)</em></a></li>
+<li><a href="#tc-w1-032-expiry-policy-hard-stop-in-fefo-allocation-integration" id="toc-tc-w1-032-expiry-policy-hard-stop-in-fefo-allocation-integration">TC-W1-032
+— Expiry policy: hard stop in FEFO allocation
+<em>(Integration)</em></a></li>
+<li><a href="#tc-w1-033-expiry-divergence-recorded-with-sign-off-parity" id="toc-tc-w1-033-expiry-divergence-recorded-with-sign-off-parity">TC-W1-033
+— Expiry divergence recorded with sign-off <em>(Parity)</em></a></li>
+<li><a href="#tc-w1-034-per-gate-behaviour-record-generation-integration" id="toc-tc-w1-034-per-gate-behaviour-record-generation-integration">TC-W1-034
+— Per-gate behaviour record generation <em>(Integration)</em></a></li>
+<li><a href="#tc-w1-035-latency-under-load-nfr" id="toc-tc-w1-035-latency-under-load-nfr">TC-W1-035 — Latency under load
+<em>(NFR)</em></a></li>
+<li><a href="#tc-w1-036-gated-action-audit-log-nfr" id="toc-tc-w1-036-gated-action-audit-log-nfr">TC-W1-036 — Gated-action
+audit log <em>(NFR)</em></a></li>
+<li><a href="#tc-w1-037-german-first-w1-screens-design-conformance" id="toc-tc-w1-037-german-first-w1-screens-design-conformance">TC-W1-037
+— German-first W1 screens <em>(Design-conformance)</em></a></li>
+<li><a href="#tc-w1-038-end-to-end-planner-operator-exit-journeys-journey" id="toc-tc-w1-038-end-to-end-planner-operator-exit-journeys-journey">TC-W1-038
+— End-to-end planner + operator exit journeys
+<em>(Journey)</em></a></li>
+<li><a href="#tc-w1-039-deskterminal-mode-conformance-design-conformance" id="toc-tc-w1-039-deskterminal-mode-conformance-design-conformance">TC-W1-039
+— Desk/Terminal mode conformance <em>(Design-conformance)</em></a></li>
+</ul></li>
+<li><a href="#parity-test-section-absorb-scope" id="toc-parity-test-section-absorb-scope">4. Parity test section (Absorb
+scope)</a></li>
+<li><a href="#wave-acceptance-checklist" id="toc-wave-acceptance-checklist">5. Wave acceptance checklist</a></li>
+</ul></nav>
+</aside>
+<main id="content">
+  <header class="doc"><h1>TST W1 — Production
+Core</h1><div class="sub">Rheinwerk MES Consolidation — Test &amp;
+Verification</div></header>
+<p><strong>Rheinwerk MES Consolidation — Test &amp;
+Verification</strong> Wave: W1 (Production Core) · Verifies:
+<code>docs/urs/URS-W1-production-core.md</code> · Status: Draft for
+review</p>
+<hr />
+<h2 id="test-strategy">1. Test strategy</h2>
+<p><strong>Levels.</strong> Unit tests assumed in-app (regression floor
+from W0). This document specifies:</p>
+<ul>
+<li><strong>Integration</strong> — workflow hooks over anchor Work
+Order/BOM/SRE; reconciliation of <code>exec_state</code> with anchor
+status; HU/Storage Location referencing the ledger.</li>
+<li><strong>Journey/acceptance</strong> — the two exit journeys: planner
+(create→accept→start→monitor) and operator (job cards, scanner, record
+output→complete), plus technologist recipe governance and warehouse
+clerk flows.</li>
+<li><strong>Characterisation-parity</strong> — W0 harness contracts
+(URS-W0-012) executed against the W1 implementation; parity for all
+gates except the signed-off expiry divergence.</li>
+<li><strong>Migration reconciliation</strong> — none: W1 lands no
+migrated data (URS §5); fixtures are created through W0 tooling.</li>
+<li><strong>NFR</strong> — latency, audit/logging, i18n, access
+control.</li>
+<li><strong>Design-conformance</strong> — Desk/Terminal modes, status
+pills, gate-refusal modals, keyboard/scanner paths, legacy bridge.</li>
+</ul>
+<p><strong>Environments.</strong> CI runner (automated
+integration/parity/NFR-scan tests) and an integration site with a
+Terminal-mode station profile for journey and design-conformance checks;
+latency tests on the terminal profile with network shaping.</p>
+<p><strong>Test data.</strong> Shared programme fixtures: items
+RW-CHM-0001/0002/0003; raw batches BATCH-A-0001 (Rheinol 40 Basisharz,
+500 kg, expiry 31.12.2026), BATCH-A-0002 (Additiv K7, 50 kg, expiry
+30.06.2026, later Blocked — used here only for expiry,
+<code>qa_state</code> workflow is W2); FG batches BATCH-C-1001/1002;
+orders PO-2026-0001 (500 kg RW-CHM-0003 on LINE-1), PO-2026-0002; work
+centres LINE-1/MIX-01, LINE-1/FILL-01; warehouses RM Lager Nord (FEFO),
+FG Lager Süd (FIFO); location NORD-A-01-01; HU-000123;
+BOM-RW-CHM-0003-001 + RT-COMPOUND-01. Personas: P. Krüger (planner), O.
+Weber (operator), T. Schmid (technologist), W. Braun (warehouse clerk),
+B. Vogel (business viewer).</p>
+<h2 id="traceability-matrix">2. Traceability matrix</h2>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>URS ID</th>
+<th>Test cases</th>
+<th></th>
+<th>Test case</th>
+<th>URS ID(s)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>URS-W1-001</td>
+<td>TC-W1-001, TC-W1-038</td>
+<td></td>
+<td>TC-W1-001</td>
+<td>URS-W1-001</td>
+</tr>
+<tr>
+<td>URS-W1-002</td>
+<td>TC-W1-002, TC-W1-030</td>
+<td></td>
+<td>TC-W1-002</td>
+<td>URS-W1-002</td>
+</tr>
+<tr>
+<td>URS-W1-003</td>
+<td>TC-W1-003</td>
+<td></td>
+<td>TC-W1-003</td>
+<td>URS-W1-003</td>
+</tr>
+<tr>
+<td>URS-W1-004</td>
+<td>TC-W1-004, TC-W1-005</td>
+<td></td>
+<td>TC-W1-004</td>
+<td>URS-W1-004</td>
+</tr>
+<tr>
+<td>URS-W1-005</td>
+<td>TC-W1-006, TC-W1-030</td>
+<td></td>
+<td>TC-W1-005</td>
+<td>URS-W1-004</td>
+</tr>
+<tr>
+<td>URS-W1-006</td>
+<td>TC-W1-007</td>
+<td></td>
+<td>TC-W1-006</td>
+<td>URS-W1-005</td>
+</tr>
+<tr>
+<td>URS-W1-007</td>
+<td>TC-W1-008, TC-W1-030</td>
+<td></td>
+<td>TC-W1-007</td>
+<td>URS-W1-006</td>
+</tr>
+<tr>
+<td>URS-W1-008</td>
+<td>TC-W1-009</td>
+<td></td>
+<td>TC-W1-008</td>
+<td>URS-W1-007</td>
+</tr>
+<tr>
+<td>URS-W1-009</td>
+<td>TC-W1-010</td>
+<td></td>
+<td>TC-W1-009</td>
+<td>URS-W1-008</td>
+</tr>
+<tr>
+<td>URS-W1-010</td>
+<td>TC-W1-011</td>
+<td></td>
+<td>TC-W1-010</td>
+<td>URS-W1-009</td>
+</tr>
+<tr>
+<td>URS-W1-011</td>
+<td>TC-W1-012</td>
+<td></td>
+<td>TC-W1-011</td>
+<td>URS-W1-010</td>
+</tr>
+<tr>
+<td>URS-W1-012</td>
+<td>TC-W1-013</td>
+<td></td>
+<td>TC-W1-012</td>
+<td>URS-W1-011</td>
+</tr>
+<tr>
+<td>URS-W1-013</td>
+<td>TC-W1-014</td>
+<td></td>
+<td>TC-W1-013</td>
+<td>URS-W1-012</td>
+</tr>
+<tr>
+<td>URS-W1-014</td>
+<td>TC-W1-015</td>
+<td></td>
+<td>TC-W1-014</td>
+<td>URS-W1-013</td>
+</tr>
+<tr>
+<td>URS-W1-015</td>
+<td>TC-W1-016, TC-W1-030</td>
+<td></td>
+<td>TC-W1-015</td>
+<td>URS-W1-014</td>
+</tr>
+<tr>
+<td>URS-W1-016</td>
+<td>TC-W1-017</td>
+<td></td>
+<td>TC-W1-016</td>
+<td>URS-W1-015</td>
+</tr>
+<tr>
+<td>URS-W1-017</td>
+<td>TC-W1-018</td>
+<td></td>
+<td>TC-W1-017</td>
+<td>URS-W1-016</td>
+</tr>
+<tr>
+<td>URS-W1-018</td>
+<td>TC-W1-019</td>
+<td></td>
+<td>TC-W1-018</td>
+<td>URS-W1-017</td>
+</tr>
+<tr>
+<td>URS-W1-019</td>
+<td>TC-W1-020</td>
+<td></td>
+<td>TC-W1-019</td>
+<td>URS-W1-018</td>
+</tr>
+<tr>
+<td>URS-W1-020</td>
+<td>TC-W1-021, TC-W1-030</td>
+<td></td>
+<td>TC-W1-020</td>
+<td>URS-W1-019</td>
+</tr>
+<tr>
+<td>URS-W1-021</td>
+<td>TC-W1-022</td>
+<td></td>
+<td>TC-W1-021</td>
+<td>URS-W1-020</td>
+</tr>
+<tr>
+<td>URS-W1-022</td>
+<td>TC-W1-023</td>
+<td></td>
+<td>TC-W1-022</td>
+<td>URS-W1-021</td>
+</tr>
+<tr>
+<td>URS-W1-023</td>
+<td>TC-W1-024</td>
+<td></td>
+<td>TC-W1-023</td>
+<td>URS-W1-022</td>
+</tr>
+<tr>
+<td>URS-W1-024</td>
+<td>TC-W1-025</td>
+<td></td>
+<td>TC-W1-024</td>
+<td>URS-W1-023</td>
+</tr>
+<tr>
+<td>URS-W1-025</td>
+<td>TC-W1-026</td>
+<td></td>
+<td>TC-W1-025</td>
+<td>URS-W1-024</td>
+</tr>
+<tr>
+<td>URS-W1-026</td>
+<td>TC-W1-027, TC-W1-038</td>
+<td></td>
+<td>TC-W1-026</td>
+<td>URS-W1-025</td>
+</tr>
+<tr>
+<td>URS-W1-027</td>
+<td>TC-W1-028</td>
+<td></td>
+<td>TC-W1-027</td>
+<td>URS-W1-026</td>
+</tr>
+<tr>
+<td>URS-W1-028</td>
+<td>TC-W1-029</td>
+<td></td>
+<td>TC-W1-028</td>
+<td>URS-W1-027</td>
+</tr>
+<tr>
+<td>URS-W1-029</td>
+<td>TC-W1-031</td>
+<td></td>
+<td>TC-W1-029</td>
+<td>URS-W1-028</td>
+</tr>
+<tr>
+<td>URS-W1-030</td>
+<td>TC-W1-032, TC-W1-033</td>
+<td></td>
+<td>TC-W1-030</td>
+<td>URS-W1-002/005/007/015/020 (parity suite)</td>
+</tr>
+<tr>
+<td>URS-W1-031</td>
+<td>TC-W1-034</td>
+<td></td>
+<td>TC-W1-031</td>
+<td>URS-W1-029</td>
+</tr>
+<tr>
+<td>URS-W1-032</td>
+<td>TC-W1-035</td>
+<td></td>
+<td>TC-W1-032</td>
+<td>URS-W1-030</td>
+</tr>
+<tr>
+<td>URS-W1-033</td>
+<td>TC-W1-036</td>
+<td></td>
+<td>TC-W1-033</td>
+<td>URS-W1-030</td>
+</tr>
+<tr>
+<td>URS-W1-034</td>
+<td>TC-W1-037</td>
+<td></td>
+<td>TC-W1-034</td>
+<td>URS-W1-031</td>
+</tr>
+<tr>
+<td>URS-W1-035</td>
+<td>TC-W1-039</td>
+<td></td>
+<td>TC-W1-035</td>
+<td>URS-W1-032</td>
+</tr>
+<tr>
+<td>—</td>
+<td>—</td>
+<td></td>
+<td>TC-W1-036</td>
+<td>URS-W1-033</td>
+</tr>
+<tr>
+<td>—</td>
+<td>—</td>
+<td></td>
+<td>TC-W1-037</td>
+<td>URS-W1-034</td>
+</tr>
+<tr>
+<td>—</td>
+<td>—</td>
+<td></td>
+<td>TC-W1-038</td>
+<td>URS-W1-001, URS-W1-026 (exit journeys)</td>
+</tr>
+<tr>
+<td>—</td>
+<td>—</td>
+<td></td>
+<td>TC-W1-039</td>
+<td>URS-W1-035</td>
+</tr>
+</tbody>
+</table>
+<p>No orphans in either direction (35 URS ↔︎ 39 TC).</p>
+<h2 id="test-cases">3. Test cases</h2>
+<h3 id="tc-w1-001-exec_state-workflow-lifecycle-integration">TC-W1-001 —
+<code>exec_state</code> workflow lifecycle <em>(Integration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> exec_state states and default.
+<strong>URS:</strong> URS-W1-001.</li>
+<li><strong>Preconditions:</strong> W0 exit; PO-2026-0001 created (500
+kg RW-CHM-0003, LINE-1, BOM-RW-CHM-0003-001 Accepted).</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Open PO-2026-0001 as P. Krüger. → <code>exec_state</code> = Pending;
+anchor Work Order unforked.</li>
+<li>Accept (dates 10.03.2026–12.03.2026 set). → Accepted.</li>
+<li>Start, then interrupt as O. Weber, then resume. → In Progress →
+Interrupted → In Progress.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> each state exactly as expected; state
+pill shows icon+label+colour.</li>
+</ul>
+<h3 id="tc-w1-002-illegal-transitions-refused-integration">TC-W1-002 —
+Illegal transitions refused <em>(Integration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> transition set matches Qcadoo
+<code>canChangeTo</code>. <strong>URS:</strong> URS-W1-002.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>On PO-2026-0002 in Pending, attempt Pending→Completed. → Refused
+naming the illegal transition.</li>
+<li>Complete PO-2026-0001 (with output); attempt any transition. →
+Refused (terminal).</li>
+<li>Attempt Interrupted→Completed on an interrupted fixture order. →
+Refused.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> all illegal transitions refused; legal
+ones (per URS-W1-002) allowed.</li>
+</ul>
+<h3 id="tc-w1-003-state_history-audit-with-mandatory-reasons-integration">TC-W1-003
+— <code>state_history</code> audit with mandatory reasons
+<em>(Integration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> audit rows and reason enforcement.
+<strong>URS:</strong> URS-W1-003.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Transition PO-2026-0001 Pending→Accepted (P. Krüger) →In Progress
+(O. Weber). → Two <code>state_history</code> rows, correct users,
+ascending timestamps.</li>
+<li>Decline PO-2026-0002 without a reason. → Refused. With reason “Kunde
+storniert”. → Succeeds; reason stored.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> rows/users/reasons exactly as
+expected.</li>
+</ul>
+<h3 id="tc-w1-004-anchor-reconciliation-accept-requires-submit-shortfall-completion-integration">TC-W1-004
+— Anchor reconciliation: accept requires submit; shortfall completion
+<em>(Integration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> exec_state ↔︎ anchor hooks.
+<strong>URS:</strong> URS-W1-004.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>With anchor Work Order in Draft, attempt acceptance of PO-2026-0001.
+→ Refused until submitted.</li>
+<li>In Progress with 480 kg of 500 kg recorded, attempt completion
+without shortfall reason. → Refused.</li>
+<li>Complete with reason “Ausschuss Mischvorgang”. → Succeeds; reason in
+<code>state_history</code>.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> all three behaviours exact.</li>
+</ul>
+<h3 id="tc-w1-005-no-unqualified-status-integration">TC-W1-005 — No
+unqualified “status” <em>(Integration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> vocabulary rule. <strong>URS:</strong>
+URS-W1-004 (AC-3).</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Scan <code>rheinwerk_mes</code> field/label catalogue for
+unqualified “status” on canonical DocTypes/screens. → Zero occurrences
+(<code>exec_state</code>/<code>qa_state</code>/<code>gov_state</code>
+only).</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> zero occurrences.</li>
+</ul>
+<h3 id="tc-w1-006-acceptance-gate-dateslinerecipe-integration-design-conformance">TC-W1-006
+— Acceptance gate: dates/line/recipe <em>(Integration +
+Design-conformance)</em></h3>
+<ul>
+<li><strong>Objective:</strong> accept gate parity and refusal
+presentation. <strong>URS:</strong> URS-W1-005.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Attempt acceptance of PO-2026-0002 without
+<code>production_line</code>. → Modal refusal naming rule, record
+PO-2026-0002, missing field, resolution; logged; not a toast.</li>
+<li>Set start 15.03.2026 / end 14.03.2026; retry. → Refused citing date
+range.</li>
+<li>Fix dates (10.03.2026–12.03.2026), set LINE-1 and Accepted recipe;
+retry. → Accepted.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> refusals and success exactly as
+specified; refusal is modal and logged.</li>
+</ul>
+<h3 id="tc-w1-007-recipe-accepted-gate-integration">TC-W1-007 —
+Recipe-Accepted gate <em>(Integration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> orders reference only Accepted recipes.
+<strong>URS:</strong> URS-W1-006.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>With BOM-RW-CHM-0003-001 governance in Draft, attempt acceptance of
+PO-2026-0002. → Refused naming recipe + <code>gov_state</code>.</li>
+<li>Progress recipe to Accepted; retry. → Succeeds.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> both as expected.</li>
+</ul>
+<h3 id="tc-w1-008-completion-gate-output-0-integration">TC-W1-008 —
+Completion gate: output &gt; 0 <em>(Integration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> completion gate parity.
+<strong>URS:</strong> URS-W1-007.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>PO-2026-0001 In Progress, recorded output 0 kg; attempt completion.
+→ Modal refusal citing zero output.</li>
+<li>Record 500 kg via job cards; retry. → Completed.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> both as expected.</li>
+</ul>
+<h3 id="tc-w1-009-material-availability-gate-at-start-integration">TC-W1-009
+— Material-availability gate at start <em>(Integration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> hard availability gate.
+<strong>URS:</strong> URS-W1-008.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>RM Lager Nord holds 400 kg available RW-CHM-0001; attempt start of
+PO-2026-0001 (needs 500 kg). → Refused listing RW-CHM-0001 shortfall 100
+kg.</li>
+<li>Receive BATCH-A-0001 (500 kg); retry. → Starts.</li>
+<li>Reserve 200 kg via another order’s draft document; verify
+availability calculation excludes it.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> shortfall list exact; reserved stock
+excluded.</li>
+</ul>
+<h3 id="tc-w1-010-reservations-cleared-on-declineabandon-integration">TC-W1-010
+— Reservations cleared on decline/abandon <em>(Integration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> listener parity. <strong>URS:</strong>
+URS-W1-009.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>PO-2026-0002 holds an active 50 kg RW-CHM-0002 reservation; decline
+with reason. → SRE cancelled; 50 kg back in available quantity.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> reservation released exactly.</li>
+</ul>
+<h3 id="tc-w1-011-over-production-hard-stop-integration">TC-W1-011 —
+Over-production hard stop <em>(Integration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> anchor error kept. <strong>URS:</strong>
+URS-W1-010.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>PO-2026-0001 for 500 kg, allowance 0 %; record manufacture 510 kg. →
+Refused with over-production error; zero SLEs written.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> refusal and no ledger writes.</li>
+</ul>
+<h3 id="tc-w1-012-stopped-order-freeze-integration">TC-W1-012 —
+Stopped-order freeze <em>(Integration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> anchor freeze kept.
+<strong>URS:</strong> URS-W1-011.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Stop PO-2026-0001’s anchor Work Order; submit MIX job card. →
+Refused citing stopped order.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> refusal exact.</li>
+</ul>
+<h3 id="tc-w1-013-closed-order-terminal-integration">TC-W1-013 — Closed
+order terminal <em>(Integration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> anchor rule kept. <strong>URS:</strong>
+URS-W1-012.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Close PO-2026-0002’s anchor Work Order; attempt stop and re-open. →
+Both refused.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> both refusals.</li>
+</ul>
+<h3 id="tc-w1-014-expired-batch-consumption-and-picking-stops-integration-design-conformance">TC-W1-014
+— Expired-batch consumption and picking stops <em>(Integration +
+Design-conformance)</em></h3>
+<ul>
+<li><strong>Objective:</strong> expiry hard stop per policy.
+<strong>URS:</strong> URS-W1-013.</li>
+<li><strong>Preconditions:</strong> BATCH-A-0002 expiry 30.06.2026;
+system date 01.07.2026.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>W. Braun issues 5 kg from BATCH-A-0002. → Modal refusal naming
+BATCH-A-0002, expiry 30.06.2026, resolution options; no SLE.</li>
+<li>Save a pick list including BATCH-A-0002. → Refused listing the
+expired batch.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> both refusals; date rendered
+DD.MM.YYYY.</li>
+</ul>
+<h3 id="tc-w1-015-gov_state-workflow-transitions-integration">TC-W1-015
+— <code>gov_state</code> workflow transitions
+<em>(Integration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> 5-state recipe lifecycle.
+<strong>URS:</strong> URS-W1-014.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>T. Schmid creates governance for BOM-RW-CHM-0003-001 +
+RT-COMPOUND-01. → Draft.</li>
+<li>Draft→Checked→Draft→Checked→Accepted. → All succeed in order.</li>
+<li>Attempt Accepted→Draft and Accepted→Checked. → Refused.</li>
+<li>On a second fixture recipe in Checked, decline. → Declined
+(terminal).</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> transition set exactly as
+URS-W1-014.</li>
+</ul>
+<h3 id="tc-w1-016-structural-validators-at-acceptance-integration">TC-W1-016
+— Structural validators at acceptance <em>(Integration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> validator battery. <strong>URS:</strong>
+URS-W1-015.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Break RW-CHM-0002 line UoM (no conversion); attempt acceptance. →
+Refused naming UoM validator + line.</li>
+<li>Attempt acceptance of a component-less fixture BOM. → Refused naming
+completeness validator.</li>
+<li>Correct BOM-RW-CHM-0003-001; accept. → Succeeds; validator results
+stored on the record.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> named validator failures and clean
+pass.</li>
+</ul>
+<h3 id="tc-w1-017-accepted-immutability-and-outdated-versioning-integration">TC-W1-017
+— Accepted immutability and Outdated versioning
+<em>(Integration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> change control. <strong>URS:</strong>
+URS-W1-016.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Edit component lines of Accepted BOM-RW-CHM-0003-001. → Refused
+citing immutability.</li>
+<li>Create successor BOM version; accept its governance. → Predecessor
+<code>gov_state</code> = Outdated automatically.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> both exact.</li>
+</ul>
+<h3 id="tc-w1-018-in-use-lock-integration">TC-W1-018 — In-use lock
+<em>(Integration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> active orders lock recipes.
+<strong>URS:</strong> URS-W1-017.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>PO-2026-0001 In Progress on BOM-RW-CHM-0003-001; attempt outdate. →
+Refused naming PO-2026-0001.</li>
+<li>Complete PO-2026-0001; retry with accepted successor. →
+Succeeds.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> refusal then success.</li>
+</ul>
+<h3 id="tc-w1-019-handling-unit-as-reference-layer-integration">TC-W1-019 —
+Handling Unit as reference layer <em>(Integration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> HU never a parallel quantity store.
+<strong>URS:</strong> URS-W1-018.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>W. Braun creates HU-000123 (“Palette”, NORD-A-01-01) containing 500
+kg RW-CHM-0001 / BATCH-A-0001. → Saves with content row.</li>
+<li>Compare HU content sum vs anchor ledger qty for BATCH-A-0001 in RM
+Lager Nord. → Ledger is truth; HU holds references; divergence raises a
+reconciliation flag, not a second quantity.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> both checks pass.</li>
+</ul>
+<h3 id="tc-w1-020-storage-location-warehouse-scoping-integration">TC-W1-020
+— Storage Location warehouse scoping <em>(Integration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> location tree scoped per warehouse.
+<strong>URS:</strong> URS-W1-019.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Create NORD-A-01-01 under RM Lager Nord; assign to HU-000123. →
+Succeeds.</li>
+<li>Offer NORD-A-01-01 for an HU in FG Lager Süd. → Not selectable.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> scoping enforced.</li>
+</ul>
+<h3 id="tc-w1-021-per-warehouse-disposal-algorithms-integration">TC-W1-021 —
+Per-warehouse disposal algorithms <em>(Integration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> FEFO/FIFO per warehouse.
+<strong>URS:</strong> URS-W1-020.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>RM Lager Nord (FEFO) holds BATCH-A-0001 (31.12.2026) + BATCH-A-0002
+(30.06.2026, unexpired fixture date); auto-allocate 20 kg. →
+BATCH-A-0002 selected first.</li>
+<li>FG Lager Süd (FIFO) holds BATCH-C-1001 (older) + BATCH-C-1002;
+auto-allocate. → BATCH-C-1001 first.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> both selections exact.</li>
+</ul>
+<h3 id="tc-w1-022-batch-aware-stock-entries-with-purpose-mapping-integration">TC-W1-022
+— Batch-aware Stock Entries with purpose mapping
+<em>(Integration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> one ledger, mapped purposes.
+<strong>URS:</strong> URS-W1-021.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Book receipt 500 kg RW-CHM-0001 as BATCH-A-0001 into RM Lager Nord /
+NORD-A-01-01 / HU-000123. → Material Receipt Stock Entry posts; ledger
+500 kg with batch allocation.</li>
+<li>Issue 100 kg BATCH-A-0001. → Material Issue posts; ledger 400
+kg.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> postings and quantities exact.</li>
+</ul>
+<h3 id="tc-w1-023-legacy-bridge-affordance-design-conformance">TC-W1-023
+— Legacy bridge affordance <em>(Design-conformance)</em></h3>
+<ul>
+<li><strong>Objective:</strong> old names on hover; flag removable.
+<strong>URS:</strong> URS-W1-022.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Hover the recipe field on PO-2026-0001. → Shows “was:
+Technology”.</li>
+<li>Disable the feature flag; hover again. → No legacy name.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> both as expected.</li>
+</ul>
+<h3 id="tc-w1-024-draft-makes-reservation-integration">TC-W1-024 — Draft
+makes reservation <em>(Integration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> Qcadoo semantics on SRE.
+<strong>URS:</strong> URS-W1-023.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>With 500 kg BATCH-A-0001 available, save a draft issue for 200 kg
+RW-CHM-0001. → SRE flagged <code>draft_reservation</code> for 200 kg;
+available 300 kg; on-hand 500 kg.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> all three quantities exact.</li>
+</ul>
+<h3 id="tc-w1-025-draft-deletion-releases-reservation-integration">TC-W1-025
+— Draft deletion releases reservation <em>(Integration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> release semantics. <strong>URS:</strong>
+URS-W1-024.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Delete the draft from TC-W1-024. → SRE cancelled; available back to
+500 kg.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> exact restoration.</li>
+</ul>
+<h3 id="tc-w1-026-order-level-sre-auto-reserve-integration">TC-W1-026 —
+Order-level SRE auto-reserve <em>(Integration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> anchor-native order reservations.
+<strong>URS:</strong> URS-W1-025.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Accept PO-2026-0001 with auto-reserve on. → SREs reserving 500 kg
+component stock exist, visible from the order.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> SREs present and linked.</li>
+</ul>
+<h3 id="tc-w1-027-operator-job-card-execution-journey">TC-W1-027 —
+Operator job-card execution <em>(Journey)</em></h3>
+<ul>
+<li><strong>Objective:</strong> job cards, time logs, output.
+<strong>URS:</strong> URS-W1-026.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>PO-2026-0001 In Progress; O. Weber opens shop-floor view. → Job
+cards for MIX (LINE-1/MIX-01) and FILL (LINE-1/FILL-01) listed.</li>
+<li>Start/stop work on MIX. → Time log with start/end and duration.</li>
+<li>Record 500 kg on FILL; submit. → Order recorded output = 500
+kg.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> all three steps exact; Terminal Card
+layout (one task, giant primary action, order/operation in header).</li>
+</ul>
+<h3 id="tc-w1-028-pauseresume-with-log-split-journey">TC-W1-028 —
+Pause/resume with log split <em>(Journey)</em></h3>
+<ul>
+<li><strong>Objective:</strong> On Hold semantics. <strong>URS:</strong>
+URS-W1-027.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Pause the MIX job card mid-work. → On Hold; open time log
+closed.</li>
+<li>Resume. → New time log; Work In Progress.</li>
+<li>Pause again; attempt submit. → Refused (on hold / completeness
+rule).</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> all as expected.</li>
+</ul>
+<h3 id="tc-w1-029-scanner-first-identification-design-conformance">TC-W1-029
+— Scanner-first identification <em>(Design-conformance)</em></h3>
+<ul>
+<li><strong>Objective:</strong> always-focused scan field with
+confirmation. <strong>URS:</strong> URS-W1-028.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>On the terminal, scan PO-2026-0001 barcode. → Job queue loads, no
+pointer used.</li>
+<li>Scan BATCH-A-0001 on the material-issue step. → Full-row highlight +
+audible confirmation.</li>
+<li>Scan unknown code “XX-0000”. → Inline error naming the code; scan
+field still focused.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> all three behaviours exact.</li>
+</ul>
+<h3 id="tc-w1-030-characterisation-parity-suite-vs-w1-gates-parity">TC-W1-030
+— Characterisation-parity suite vs W1 gates <em>(Parity)</em></h3>
+<ul>
+<li><strong>Objective:</strong> W0 contracts pass against the target
+implementation. <strong>URS:</strong> URS-W1-002, -005, -007, -015,
+-020.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Run the transition-legality contract
+(<code>OrderState.java:54-81</code>). → Pass.</li>
+<li>Run the acceptance-gate contract
+(<code>OrderStateValidationService.java:44-47</code>). → Pass.</li>
+<li>Run the completion-gate contract
+(<code>OrderStateValidationService.java:54-63</code>). → Pass.</li>
+<li>Run the technology-validator contracts in W1 scope
+(<code>TechnologyValidationService.java:91-707</code>). → Pass.</li>
+<li>Run the FEFO contract
+(<code>ResourceManagementServiceImpl.java:1015-1027</code>). →
+Pass.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> every parity contract green (expiry
+contract excluded — see §4).</li>
+</ul>
+<h3 id="tc-w1-031-per-transition-role-gating-nfrintegration">TC-W1-031 —
+Per-transition role gating <em>(NFR/Integration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> workflow-state-level RBAC.
+<strong>URS:</strong> URS-W1-029.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>O. Weber (operator only) attempts Pending→Accepted on PO-2026-0002.
+→ Permission refusal; no state change; refusal audited.</li>
+<li>P. Krüger performs the same transition. → Succeeds.</li>
+<li>W. Braun attempts Checked→Accepted on a recipe. → Refused.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> all three exact with audit rows.</li>
+</ul>
+<h3 id="tc-w1-032-expiry-policy-hard-stop-in-fefo-allocation-integration">TC-W1-032
+— Expiry policy: hard stop in FEFO allocation
+<em>(Integration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> target expiry behaviour.
+<strong>URS:</strong> URS-W1-030 (AC-1).</li>
+<li><strong>Preconditions:</strong> system date 01.07.2026; BATCH-A-0002
+expired 30.06.2026 in RM Lager Nord (FEFO).</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Auto-allocate Additiv K7 demand covered by unexpired stock. →
+BATCH-A-0002 skipped.</li>
+<li>Auto-allocate demand only coverable by BATCH-A-0002. → Issue
+refused; never silently issued; expiring/expired stock flagged
+amber/red.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> both exact.</li>
+</ul>
+<h3 id="tc-w1-033-expiry-divergence-recorded-with-sign-off-parity">TC-W1-033
+— Expiry divergence recorded with sign-off <em>(Parity)</em></h3>
+<ul>
+<li><strong>Objective:</strong> deviation is explicit and signed off.
+<strong>URS:</strong> URS-W1-030 (AC-2/AC-3).</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Run the legacy Plant A expiry characterisation contract
+(FEFO-advisory: expired resource issuable) against the target. → Delta
+reported as <em>intentional divergence</em> linked to the sign-off
+reference, not a parity failure.</li>
+<li>Run the W1 exit verification with the sign-off identifier removed
+from the decision record. → Verification fails.</li>
+<li>Restore sign-off (name/role/date); re-run. → Passes.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> divergence classification and sign-off
+gate both work.</li>
+</ul>
+<h3 id="tc-w1-034-per-gate-behaviour-record-generation-integration">TC-W1-034
+— Per-gate behaviour record generation <em>(Integration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> W1-10 record generated from harness
+results. <strong>URS:</strong> URS-W1-031.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Generate the record after a full harness run. → One row per W1 gate
+(acceptance, recipe-Accepted, completion, material availability,
+transition legality, over-production, stopped freeze, closed terminal,
+expiry, in-use lock) with verdict + legacy citation.</li>
+<li>Check the expiry row. → Verdict Divergence, links URS-W1-030
+sign-off; all other rows Parity.</li>
+<li>Break one contract without recording a divergence; regenerate. →
+Generation fails.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> all three exact.</li>
+</ul>
+<h3 id="tc-w1-035-latency-under-load-nfr">TC-W1-035 — Latency under load
+<em>(NFR)</em></h3>
+<ul>
+<li><strong>Objective:</strong> scan/gate latency budget.
+<strong>URS:</strong> URS-W1-032.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Run 100 sequential scans of BATCH-A-0001 on the terminal profile;
+measure. → p95 server-confirmed ≤ 300 ms; UI feedback &lt; 100 ms
+each.</li>
+<li>Delay server 2 s; trigger completion. → Progress shown on the
+control; no success indication before server confirmation.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> both thresholds met.</li>
+</ul>
+<h3 id="tc-w1-036-gated-action-audit-log-nfr">TC-W1-036 — Gated-action
+audit log <em>(NFR)</em></h3>
+<ul>
+<li><strong>Objective:</strong> refusals and transitions logged
+immutably. <strong>URS:</strong> URS-W1-033.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Trigger the TC-W1-006 refusal; open the order’s audit view as B.
+Vogel. → Refusal row with gate name, missing field, user,
+timestamp.</li>
+<li>Attempt to modify that audit entry via API. → Refused.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> both exact.</li>
+</ul>
+<h3 id="tc-w1-037-german-first-w1-screens-design-conformance">TC-W1-037
+— German-first W1 screens <em>(Design-conformance)</em></h3>
+<ul>
+<li><strong>Objective:</strong> i18n on W1 scope. <strong>URS:</strong>
+URS-W1-034.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Locale de; trigger the expiry refusal. → Modal shows 30.06.2026 and
+kg, from externalized strings.</li>
+<li>Scan the W1 string catalogue. → Every user-facing string has a
+German entry.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> both pass.</li>
+</ul>
+<h3 id="tc-w1-038-end-to-end-planner-operator-exit-journeys-journey">TC-W1-038
+— End-to-end planner + operator exit journeys <em>(Journey)</em></h3>
+<ul>
+<li><strong>Objective:</strong> the two W1 exit journeys in one run.
+<strong>URS:</strong> URS-W1-001, URS-W1-026 (with gates from
+URS-W1-005…008).</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>P. Krüger creates PO-2026-0001 (500 kg RW-CHM-0003, LINE-1, dates
+10.03.–12.03.2026, Accepted recipe); accepts. → Accepted; all gates
+green.</li>
+<li>Starts the order with BATCH-A-0001 available. → In Progress;
+availability gate passed.</li>
+<li>O. Weber runs MIX and FILL job cards with scanner identification,
+pause/resume once, records 500 kg. → Output recorded.</li>
+<li>O. Weber completes the order. → Completed;
+<code>state_history</code> full; B. Vogel sees the completed order and
+audit trail.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> entire journey passes without manual
+intervention beyond the scripted persona steps.</li>
+</ul>
+<h3 id="tc-w1-039-deskterminal-mode-conformance-design-conformance">TC-W1-039
+— Desk/Terminal mode conformance <em>(Design-conformance)</em></h3>
+<ul>
+<li><strong>Objective:</strong> density modes, pills, keyboard path.
+<strong>URS:</strong> URS-W1-035.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Render the job-card screen in Terminal mode; measure. → Base ≥16px;
+targets ≥48px; same fields as Desk mode.</li>
+<li>Render <code>exec_state</code>/<code>gov_state</code> pills in
+grayscale. → Distinguishable by icon+label.</li>
+<li>Press <code>?</code> on each W1 screen. → Shortcut sheet opens;
+Enter/Esc/arrow paths work end-to-end on the queue.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> all three checks on every W1
+screen.</li>
+</ul>
+<h2 id="parity-test-section-absorb-scope">4. Parity test section (Absorb
+scope)</h2>
+<p>Side-by-side assertions of target behaviour against the Qcadoo
+characterisation baseline (contracts built in W0, URS-W0-012):</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Behaviour</th>
+<th>Legacy baseline (contract source)</th>
+<th>Target assertion</th>
+<th>Verdict</th>
+<th>TC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P-1</td>
+<td>Order transition legality (7-state <code>canChangeTo</code>)</td>
+<td><code>OrderState.java:31-81</code></td>
+<td>Identical legal/illegal transition set on
+<code>exec_state</code></td>
+<td>Parity</td>
+<td>TC-W1-002, TC-W1-030</td>
+</tr>
+<tr>
+<td>P-2</td>
+<td>Acceptance requires dates + line + technology/recipe</td>
+<td><code>OrderStateValidationService.java:44-47</code></td>
+<td>Same refusal conditions on Pending→Accepted</td>
+<td>Parity</td>
+<td>TC-W1-006, TC-W1-030</td>
+</tr>
+<tr>
+<td>P-3</td>
+<td>Completion blocked at zero recorded output</td>
+<td><code>OrderStateValidationService.java:54-63</code></td>
+<td>Same refusal on In Progress→Completed</td>
+<td>Parity</td>
+<td>TC-W1-008, TC-W1-030</td>
+</tr>
+<tr>
+<td>P-4</td>
+<td>Material availability checked at order start; reservations cleared
+on decline/abandon</td>
+<td><code>OrderStatesListenerServicePFTD.java:580</code>,
+<code>:633</code></td>
+<td>Hard gate at start; SRE cancellation on Declined/Abandoned</td>
+<td>Parity</td>
+<td>TC-W1-009, TC-W1-010</td>
+</tr>
+<tr>
+<td>P-5</td>
+<td>Technology validators (tree completeness, unit match, in-use
+lock)</td>
+<td><code>TechnologyValidationService.java:91-707</code></td>
+<td>Same named-validator refusals at Checked→Accepted</td>
+<td>Parity</td>
+<td>TC-W1-016, TC-W1-018, TC-W1-030</td>
+</tr>
+<tr>
+<td>P-6</td>
+<td>Recipe 5-state lifecycle incl. immutable Accepted → Outdated</td>
+<td><code>TechnologyState.java:33-66</code></td>
+<td>Identical <code>gov_state</code> transition set</td>
+<td>Parity</td>
+<td>TC-W1-015, TC-W1-017</td>
+</tr>
+<tr>
+<td>P-7</td>
+<td>FIFO/LIFO/FEFO/LEFO outbound pick order</td>
+<td><code>ResourceManagementServiceImpl.java:1015-1027</code>;
+<code>WarehouseAlgorithm.java:26-27</code></td>
+<td>Same ordering per warehouse algorithm</td>
+<td>Parity</td>
+<td>TC-W1-021, TC-W1-030</td>
+</tr>
+<tr>
+<td>P-8</td>
+<td>Draft documents reserve stock; deletion releases</td>
+<td><code>ReservationsService.java:81-247</code></td>
+<td><code>draft_reservation</code> SREs mirror create/release
+semantics</td>
+<td>Parity</td>
+<td>TC-W1-024, TC-W1-025</td>
+</tr>
+<tr>
+<td>P-9</td>
+<td>Expired stock issuable under FEFO-advisory</td>
+<td>Legacy: no hard stop in
+<code>ResourceManagementServiceImpl.java:1015-1027</code>; target: hard
+stop per <code>stock_ledger_entry.py:287-299</code></td>
+<td>Target <strong>deviates deliberately</strong>: hard stop
+estate-wide</td>
+<td><strong>Intentional divergence — Business sign-off required
+(URS-W1-030)</strong></td>
+<td>TC-W1-032, TC-W1-033</td>
+</tr>
+</tbody>
+</table>
+<p>Anchor-adopt behaviours (over-production, stopped freeze, closed
+terminal, expired-batch throw) are verified against the ERPNext baseline
+(<code>services/status.py:29-47,208-224</code>;
+<code>job_card.py:904-910</code>; <code>work_order.py:1131-1132</code>;
+<code>stock_ledger_entry.py:287-299</code>) by TC-W1-011…014 — these are
+Adopt, not parity-vs-Qcadoo.</p>
+<h2 id="wave-acceptance-checklist">5. Wave acceptance checklist</h2>
+<p>Executable form of the W1 exit criteria
+(<code>docs/urs/URS-W1-production-core.md</code> §6); this checklist
+closes the W1 Epic.</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Exit ID</th>
+<th>Check</th>
+<th>Test cases</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>EXIT-W1-1</td>
+<td>Planner journey passes acceptance (create→accept→start with
+gates→monitor)</td>
+<td>TC-W1-001…010, TC-W1-026, TC-W1-038</td>
+<td>☐</td>
+</tr>
+<tr>
+<td>EXIT-W1-2</td>
+<td>Operator journey passes acceptance (job cards, scanner,
+pause/resume, output→completion)</td>
+<td>TC-W1-027…029, TC-W1-008, TC-W1-038</td>
+<td>☐</td>
+</tr>
+<tr>
+<td>EXIT-W1-3</td>
+<td>Recipe governance live with validators, immutability, in-use lock,
+order gate</td>
+<td>TC-W1-007, TC-W1-015…018</td>
+<td>☐</td>
+</tr>
+<tr>
+<td>EXIT-W1-4</td>
+<td>Warehouse fidelity base live (HU, locations, disposal algorithms,
+reservations; ledger single truth)</td>
+<td>TC-W1-019…026</td>
+<td>☐</td>
+</tr>
+<tr>
+<td>EXIT-W1-5</td>
+<td>Behaviour-choice record generated per gate; expiry divergence signed
+off</td>
+<td>TC-W1-030, TC-W1-032…034</td>
+<td>☐</td>
+</tr>
+<tr>
+<td>EXIT-W1-6</td>
+<td>Role model, audit, latency, i18n, Desk/Terminal conformance
+verified</td>
+<td>TC-W1-031, TC-W1-035…037, TC-W1-039</td>
+<td>☐</td>
+</tr>
+</tbody>
+</table>
+  <footer class="doc">Rheinwerk Chemie GmbH — MES consolidation programme. Generated from the Markdown source of record in SachetCognition/rheinwerk-mes-core.</footer>
+</main>
+<button id="top-btn" title="Back to top">⇧</button>
+<script>
+const links=[...document.querySelectorAll('#sidebar nav a')];
+const targets=links.map(a=>document.getElementById(decodeURIComponent(a.hash.slice(1)))).filter(Boolean);
+function onScroll(){
+  const y=window.scrollY+90;let cur=targets[0];
+  for(const t of targets){if(t.offsetTop<=y)cur=t;else break}
+  links.forEach(a=>a.classList.toggle('active',cur&&decodeURIComponent(a.hash.slice(1))===cur.id));
+  document.getElementById('top-btn').classList.toggle('show',window.scrollY>500);
+}
+document.addEventListener('scroll',onScroll,{passive:true});onScroll();
+document.getElementById('top-btn').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
+</script>
+</body>
+</html>

@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>URS W1 — Production Core</title>
+<style>
+:root{--accent:#1f4e79;--accent2:#2e74b5;--bg:#f7f9fb;--card:#ffffff;--text:#24292f;--muted:#6a737d;--border:#e1e6eb;--sidebar-w:300px}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",Calibri,Arial,sans-serif;color:var(--text);background:var(--bg);line-height:1.55;font-size:15px}
+#sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:var(--accent);color:#fff;overflow-y:auto;padding:22px 18px}
+#sidebar .brand{font-size:15px;font-weight:600;letter-spacing:.4px;border-bottom:1px solid rgba(255,255,255,.25);padding-bottom:12px;margin-bottom:12px}
+#sidebar .brand small{display:block;font-weight:400;opacity:.75;margin-top:4px}
+#sidebar nav ul{list-style:none;margin:0;padding-left:0}
+#sidebar nav ul ul{padding-left:14px}
+#sidebar nav a{display:block;color:rgba(255,255,255,.85);text-decoration:none;font-size:12.6px;padding:4px 8px;border-radius:5px;border-left:3px solid transparent}
+#sidebar nav a:hover{background:rgba(255,255,255,.12);color:#fff}
+#sidebar nav a.active{background:rgba(255,255,255,.18);color:#fff;border-left-color:#9cc3e5;font-weight:600}
+#content{margin-left:var(--sidebar-w);padding:42px 56px;max-width:1080px}
+header.doc{border-bottom:3px solid var(--accent);padding-bottom:18px;margin-bottom:30px}
+header.doc h1{color:var(--accent);font-size:30px;margin:0 0 6px}
+header.doc .sub{color:var(--accent2);font-size:15.5px;font-weight:600}
+h1,h2{color:var(--accent);margin-top:2.1em;border-bottom:1px solid var(--border);padding-bottom:.25em}
+h3,h4{color:var(--accent2);margin-top:1.7em}
+a{color:var(--accent2)}
+table{border-collapse:collapse;width:100%;margin:1.1em 0;background:var(--card);font-size:13.2px;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+th{background:var(--accent);color:#fff;text-align:left;padding:8px 10px;font-weight:600}
+td{border:1px solid var(--border);padding:7px 10px;vertical-align:top}
+tr:nth-child(even) td{background:#f2f6fa}
+code{background:#eef2f6;border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:12px;font-family:Consolas,Menlo,monospace;color:#0b3d66}
+pre{background:#0f2a43;color:#dce8f5;padding:14px 16px;border-radius:8px;overflow-x:auto;font-size:12.5px}
+pre code{background:none;border:none;color:inherit;padding:0}
+blockquote{margin:1em 0;padding:10px 16px;background:#eaf1f8;border-left:5px solid var(--accent2);border-radius:0 6px 6px 0;color:#243b53}
+img.diagram,p img{max-width:100%;background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px;box-shadow:0 1px 3px rgba(0,0,0,.08);display:block;margin:1.2em auto}
+#top-btn{position:fixed;right:26px;bottom:26px;background:var(--accent);color:#fff;border:none;border-radius:50%;width:46px;height:46px;font-size:19px;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .25s;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+#top-btn.show{opacity:.92;pointer-events:auto}
+footer.doc{margin-top:60px;border-top:1px solid var(--border);padding-top:14px;color:var(--muted);font-size:12px}
+@media(max-width:900px){#sidebar{display:none}#content{margin-left:0;padding:24px}}
+</style>
+</head>
+<body>
+<aside id="sidebar">
+  <div class="brand">URS W1 — Production Core<small>Rheinwerk MES
+Consolidation — User Requirements Specification</small></div>
+  <nav><ul>
+<li><a href="#purpose-scope" id="toc-purpose-scope">1. Purpose &amp;
+scope</a></li>
+<li><a href="#personas-in-scope" id="toc-personas-in-scope">2. Personas
+in scope</a></li>
+<li><a href="#requirements" id="toc-requirements">3. Requirements</a>
+<ul>
+<li><a href="#production-order-state-machine-w1-1" id="toc-production-order-state-machine-w1-1">3.1 Production-order state
+machine (W1-1)</a></li>
+<li><a href="#execution-gating-hooks-w1-2" id="toc-execution-gating-hooks-w1-2">3.2 Execution gating hooks
+(W1-2)</a></li>
+<li><a href="#anchor-hard-stops-keptverified-w1-3" id="toc-anchor-hard-stops-keptverified-w1-3">3.3 Anchor hard stops
+kept/verified (W1-3)</a></li>
+<li><a href="#recipe-governance-workflow-w1-4" id="toc-recipe-governance-workflow-w1-4">3.4 Recipe governance workflow
+(W1-4)</a></li>
+<li><a href="#warehouse-physical-fidelity-base-w1-5" id="toc-warehouse-physical-fidelity-base-w1-5">3.5 Warehouse physical
+fidelity base (W1-5)</a></li>
+<li><a href="#reservations-w1-6" id="toc-reservations-w1-6">3.6
+Reservations (W1-6)</a></li>
+<li><a href="#shop-floor-operator-journey-w1-7" id="toc-shop-floor-operator-journey-w1-7">3.7 Shop-floor operator
+journey (W1-7)</a></li>
+<li><a href="#role-model-w1-8" id="toc-role-model-w1-8">3.8 Role model
+(W1-8)</a></li>
+<li><a href="#expiry-enforcement-policy-decision-w1-9" id="toc-expiry-enforcement-policy-decision-w1-9">3.9 Expiry-enforcement
+policy decision (W1-9)</a></li>
+<li><a href="#characterisation-vs-behaviour-record-w1-10" id="toc-characterisation-vs-behaviour-record-w1-10">3.10
+Characterisation-vs-behaviour record (W1-10)</a></li>
+</ul></li>
+<li><a href="#non-functional-requirements" id="toc-non-functional-requirements">4. Non-functional
+requirements</a></li>
+<li><a href="#data-migration-requirements" id="toc-data-migration-requirements">5. Data migration
+requirements</a></li>
+<li><a href="#wave-exit-criteria" id="toc-wave-exit-criteria">6. Wave
+exit criteria</a></li>
+<li><a href="#untraceable-deferred" id="toc-untraceable-deferred">7.
+Untraceable / deferred</a></li>
+</ul></nav>
+</aside>
+<main id="content">
+  <header class="doc"><h1>URS W1 — Production
+Core</h1><div class="sub">Rheinwerk MES Consolidation — User
+Requirements Specification</div></header>
+<p><strong>Rheinwerk MES Consolidation — User Requirements
+Specification</strong> Wave: W1 (Production Core) · Source backlog:
+<code>docs/waves/W1-production-core.md</code> (W1-1…W1-10) · Status:
+Draft for review</p>
+<hr />
+<h2 id="purpose-scope">1. Purpose &amp; scope</h2>
+<p>Wave W1 delivers the production core: the explicit production-order
+<code>exec_state</code> machine layered over the anchor Work Order,
+execution gating hooks, verification of anchor hard stops, the recipe
+governance workflow (<code>gov_state</code>) on BOM/Routing, the
+warehouse physical-fidelity base (Handling Unit, Storage Location,
+per-warehouse disposal algorithms), draft-document reservation semantics
+reconciled with Stock Reservation Entry, the shop-floor operator journey
+on Job Cards, workflow-state-level role permissions, the estate-wide
+expiry-enforcement policy decision, and the per-gate
+characterisation-vs-behaviour record. W1 exit: planner + operator
+journeys pass acceptance; behaviour choices vs characterisation tests
+documented (<code>docs/waves/W1-production-core.md</code>).</p>
+<p><strong>Out of scope for W1</strong> (later waves — listed so scope
+creep is visible):</p>
+<ul>
+<li>Batch genealogy system-of-record, unified Batch object with
+<code>qa_state</code> workflow, blocking/quarantine propagation, Quality
+Inspection wiring, CoA, ISA-88, hazmat — <strong>W2</strong>. W1
+references batch expiry data for FEFO/expiry gating but does not deliver
+the Batch <code>qa_state</code> workflow.</li>
+<li>Warehouse fidelity completion (quarantine locations, pallet
+balances, stocktaking/repacking journeys) — <strong>W2</strong>
+(W2-8).</li>
+<li>Planning/MRP journey, finite capacity, ERP boundary interface, SCADA
+— <strong>W3</strong>.</li>
+<li>Open-batch/genealogy/history data migration —
+<strong>W2/W4</strong>. W1 lands <strong>no migrated data</strong>; it
+consumes W0 master data and fixtures.</li>
+</ul>
+<h2 id="personas-in-scope">2. Personas in scope</h2>
+<p>From the dossier role model (ch. 3.1 §B.2; ch. 3.2
+personas/roles):</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Persona</th>
+<th>Fixture name</th>
+<th>W1 relevance</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Planner</td>
+<td>P. Krüger</td>
+<td>Creates, accepts, declines, releases production orders</td>
+<td>dossier ch. 3.1 §B.2 (production planner / supervisor roles);
+ch. 3.2 <code>Manufacturing User</code> on Work Order</td>
+</tr>
+<tr>
+<td>Shop-floor operator</td>
+<td>O. Weber</td>
+<td>Executes job cards, records output, pause/resume</td>
+<td>dossier ch. 3.2 (<code>job_card.py:1280-1397</code>); ch. 3.1
+production tracking roles</td>
+</tr>
+<tr>
+<td>Technologist</td>
+<td>T. Schmid</td>
+<td>Authors and progresses recipes through governance</td>
+<td>dossier ch. 3.1 §B.2 (technology roles); ch. 3.2
+<code>Manufacturing Manager</code> on BOM</td>
+</tr>
+<tr>
+<td>Warehouse clerk</td>
+<td>W. Braun</td>
+<td>Manages handling units, storage locations, issues stock,
+reservations</td>
+<td>dossier ch. 3.1 §B.2 (warehouse operator roles
+incl. <code>ROLE_DOCUMENTS_STATES_ACCEPT</code>)</td>
+</tr>
+<tr>
+<td>Business viewer</td>
+<td>B. Vogel</td>
+<td>Reads order progress and the characterisation-choice record</td>
+<td>dossier §6.2 platform-substrate row</td>
+</tr>
+</tbody>
+</table>
+<p>Quality inspector (Q. Fischer) enters scope in W2.</p>
+<h2 id="requirements">3. Requirements</h2>
+<h3 id="production-order-state-machine-w1-1">3.1 Production-order state
+machine (W1-1)</h3>
+<h4 id="urs-w1-001-explicit-exec_state-workflow-on-work-order">URS-W1-001 —
+Explicit <code>exec_state</code> workflow on Work Order</h4>
+<p>The system shall provide the user-owned, role-gated
+<code>exec_state</code> workflow (Pending, Accepted, In Progress,
+Completed, Interrupted, Abandoned, Declined) as a Frappe workflow +
+hooks layered over the anchor Work Order, never forking the anchor
+DocType, so that the planner and operator own order state explicitly
+rather than deriving it from postings.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Absorb · Qcadoo ·
+<code>orders/states/constants/OrderState.java:31-81</code>; ADR-004 /
+CDM-02; dossier §7 implication 1</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given production order PO-2026-0001 (500 kg
+RW-CHM-0003 on LINE-1) is newly created, When P. Krüger opens it, Then
+<code>exec_state</code> = Pending.</li>
+<li><strong>AC-2</strong> Given PO-2026-0001 in Pending with dates, line
+and Accepted recipe set, When P. Krüger transitions it, Then
+<code>exec_state</code> = Accepted.</li>
+<li><strong>AC-3</strong> Given PO-2026-0001 in In Progress, When O.
+Weber interrupts it, Then <code>exec_state</code> = Interrupted, and a
+subsequent resume returns it to In Progress.</li>
+</ul></li>
+<li><strong>Design conformance:</strong> <code>exec_state</code> renders
+as a status pill (icon + label + colour, design skill §“Component
+rules”); state names use the exact glossary vocabulary (§“Interaction
+rules — State names are law”); order identifiers in mono
+(§“Typography”).</li>
+<li><strong>Dependencies:</strong> W0 exit (URS-W0-007,
+URS-W0-012).</li>
+</ul>
+<h4 id="urs-w1-002-legal-transition-enforcement">URS-W1-002 — Legal
+transition enforcement</h4>
+<p>The system shall permit only the legal <code>exec_state</code>
+transitions (Pending→Accepted/In Progress/Declined; Accepted→In
+Progress/Declined; In Progress→Completed/Interrupted/Abandoned;
+Interrupted→In Progress/Abandoned; Completed, Declined, Abandoned
+terminal) and refuse all others, matching the Qcadoo
+<code>canChangeTo</code> transition set exactly.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Absorb (exact parity) · Qcadoo ·
+<code>OrderState.java:54-81</code> (illegal state jumps rejected);
+dossier ch. 3.1 §C.2 order state diagram</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given PO-2026-0002 in Completed, When any
+transition is attempted, Then it is refused (terminal state).</li>
+<li><strong>AC-2</strong> Given PO-2026-0001 in Pending, When a direct
+transition to Completed is attempted, Then it is refused with a message
+naming the illegal transition.</li>
+<li><strong>AC-3</strong> Given the characterisation harness
+order-transition contract (URS-W0-012), When it runs against the target
+implementation, Then every legal/illegal transition assertion passes
+(parity).</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W1-001.</li>
+</ul>
+<h4 id="urs-w1-003-state-change-audit-state_history">URS-W1-003 —
+State-change audit (<code>state_history</code>)</h4>
+<p>The system shall record every <code>exec_state</code> transition in
+the <code>state_history</code> child table with state, user, timestamp,
+and reason (reason mandatory for Declined, Abandoned, Interrupted),
+equivalent to Qcadoo’s order state-change audit entity.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Absorb · Qcadoo ·
+<code>orders/model/orderStateChange.xml:36-47</code>;
+<code>orders/model/reasonTypeOfChangingOrderState.xml</code>; CDM-02
+<code>state_history</code></li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given PO-2026-0001 transitions
+Pending→Accepted→In Progress, When the <code>state_history</code> is
+read, Then it contains two rows with the acting users (P. Krüger, then
+O. Weber) and timestamps in order.</li>
+<li><strong>AC-2</strong> Given PO-2026-0002 in Pending, When P. Krüger
+declines it without a reason, Then the transition is refused; When she
+supplies reason “Kunde storniert”, Then it succeeds and the reason is
+stored.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W1-001.</li>
+</ul>
+<h4 id="urs-w1-004-reconciliation-with-anchor-derived-status-no-unqualified-status">URS-W1-004
+— Reconciliation with anchor-derived status; no unqualified
+“status”</h4>
+<p>The system shall reconcile <code>exec_state</code> with the anchor
+Work Order’s posting-derived status via hooks — accepting requires
+anchor submit; completing requires produced ≥ ordered or an explicit
+shortfall reason — and shall never expose the unqualified word “status”
+in canonical <code>rheinwerk_mes</code> interfaces (fields are
+<code>exec_state</code>, <code>qa_state</code>,
+<code>gov_state</code>).</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Absorb + Adopt reconciliation · Qcadoo
+semantics over ERPNext anchor · CDM-02 semantics paragraph; ADR-004
+decision (“the unqualified word ‘status’ is banned”); dossier §5.2
+production-order row (High mismatch)</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given PO-2026-0001 with the anchor Work Order
+in Draft (docstatus 0), When acceptance is attempted, Then it is refused
+until the anchor document is submitted.</li>
+<li><strong>AC-2</strong> Given PO-2026-0001 In Progress with produced
+quantity 480 kg of 500 kg, When completion is attempted without a
+shortfall reason, Then it is refused; with shortfall reason “Ausschuss
+Mischvorgang”, Then it completes and the reason is stored in
+<code>state_history</code>.</li>
+<li><strong>AC-3</strong> Given the <code>rheinwerk_mes</code> field and
+label catalogue, When scanned for an unqualified field/label “status” on
+canonical DocTypes and screens, Then zero occurrences are found.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W1-001, URS-W1-003.</li>
+</ul>
+<h3 id="execution-gating-hooks-w1-2">3.2 Execution gating hooks
+(W1-2)</h3>
+<h4 id="urs-w1-005-acceptance-gate-dates-line-recipe">URS-W1-005 —
+Acceptance gate: dates, line, recipe</h4>
+<p>The system shall refuse the Pending→Accepted transition unless the
+order carries planned start date, planned end date,
+<code>production_line</code> and a recipe reference, with the date range
+consistent (end after start), matching Qcadoo acceptance gating.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Absorb (exact parity) · Qcadoo ·
+<code>OrderStateValidationService.java:44-47</code>; date consistency
+<code>OrderStateService.java:47-59</code></li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given PO-2026-0002 without
+<code>production_line</code>, When P. Krüger attempts acceptance, Then
+the gate refuses and names the missing field.</li>
+<li><strong>AC-2</strong> Given PO-2026-0002 with start 15.03.2026 and
+end 14.03.2026, When acceptance is attempted, Then the gate refuses
+citing the inconsistent date range.</li>
+<li><strong>AC-3</strong> Given PO-2026-0001 with dates
+10.03.2026–12.03.2026, LINE-1 and BOM-RW-CHM-0003-001 (Accepted), When
+acceptance is attempted, Then it succeeds.</li>
+<li><strong>AC-4</strong> Given the characterisation acceptance-gate
+contract (URS-W0-012 AC-1), When run against the target, Then it passes
+(parity).</li>
+</ul></li>
+<li><strong>Design conformance:</strong> gate refusal presented per
+design skill §“Interaction rules — Hard gates look hard”: modal (not
+toast), naming the rule, the record (PO-2026-0002), and what resolves
+it; refusal logged.</li>
+<li><strong>Dependencies:</strong> URS-W1-001.</li>
+</ul>
+<h4 id="urs-w1-006-acceptance-gate-recipe-must-be-accepted">URS-W1-006 —
+Acceptance gate: recipe must be Accepted</h4>
+<p>The system shall refuse order acceptance when the referenced recipe’s
+<code>gov_state</code> is not Accepted, so that only governed recipes
+reach the shop floor.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Absorb · Qcadoo (orders must reference
+accepted technologies) · CDM-04 semantics (“orders may only reference
+Accepted recipes — gate in CDM-02 accept”); ADR-006</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given BOM-RW-CHM-0003-001 with
+<code>gov_state</code> = Draft, When P. Krüger attempts to accept
+PO-2026-0002 referencing it, Then the gate refuses naming the recipe and
+its <code>gov_state</code>.</li>
+<li><strong>AC-2</strong> Given the same recipe moved to Accepted (via
+URS-W1-015), When acceptance is retried, Then it succeeds.</li>
+</ul></li>
+<li><strong>Design conformance:</strong> gate refusal modal naming
+rule/record/resolution (design skill §“Hard gates look hard”).</li>
+<li><strong>Dependencies:</strong> URS-W1-001, URS-W1-014.</li>
+</ul>
+<h4 id="urs-w1-007-completion-gate-recorded-output-0">URS-W1-007 —
+Completion gate: recorded output &gt; 0</h4>
+<p>The system shall refuse the In Progress→Completed transition when
+recorded output is zero or when required execution dates are missing,
+matching Qcadoo completion gating.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Absorb (exact parity) · Qcadoo ·
+<code>OrderStateValidationService.java:54-63</code></li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given PO-2026-0001 In Progress with recorded
+output 0 kg, When O. Weber attempts completion, Then the gate refuses
+citing zero recorded output.</li>
+<li><strong>AC-2</strong> Given PO-2026-0001 with recorded output 500
+kg, When completion is attempted, Then it succeeds.</li>
+<li><strong>AC-3</strong> Given the characterisation completion-gate
+contract (URS-W0-012 AC-2), When run against the target, Then it passes
+(parity).</li>
+</ul></li>
+<li><strong>Design conformance:</strong> gate refusal modal naming
+rule/record/resolution.</li>
+<li><strong>Dependencies:</strong> URS-W1-001, URS-W1-004.</li>
+</ul>
+<h4 id="urs-w1-008-material-availability-gate-on-releasestart">URS-W1-008 —
+Material-availability gate on release/start</h4>
+<p>The system shall check material availability when an order starts
+(Accepted→In Progress): required component quantities per the recipe
+must be available (on hand minus reservations) in the source warehouse,
+refusing the start with a per-component shortfall list otherwise,
+matching the Qcadoo listener gate.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Absorb (exact parity) · Qcadoo ·
+<code>OrderStatesListenerServicePFTD.java:580</code> (material
+availability checked at order start), <code>:129,134,633</code>; dossier
+§5.4 material-availability row (hard vs soft gate — target adopts the
+hard gate)</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given PO-2026-0001 requires 500 kg RW-CHM-0001
+and RM Lager Nord holds only 400 kg available, When start is attempted,
+Then the gate refuses listing RW-CHM-0001 with shortfall 100 kg.</li>
+<li><strong>AC-2</strong> Given BATCH-A-0001 (500 kg RW-CHM-0001)
+available in RM Lager Nord, When start is attempted, Then it
+succeeds.</li>
+<li><strong>AC-3</strong> Given a component quantity reserved by another
+order’s draft document (URS-W1-023), When availability is computed, Then
+the reserved quantity is excluded from availability.</li>
+</ul></li>
+<li><strong>Design conformance:</strong> gate refusal modal naming
+rule/record (the shortfall components)/resolution; logged.</li>
+<li><strong>Dependencies:</strong> URS-W1-001, URS-W1-021,
+URS-W1-023.</li>
+</ul>
+<h4 id="urs-w1-009-reservation-clearing-on-declinedabandoned">URS-W1-009
+— Reservation clearing on Declined/Abandoned</h4>
+<p>The system shall release all stock reservations held by an order when
+it transitions to Declined or Abandoned, matching Qcadoo listener
+behaviour.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Absorb · Qcadoo ·
+<code>OrderStatesListenerServicePFTD.java:633</code> (reservations
+cleared on decline/abandon)</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given PO-2026-0002 with an active reservation
+of 50 kg RW-CHM-0002 (BATCH-A-0002 lineage fixture), When P. Krüger
+declines the order with a reason, Then the reservation entry is
+cancelled and the 50 kg returns to available quantity.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W1-001, URS-W1-025.</li>
+</ul>
+<h3 id="anchor-hard-stops-keptverified-w1-3">3.3 Anchor hard stops
+kept/verified (W1-3)</h3>
+<h4 id="urs-w1-010-over-production-hard-stop">URS-W1-010 —
+Over-production hard stop</h4>
+<p>The system shall keep the anchor over-production errors:
+manufacturing or transferring quantity above plan + allowance throws and
+blocks the posting.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Adopt (exact anchor behaviour) · ERPNext ·
+<code>services/status.py:29-47</code> (vs Sales Order),
+<code>:208-224</code> (<code>StockOverProductionError</code>); dossier
+ch. 3.2 §C rules table</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given PO-2026-0001 for 500 kg with 0 %
+over-production allowance, When O. Weber records a manufacture of 510
+kg, Then the posting is refused with the over-production error and no
+stock ledger entry is written.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W1-004.</li>
+</ul>
+<h4 id="urs-w1-011-stopped-order-freeze">URS-W1-011 — Stopped-order
+freeze</h4>
+<p>The system shall keep the anchor freeze: job-card submission against
+a stopped Work Order is refused.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Adopt · ERPNext ·
+<code>job_card.py:904-910</code>; dossier ch. 3.2 §C rules table</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given PO-2026-0001’s anchor Work Order is
+stopped, When O. Weber attempts to submit a job card for operation MIX
+at LINE-1/MIX-01, Then submission is refused citing the stopped
+order.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W1-026.</li>
+</ul>
+<h4 id="urs-w1-012-closed-order-is-terminal">URS-W1-012 — Closed order
+is terminal</h4>
+<p>The system shall keep the anchor rule that a closed Work Order cannot
+be stopped or re-opened, and shall map anchor Closed consistently with
+terminal <code>exec_state</code>s in the reconciliation hooks.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Adopt · ERPNext ·
+<code>work_order.py:1131-1132</code>; dossier ch. 3.2 Work Order
+lifecycle</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given PO-2026-0002’s anchor Work Order is
+Closed, When stop or re-open is attempted, Then it is refused.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W1-004.</li>
+</ul>
+<h4 id="urs-w1-013-expired-batch-consumption-hard-stop">URS-W1-013 —
+Expired-batch consumption hard stop</h4>
+<p>The system shall keep the anchor expired-batch throw: outward stock
+ledger postings against a batch past its <code>expiry_date</code> are
+refused, and pick lists refuse expired batches — subject to the
+estate-wide policy decision in URS-W1-030.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Adopt · ERPNext ·
+<code>stock_ledger_entry.py:287-299</code> (expired batch throw);
+<code>pick_list.py:286-311</code> (pick list block); dossier §5.4
+expired-stock row</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given BATCH-A-0002 (Additiv K7, expiry
+30.06.2026) and system date 01.07.2026, When W. Braun attempts an issue
+of 5 kg from BATCH-A-0002, Then the posting is refused naming the
+expired batch.</li>
+<li><strong>AC-2</strong> Given the same conditions, When a pick list
+including BATCH-A-0002 is saved, Then the save is refused listing the
+expired batch.</li>
+</ul></li>
+<li><strong>Design conformance:</strong> refusal presented as a
+hard-gate modal naming rule (expiry policy), record (BATCH-A-0002,
+expiry 30.06.2026 in DD.MM.YYYY), and resolution (select non-expired
+stock / QA disposition).</li>
+<li><strong>Dependencies:</strong> URS-W1-021, URS-W1-030.</li>
+</ul>
+<h3 id="recipe-governance-workflow-w1-4">3.4 Recipe governance workflow
+(W1-4)</h3>
+<h4 id="urs-w1-014-gov_state-workflow-on-recipe-governance">URS-W1-014 —
+<code>gov_state</code> workflow on Recipe Governance</h4>
+<p>The system shall provide the Recipe Governance DocType linking a BOM
+(and its selected routing) with <code>gov_state</code> workflow Draft →
+Checked → Accepted → Outdated, with Declined reachable from Draft and
+Checked, matching the Qcadoo technology lifecycle.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Absorb · Qcadoo ·
+<code>TechnologyState.java:33-66</code> (5-state lifecycle); ADR-006 /
+CDM-04; dossier §7 implication 5</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given T. Schmid creates a Recipe Governance
+record for BOM-RW-CHM-0003-001 with routing RT-COMPOUND-01, Then
+<code>gov_state</code> = Draft.</li>
+<li><strong>AC-2</strong> Given the record in Draft, When T. Schmid
+progresses it, Then Draft→Checked and Checked→Accepted succeed in order;
+Checked→Draft (rework) also succeeds.</li>
+<li><strong>AC-3</strong> Given the record in Accepted, When a
+transition to Draft or Checked is attempted, Then it is refused (only
+Accepted→Outdated is legal).</li>
+<li><strong>AC-4</strong> Given a record in Checked, When T. Schmid
+declines it, Then <code>gov_state</code> = Declined (terminal).</li>
+</ul></li>
+<li><strong>Design conformance:</strong> <code>gov_state</code> pill
+with icon + label + colour; state vocabulary exactly
+Draft/Checked/Accepted/Outdated/Declined.</li>
+<li><strong>Dependencies:</strong> URS-W0-006 (W0).</li>
+</ul>
+<h4 id="urs-w1-015-structural-validators-at-checkedaccepted">URS-W1-015
+— Structural validators at Checked→Accepted</h4>
+<p>The system shall run structural validators when a recipe is accepted
+— tree/BOM completeness (materials present, output declared as the BOM’s
+item), UoM consistency between BOM lines and item UoM conversions, and
+routing operation completeness — refusing acceptance with a named
+validator failure list otherwise, re-implementing the Qcadoo validation
+battery scoped to the anchor BOM/Routing split.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Absorb · Qcadoo ·
+<code>TechnologyValidationService.java:91-707</code> (~20 structural
+checks incl. tree set, units match, in-components present); CDM-04
+semantics; characterisation contract URS-W0-012</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given BOM-RW-CHM-0003-001 with the RW-CHM-0002
+line’s UoM set to a unit with no conversion for that item, When
+acceptance is attempted, Then it is refused naming the UoM-consistency
+validator and the offending line.</li>
+<li><strong>AC-2</strong> Given a BOM with no component lines, When
+acceptance is attempted, Then it is refused naming the completeness
+validator.</li>
+<li><strong>AC-3</strong> Given BOM-RW-CHM-0003-001 corrected
+(RW-CHM-0001 in kg, RW-CHM-0002 in kg, output 25 kg-batches of
+RW-CHM-0003, routing RT-COMPOUND-01 with MIX and FILL operations), When
+acceptance is attempted, Then it succeeds and the validator results are
+stored on the governance record.</li>
+<li><strong>AC-4</strong> Given the characterisation
+technology-validator contract (URS-W0-012), When run against the target
+validators, Then the parity assertions pass for the checks in W1 scope
+(tree completeness, unit match, in-use lock).</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W1-014.</li>
+</ul>
+<h4 id="urs-w1-016-accepted-recipes-are-immutable-versioning-via-outdated">URS-W1-016
+— Accepted recipes are immutable; versioning via Outdated</h4>
+<p>The system shall make Accepted recipes immutable by policy: changes
+require a new BOM version whose governance record starts in Draft, and
+accepting the successor moves the predecessor to Outdated.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Absorb · Qcadoo ·
+<code>TechnologyState.java</code> (accepted → outdated, immutable);
+dossier §5.4 recipe-change row (“change-control strength differs by an
+order of magnitude”); ADR-006 consequence</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given BOM-RW-CHM-0003-001 Accepted, When T.
+Schmid attempts to edit its component lines, Then the edit is refused
+citing recipe immutability.</li>
+<li><strong>AC-2</strong> Given a successor BOM version for RW-CHM-0003
+whose governance record is accepted, Then the predecessor’s
+<code>gov_state</code> automatically becomes Outdated.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W1-014, URS-W1-015.</li>
+</ul>
+<h4 id="urs-w1-017-in-use-lock">URS-W1-017 — In-use lock</h4>
+<p>The system shall refuse moving a recipe to Outdated or Declined while
+it is referenced by an order whose <code>exec_state</code> is Accepted,
+In Progress or Interrupted (in-use lock), matching Qcadoo’s
+not-used-in-active-order check.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Absorb · Qcadoo ·
+<code>TechnologyValidationService.java:707</code> (not used in active
+order); CDM-04 <code>in_use_lock</code></li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given PO-2026-0001 In Progress referencing
+BOM-RW-CHM-0003-001, When T. Schmid attempts to outdate the recipe, Then
+it is refused naming PO-2026-0001.</li>
+<li><strong>AC-2</strong> Given PO-2026-0001 Completed, When the outdate
+is retried (with an accepted successor), Then it succeeds.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W1-014, URS-W1-001.</li>
+</ul>
+<h3 id="warehouse-physical-fidelity-base-w1-5">3.5 Warehouse physical
+fidelity base (W1-5)</h3>
+<h4 id="urs-w1-018-handling-unit-doctype">URS-W1-018 — Handling Unit
+DocType</h4>
+<p>The system shall provide a Handling Unit DocType (id, type, current
+storage location, contents child table referencing item/batch/quantity)
+as a referencing layer over the anchor ledger — never a parallel
+quantity store — so that the warehouse clerk tracks pallets/load
+units.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Absorb · Qcadoo ·
+<code>ResourceFields.java:32-90</code> (palletNumber on lot-level
+resources); ADR-005 / CDM-03 (Handling Unit as integrity DocType);
+dossier §7 implication 4</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given warehouse RM Lager Nord, When W. Braun
+creates handling unit HU-000123 of type “Palette” at storage location
+NORD-A-01-01 containing 500 kg RW-CHM-0001 (BATCH-A-0001), Then it saves
+and lists that content row.</li>
+<li><strong>AC-2</strong> Given HU-000123, When its content quantities
+are summed and compared with the anchor ledger quantity for BATCH-A-0001
+in RM Lager Nord, Then the ledger is the quantity truth and the HU
+stores only references (no independent quantity that can diverge without
+a reconciliation flag).</li>
+</ul></li>
+<li><strong>Design conformance:</strong> HU identifiers in mono; scanner
+path — scanning HU-000123’s barcode on any screen expecting
+identification focuses/loads it (design skill §“Scanner is a first-class
+input”).</li>
+<li><strong>Dependencies:</strong> URS-W0-003 (W0).</li>
+</ul>
+<h4 id="urs-w1-019-storage-location-tree">URS-W1-019 — Storage Location
+tree</h4>
+<p>The system shall provide a Storage Location DocType as a
+warehouse-scoped tree below the anchor Warehouse (e.g. NORD-A-01-01
+under RM Lager Nord), assignable to handling units and batch
+allocations.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Absorb · Qcadoo ·
+<code>ResourceFields.java</code> (storageLocation), storageLocation
+model <code>materialFlowResources/model/</code>; CDM-03</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given RM Lager Nord, When W. Braun creates
+NORD-A-01-01 under it, Then the location saves scoped to that warehouse
+and is selectable on HU-000123.</li>
+<li><strong>AC-2</strong> Given FG Lager Süd, When NORD-A-01-01 is
+offered as a location for a handling unit in FG Lager Süd, Then it is
+not selectable (warehouse-scoped).</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W1-018.</li>
+</ul>
+<h4 id="urs-w1-020-per-warehouse-disposal-algorithm">URS-W1-020 —
+Per-warehouse disposal algorithm</h4>
+<p>The system shall support a per-warehouse disposal algorithm (FIFO,
+LIFO, FEFO, LEFO) governing automatic outbound batch selection, matching
+Qcadoo’s warehouse-level algorithm rather than the anchor’s single
+global setting.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Absorb · Qcadoo ·
+<code>WarehouseAlgorithm.java:26-27</code>;
+<code>ResourceManagementServiceImpl.java:1015-1027,1207-1220</code>;
+dossier ch. 3.2 (<code>stock_settings.json:363-370</code> global-only in
+anchor)</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given RM Lager Nord configured FEFO holding
+BATCH-A-0001 (expiry 31.12.2026) and BATCH-A-0002 (expiry 30.06.2026),
+When an automatic issue of 20 kg Additiv-class stock is allocated, Then
+BATCH-A-0002 is selected first (earliest expiry).</li>
+<li><strong>AC-2</strong> Given FG Lager Süd configured FIFO holding
+BATCH-C-1001 (received first) and BATCH-C-1002, When an automatic issue
+is allocated, Then BATCH-C-1001 is selected first.</li>
+<li><strong>AC-3</strong> Given the characterisation FEFO contract
+(URS-W0-012 AC-3), When run against the target allocation, Then the
+parity assertions pass.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W1-021.</li>
+</ul>
+<h4 id="urs-w1-021-batch-aware-stock-movements-on-the-anchor-ledger">URS-W1-021
+— Batch-aware stock movements on the anchor ledger</h4>
+<p>The system shall book all W1 stock movements as anchor Stock Entries
+with batch allocations (Serial and Batch Bundle), with Qcadoo
+document-type semantics mapped to Stock Entry purposes (Receipt→Material
+Receipt, Release→Material Issue, Transfer→Material Transfer), so that
+movement history lives in one immutable ledger.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Adopt (anchor) + Absorb (type mapping) ·
+ERPNext ledger, Qcadoo document taxonomy · ADR-007 / CDM-05;
+<code>DocumentType.java:31-35</code>; dossier §5.2 stock-movement
+row</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given fixture stock, When W. Braun books a
+receipt of 500 kg RW-CHM-0001 as BATCH-A-0001 into RM Lager Nord at
+NORD-A-01-01 on HU-000123, Then a Material Receipt Stock Entry posts
+with a batch allocation and ledger quantity 500 kg.</li>
+<li><strong>AC-2</strong> Given the receipt, When an issue of 100 kg
+BATCH-A-0001 is booked, Then a Material Issue posts and the remaining
+ledger quantity is 400 kg.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W1-018, URS-W1-019.</li>
+</ul>
+<h4 id="urs-w1-022-legacy-bridge-affordance-on-renamed-fields">URS-W1-022 —
+Legacy bridge affordance on renamed fields</h4>
+<p>The system shall offer the legacy field name on hover/long-press for
+fields renamed from legacy vocabulary (e.g. “was: Technology → now:
+Recipe”, “was: Resource → now: Batch quantity at location”), removable
+by feature flag after cutover.</p>
+<ul>
+<li><strong>Priority:</strong> Should</li>
+<li><strong>Lineage:</strong> Design conformance · design skill
+§“Interaction rules — Legacy bridge affordance” · legacy vocabulary from
+dossier ch. 3.1 §B.1</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given the recipe field on a production order,
+When P. Krüger hovers it, Then the affordance shows “was:
+Technology”.</li>
+<li><strong>AC-2</strong> Given the post-cutover feature flag is off,
+When the same hover occurs, Then no legacy name is shown.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W1-001, URS-W1-014.</li>
+</ul>
+<h3 id="reservations-w1-6">3.6 Reservations (W1-6)</h3>
+<h4 id="urs-w1-023-draft-makes-reservation">URS-W1-023 — Draft makes
+reservation</h4>
+<p>The system shall create Stock Reservation Entries automatically when
+a draft outbound stock document is saved (“draft makes reservation”),
+flagged <code>draft_reservation</code>, reducing available (not on-hand)
+quantity, matching Qcadoo draft-document reservation semantics on the
+anchor SRE.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Absorb + Adopt · Qcadoo
+<code>ReservationsService.java:81-247</code> reconciled with ERPNext
+<code>stock_reservation_entry.py:530-553</code> · ADR-008 / CDM-06;
+dossier §5.2 reservation row</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given 500 kg BATCH-A-0001 available in RM
+Lager Nord, When W. Braun saves a draft issue document for 200 kg
+RW-CHM-0001, Then an SRE flagged <code>draft_reservation</code> exists
+for 200 kg and available quantity shows 300 kg while on-hand remains 500
+kg.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W1-021.</li>
+</ul>
+<h4 id="urs-w1-024-draft-deletionrejection-releases-reservation">URS-W1-024
+— Draft deletion/rejection releases reservation</h4>
+<p>The system shall cancel the linked <code>draft_reservation</code>
+SREs when the draft document is deleted or rejected, restoring available
+quantity.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Absorb · Qcadoo ·
+<code>ReservationsService.java:81-247</code> (reservations deleted with
+draft positions); ADR-008</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given the 200 kg draft reservation from
+URS-W1-023 AC-1, When the draft document is deleted, Then the SRE is
+cancelled and available quantity returns to 500 kg.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W1-023.</li>
+</ul>
+<h4 id="urs-w1-025-order-level-reservations-on-sre">URS-W1-025 —
+Order-level reservations on SRE</h4>
+<p>The system shall support order-level stock reservations as anchor
+SREs against the Work Order (auto-reserve on acceptance where
+configured), so that order and document reservations share one
+mechanism.</p>
+<ul>
+<li><strong>Priority:</strong> Should</li>
+<li><strong>Lineage:</strong> Adopt · ERPNext ·
+<code>stock_reservation_entry.py:530-553</code>;
+<code>work_order/services/reservation.py</code>; ADR-008 (order-level
+reservations = SREs against Work Order, anchor-native)</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given PO-2026-0001 accepted with auto-reserve
+enabled, When acceptance completes, Then SREs exist reserving 500 kg
+RW-CHM-0001-class components for the order, visible from the order.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W1-001, URS-W1-023.</li>
+</ul>
+<h3 id="shop-floor-operator-journey-w1-7">3.7 Shop-floor operator
+journey (W1-7)</h3>
+<h4 id="urs-w1-026-job-card-execution-with-time-logs">URS-W1-026 —
+Job-card execution with time logs</h4>
+<p>The system shall provide the shop-floor operator journey on anchor
+Job Cards: per-operation job cards spawned from the order, time-log
+start/stop, and completed-quantity recording feeding the completion
+gate.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Adopt · ERPNext ·
+<code>job_card.py:1280-1397</code> (status, time logs); dossier §6.2
+shop-floor execution recording row; §5.3 execute-and-record journey</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given PO-2026-0001 In Progress, When O. Weber
+opens the shop-floor view, Then job cards for operations MIX
+(LINE-1/MIX-01) and FILL (LINE-1/FILL-01) are listed against the
+order.</li>
+<li><strong>AC-2</strong> Given the MIX job card, When O. Weber starts
+and later stops work, Then a time log with start/end timestamps and
+computed duration is stored.</li>
+<li><strong>AC-3</strong> Given the FILL job card, When O. Weber records
+completed quantity 500 kg and submits, Then submission succeeds and the
+order’s recorded output reflects 500 kg.</li>
+</ul></li>
+<li><strong>Design conformance:</strong> Terminal Card pattern (design
+skill §“Layout patterns” 2): one task at a time, giant primary action,
+current order/operation in header; Terminal mode 16–18px base, ≥48px
+touch targets; complete keyboard path (Enter confirms, Esc cancels,
+arrows move).</li>
+<li><strong>Dependencies:</strong> URS-W1-001, URS-W1-004.</li>
+</ul>
+<h4 id="urs-w1-027-pauseresume-on-job-cards">URS-W1-027 — Pause/resume
+on job cards</h4>
+<p>The system shall support pause (On Hold) and resume on job cards with
+time logs split accordingly, matching the anchor pause/resume
+behaviour.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Adopt · ERPNext ·
+<code>job_card.py:1371-1397</code> (pause_job/resume_job); dossier
+ch. 3.2 Job Card lifecycle</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given O. Weber working the MIX job card, When
+he pauses, Then the job card is On Hold and the open time log is closed;
+When he resumes, Then a new time log opens and the card returns to Work
+In Progress.</li>
+<li><strong>AC-2</strong> Given an On Hold job card, When submission is
+attempted, Then it is refused (anchor completeness rule
+<code>job_card.py:912-959</code>).</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W1-026.</li>
+</ul>
+<h4 id="urs-w1-028-scanner-first-identification-on-shop-floor-screens">URS-W1-028
+— Scanner-first identification on shop-floor screens</h4>
+<p>The system shall accept barcode scanner input on every shop-floor
+screen expecting order, material or batch identification via an
+always-focused scan field, with full-row visual and audible confirmation
+on successful scan.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Design conformance · design skill
+§“Interaction rules — Scanner is a first-class input”; Terminal Card
+pattern · UI-bearing part of W1-7</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given O. Weber on the terminal job-card
+screen, When he scans the barcode PO-2026-0001, Then the corresponding
+job queue loads without any pointer interaction.</li>
+<li><strong>AC-2</strong> Given a material-issue step, When he scans
+BATCH-A-0001, Then the batch row is selected with a visible full-row
+highlight and an audible confirmation.</li>
+<li><strong>AC-3</strong> Given an unknown barcode, When scanned, Then a
+non-blocking inline error names the unrecognised code and the scan field
+stays focused.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W1-026.</li>
+</ul>
+<h3 id="role-model-w1-8">3.8 Role model (W1-8)</h3>
+<h4 id="urs-w1-029-workflow-state-level-permissions-per-transition">URS-W1-029
+— Workflow-state-level permissions per transition</h4>
+<p>The system shall gate every <code>exec_state</code> and
+<code>gov_state</code> transition by role at the transition level
+(e.g. only planners accept or decline orders; only operators or planners
+interrupt; only technologists accept recipes), expressing Qcadoo’s
+per-transition roles in Frappe workflow RBAC — per-DocType rights alone
+are insufficient.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Absorb (semantics) · Qcadoo 151-role model
+· dossier ch. 3.1 §B.2; §7 implication 7 (role-model levelling); §5.4
+who-may-change-state row</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given O. Weber holds only the shop-floor
+operator role, When he attempts Pending→Accepted on PO-2026-0002, Then
+the transition is refused with a permission error and no state change
+occurs.</li>
+<li><strong>AC-2</strong> Given P. Krüger (planner), When she performs
+Pending→Accepted, Then it succeeds; and given W. Braun (warehouse
+clerk), When he attempts Checked→Accepted on a recipe, Then it is
+refused.</li>
+<li><strong>AC-3</strong> Given any refused transition, Then the refusal
+is recorded in the audit log with user, transition attempted and
+timestamp.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W1-001, URS-W1-014.</li>
+</ul>
+<h3 id="expiry-enforcement-policy-decision-w1-9">3.9 Expiry-enforcement
+policy decision (W1-9)</h3>
+<h4 id="urs-w1-030-estate-wide-expiry-policy-hard-stop-deliberate-deviation-business-sign-off-required">URS-W1-030
+— Estate-wide expiry policy: hard stop (deliberate deviation) —
+<strong>Business sign-off required</strong></h4>
+<p>The system shall enforce the estate-wide expiry policy decided for
+consolidation: <strong>hard stop</strong> on consuming/picking expired
+batches (anchor behaviour) across all plants, which is a
+<strong>deliberate deviation</strong> from Plant A’s legacy
+FEFO-advisory behaviour (Qcadoo has no hard stop on issuing expired
+resources — FEFO ordering only). The decision, its characterisation-test
+deltas, and the business sign-off reference shall be recorded in the
+per-gate behaviour record (URS-W1-031). <strong>Business sign-off
+required</strong> before W1 exit.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Decision · deviation from Qcadoo
+(<code>ResourceManagementServiceImpl.java:1015-1027</code>
+FEFO-advisory, no hard stop found) toward ERPNext
+(<code>stock_ledger_entry.py:287-299</code> hard stop) · dossier §5.4
+expired-stock divergence; §7 implication 6; W1-9 backlog item</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1 (target behaviour)</strong> Given BATCH-A-0002 expired
+on 30.06.2026 in FEFO warehouse RM Lager Nord and system date
+01.07.2026, When automatic allocation runs for Additiv K7, Then
+BATCH-A-0002 is skipped and the issue is refused if no unexpired stock
+covers the demand — it is never silently issued.</li>
+<li><strong>AC-2 (deviation is explicit)</strong> Given the
+characterisation harness runs the legacy Plant A expiry contract
+(expired resource issuable under FEFO-advisory), When compared with the
+target, Then the delta is reported as an <em>intentional divergence</em>
+linked to the recorded sign-off reference, not as a parity failure.</li>
+<li><strong>AC-3 (sign-off gate)</strong> Given the W1 exit checklist,
+When EXIT-W1 verification runs, Then it fails unless the decision record
+carries a business sign-off identifier (name/role/date).</li>
+</ul></li>
+<li><strong>Design conformance:</strong> expiry refusals presented as
+hard-gate modals naming rule/record/resolution; expiring batches flagged
+with the amber signal state (design skill §“Design tokens —
+Color”).</li>
+<li><strong>Dependencies:</strong> URS-W1-013, URS-W1-020.</li>
+</ul>
+<h3 id="characterisation-vs-behaviour-record-w1-10">3.10
+Characterisation-vs-behaviour record (W1-10)</h3>
+<h4 id="urs-w1-031-per-gate-paritydivergence-record">URS-W1-031 —
+Per-gate parity/divergence record</h4>
+<p>The system shall document, for every gate delivered in W1 (acceptance
+gate, recipe-Accepted gate, completion gate, material-availability gate,
+transition legality, over-production, stopped freeze, closed terminal,
+expiry policy, in-use lock), whether the target behaviour is
+characterisation parity or intentional divergence, each row citing the
+legacy source path and — for divergences — the sign-off reference; the
+record is generated from harness results, not hand-maintained.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Wave exit criterion · — ·
+<code>docs/waves/W1-production-core.md</code> W1-10; ADR-001
+consequence; URS-W0-013 evidence-pack generator</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given the W1 harness run, When the record is
+generated, Then it contains one row per gate above with verdict Parity
+or Divergence and the legacy citation
+(e.g. <code>OrderStateValidationService.java:44-63</code>).</li>
+<li><strong>AC-2</strong> Given the expiry-policy row, Then its verdict
+is Divergence and it links the URS-W1-030 sign-off reference; all other
+W1 rows are Parity unless separately signed off.</li>
+<li><strong>AC-3</strong> Given a harness contract failure without a
+recorded divergence, When the record is generated, Then generation
+fails, blocking W1 exit.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W1-002, URS-W1-005, URS-W1-007,
+URS-W1-008, URS-W1-015, URS-W1-030.</li>
+</ul>
+<h2 id="non-functional-requirements">4. Non-functional requirements</h2>
+<h4 id="urs-w1-032-shop-floor-interaction-latency">URS-W1-032 —
+Shop-floor interaction latency</h4>
+<p>The system shall confirm scanner and gated actions from the server
+within 300 ms (95th percentile) on the shop-floor terminal, with UI
+feedback within 100 ms for all actions; gated actions are never
+optimistically confirmed.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Design conformance · design skill
+§“Interaction rules — No dead air” (under 100 ms feels instant; gated
+actions always confirm from the server) · applies to URS-W1-026/028
+journeys</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given a load test of 100 sequential scans of
+BATCH-A-0001 on the terminal, Then p95 server-confirmed
+scan-to-confirmation latency ≤ 300 ms and every scan shows UI feedback
+&lt; 100 ms.</li>
+<li><strong>AC-2</strong> Given a completion action while the server is
+artificially delayed 2 s, Then the UI shows progress on the control
+itself and does not display success before server confirmation.</li>
+</ul></li>
+</ul>
+<h4 id="urs-w1-033-audit-and-logging-of-gated-actions">URS-W1-033 —
+Audit and logging of gated actions</h4>
+<p>The system shall log every gate evaluation that refuses an action
+(gate name, record, user, timestamp, refusing rule) and every state
+transition, retrievable per order/recipe for the business viewer, with
+log entries immutable.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Absorb (audit semantics) · Qcadoo
+state-change audit <code>orderStateChange.xml:36-47</code> extended per
+design skill §“Hard gates look hard” (“gate refusals are … logged”)</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given the refused acceptance in URS-W1-005
+AC-1, When B. Vogel opens the order’s audit view, Then the refusal
+appears with gate name, missing field, user and timestamp.</li>
+<li><strong>AC-2</strong> Given any audit entry, When modification is
+attempted via API, Then it is refused.</li>
+</ul></li>
+</ul>
+<h4 id="urs-w1-034-german-first-i18n-and-units-on-w1-screens">URS-W1-034
+— German-first i18n and units on W1 screens</h4>
+<p>The system shall render all W1 screens (order workflow, recipe
+governance, warehouse, shop floor) German-first with externalized
+strings, DD.MM.YYYY dates and kg quantities, including gate-refusal
+texts.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Design conformance · design skill
+§“Content and language” · extends URS-W0-016 to W1 scope</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given locale de, When the URS-W1-013 expiry
+refusal fires, Then the modal shows the expiry as 30.06.2026 and
+quantities in kg, from externalized strings.</li>
+<li><strong>AC-2</strong> Given the W1 string catalogue, When scanned,
+Then every user-facing W1 string has a German translation entry.</li>
+</ul></li>
+</ul>
+<h4 id="urs-w1-035-deskterminal-mode-conformance-for-w1-screens">URS-W1-035
+— Desk/Terminal mode conformance for W1 screens</h4>
+<p>The system shall render every W1 UI-bearing screen correctly in both
+Desk mode (13–14px base, 32px rows, full density) and Terminal mode
+(16–18px base, ≥48px targets, larger status pills, same information —
+never hidden), with mode auto-selected by station profile and manually
+switchable in one tap; status is never colour-only.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Design conformance · design skill
+§“Density modes”, §“Component rules — Status pill”, §“Definition of
+done”</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given the job-card screen in Terminal mode,
+When measured, Then base font ≥16px and all touch targets ≥48px, and the
+same fields visible in Desk mode are present.</li>
+<li><strong>AC-2</strong> Given any
+<code>exec_state</code>/<code>gov_state</code> pill, When rendered in
+grayscale, Then the state remains distinguishable by icon + label (not
+colour-only).</li>
+<li><strong>AC-3</strong> Given any W1 screen, When <code>?</code> is
+pressed, Then the per-screen shortcut sheet opens listing the complete
+keyboard path.</li>
+</ul></li>
+</ul>
+<h2 id="data-migration-requirements">5. Data migration requirements</h2>
+<p>W1 lands <strong>no migrated data</strong> (W0 migrated master data;
+open batches/genealogy history land in W2, backfills in W4 — see §1
+out-of-scope). W1 fixtures (BATCH-A-0001/0002, PO-2026-0001/0002,
+HU-000123 etc.) are test data created through the W0 tooling, not
+migrations. No source→canonical mapping, reconciliation or rollback
+requirements arise in this wave.</p>
+<h2 id="wave-exit-criteria">6. Wave exit criteria</h2>
+<p>Restated from <code>docs/waves/W1-production-core.md</code> (“planner
++ operator journeys pass acceptance; behaviour choices vs
+characterisation tests documented”) and decomposed:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>ID</th>
+<th>Check</th>
+<th>Verified by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>EXIT-W1-1</td>
+<td>Planner journey passes acceptance: create → accept (all gates) →
+release/start with material availability → monitor, on fixture
+PO-2026-0001</td>
+<td>URS-W1-001…009, URS-W1-025</td>
+</tr>
+<tr>
+<td>EXIT-W1-2</td>
+<td>Operator journey passes acceptance: job cards, time logs,
+pause/resume, scanner path, record output → order completion, on
+PO-2026-0001</td>
+<td>URS-W1-026…028, URS-W1-007</td>
+</tr>
+<tr>
+<td>EXIT-W1-3</td>
+<td>Recipe governance live: Draft→Checked→Accepted with validators,
+immutability, in-use lock; orders gate on Accepted recipes</td>
+<td>URS-W1-014…017, URS-W1-006</td>
+</tr>
+<tr>
+<td>EXIT-W1-4</td>
+<td>Warehouse fidelity base live: HU + storage locations + per-warehouse
+disposal algorithms + draft reservations, ledger remains single quantity
+truth</td>
+<td>URS-W1-018…025</td>
+</tr>
+<tr>
+<td>EXIT-W1-5</td>
+<td>Behaviour choices vs characterisation tests documented per gate,
+generated from harness results; expiry-policy divergence carries
+business sign-off</td>
+<td>URS-W1-030, URS-W1-031</td>
+</tr>
+<tr>
+<td>EXIT-W1-6</td>
+<td>Role model enforces per-transition permissions; all gated actions
+audited; design conformance (Desk/Terminal, pills, i18n, latency)
+verified</td>
+<td>URS-W1-029, URS-W1-032…035</td>
+</tr>
+</tbody>
+</table>
+<h2 id="untraceable-deferred">7. Untraceable / deferred</h2>
+<ul>
+<li>None untraceable. All requirements trace to W1 backlog items,
+ADRs/CDM, dossier evidence or the design skill.</li>
+<li><strong>Open-question dependency (flagged, not invented):</strong>
+dossier §8.2 Q1 — Plant C’s operated settings (inspection severity,
+negative stock, capacity planning) materially change gating behaviour.
+URS-W1-010/013 assert shipped anchor behaviour; the operated-settings
+confirmation must be attached to the W1 exit evidence. No requirement is
+written for settings we cannot yet trace.</li>
+<li>Deferred by design: blocked/quarantined batch exclusion from picking
+(needs <code>qa_state</code>, W2-3); QI gates on job cards (W2-4);
+quarantine storage locations (W2-8).</li>
+<li>Sizing note: 35 requirements — within the 25–40 guide; the count
+reflects one requirement per independently testable gate rather than
+padding.</li>
+</ul>
+  <footer class="doc">Rheinwerk Chemie GmbH — MES consolidation programme. Generated from the Markdown source of record in SachetCognition/rheinwerk-mes-core.</footer>
+</main>
+<button id="top-btn" title="Back to top">⇧</button>
+<script>
+const links=[...document.querySelectorAll('#sidebar nav a')];
+const targets=links.map(a=>document.getElementById(decodeURIComponent(a.hash.slice(1)))).filter(Boolean);
+function onScroll(){
+  const y=window.scrollY+90;let cur=targets[0];
+  for(const t of targets){if(t.offsetTop<=y)cur=t;else break}
+  links.forEach(a=>a.classList.toggle('active',cur&&decodeURIComponent(a.hash.slice(1))===cur.id));
+  document.getElementById('top-btn').classList.toggle('show',window.scrollY>500);
+}
+document.addEventListener('scroll',onScroll,{passive:true});onScroll();
+document.getElementById('top-btn').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
+</script>
+</body>
+</html>

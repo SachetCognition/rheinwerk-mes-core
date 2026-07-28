@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>URS W0 — Foundation</title>
+<style>
+:root{--accent:#1f4e79;--accent2:#2e74b5;--bg:#f7f9fb;--card:#ffffff;--text:#24292f;--muted:#6a737d;--border:#e1e6eb;--sidebar-w:300px}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",Calibri,Arial,sans-serif;color:var(--text);background:var(--bg);line-height:1.55;font-size:15px}
+#sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:var(--accent);color:#fff;overflow-y:auto;padding:22px 18px}
+#sidebar .brand{font-size:15px;font-weight:600;letter-spacing:.4px;border-bottom:1px solid rgba(255,255,255,.25);padding-bottom:12px;margin-bottom:12px}
+#sidebar .brand small{display:block;font-weight:400;opacity:.75;margin-top:4px}
+#sidebar nav ul{list-style:none;margin:0;padding-left:0}
+#sidebar nav ul ul{padding-left:14px}
+#sidebar nav a{display:block;color:rgba(255,255,255,.85);text-decoration:none;font-size:12.6px;padding:4px 8px;border-radius:5px;border-left:3px solid transparent}
+#sidebar nav a:hover{background:rgba(255,255,255,.12);color:#fff}
+#sidebar nav a.active{background:rgba(255,255,255,.18);color:#fff;border-left-color:#9cc3e5;font-weight:600}
+#content{margin-left:var(--sidebar-w);padding:42px 56px;max-width:1080px}
+header.doc{border-bottom:3px solid var(--accent);padding-bottom:18px;margin-bottom:30px}
+header.doc h1{color:var(--accent);font-size:30px;margin:0 0 6px}
+header.doc .sub{color:var(--accent2);font-size:15.5px;font-weight:600}
+h1,h2{color:var(--accent);margin-top:2.1em;border-bottom:1px solid var(--border);padding-bottom:.25em}
+h3,h4{color:var(--accent2);margin-top:1.7em}
+a{color:var(--accent2)}
+table{border-collapse:collapse;width:100%;margin:1.1em 0;background:var(--card);font-size:13.2px;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+th{background:var(--accent);color:#fff;text-align:left;padding:8px 10px;font-weight:600}
+td{border:1px solid var(--border);padding:7px 10px;vertical-align:top}
+tr:nth-child(even) td{background:#f2f6fa}
+code{background:#eef2f6;border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:12px;font-family:Consolas,Menlo,monospace;color:#0b3d66}
+pre{background:#0f2a43;color:#dce8f5;padding:14px 16px;border-radius:8px;overflow-x:auto;font-size:12.5px}
+pre code{background:none;border:none;color:inherit;padding:0}
+blockquote{margin:1em 0;padding:10px 16px;background:#eaf1f8;border-left:5px solid var(--accent2);border-radius:0 6px 6px 0;color:#243b53}
+img.diagram,p img{max-width:100%;background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px;box-shadow:0 1px 3px rgba(0,0,0,.08);display:block;margin:1.2em auto}
+#top-btn{position:fixed;right:26px;bottom:26px;background:var(--accent);color:#fff;border:none;border-radius:50%;width:46px;height:46px;font-size:19px;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .25s;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+#top-btn.show{opacity:.92;pointer-events:auto}
+footer.doc{margin-top:60px;border-top:1px solid var(--border);padding-top:14px;color:var(--muted);font-size:12px}
+@media(max-width:900px){#sidebar{display:none}#content{margin-left:0;padding:24px}}
+</style>
+</head>
+<body>
+<aside id="sidebar">
+  <div class="brand">URS W0 — Foundation<small>Rheinwerk MES
+Consolidation — User Requirements Specification</small></div>
+  <nav><ul>
+<li><a href="#purpose-scope" id="toc-purpose-scope">1. Purpose &amp;
+scope</a></li>
+<li><a href="#personas-in-scope" id="toc-personas-in-scope">2. Personas
+in scope</a></li>
+<li><a href="#requirements" id="toc-requirements">3. Requirements</a>
+<ul>
+<li><a href="#platform-scaffold-ci-w0-1" id="toc-platform-scaffold-ci-w0-1">3.1 Platform scaffold &amp; CI
+(W0-1)</a></li>
+<li><a href="#canonical-master-data-w0-2" id="toc-canonical-master-data-w0-2">3.2 Canonical master data
+(W0-2)</a></li>
+<li><a href="#canonical-work-centre-w0-3" id="toc-canonical-work-centre-w0-3">3.3 Canonical Work Centre
+(W0-3)</a></li>
+<li><a href="#canonical-bomrecipe-production-order-entities-w0-4" id="toc-canonical-bomrecipe-production-order-entities-w0-4">3.4
+Canonical BOM/recipe &amp; production-order entities (W0-4)</a></li>
+<li><a href="#master-data-migration-tooling-w0-5" id="toc-master-data-migration-tooling-w0-5">3.5 Master-data migration
+tooling (W0-5)</a></li>
+<li><a href="#characterisation-test-harness-w0-6" id="toc-characterisation-test-harness-w0-6">3.6 Characterisation-test
+harness (W0-6)</a></li>
+<li><a href="#evidence-pack-generator-w0-7" id="toc-evidence-pack-generator-w0-7">3.7 Evidence-pack generator
+(W0-7)</a></li>
+<li><a href="#namingnumbering-scheme-w0-8" id="toc-namingnumbering-scheme-w0-8">3.8 Naming/numbering scheme
+(W0-8)</a></li>
+</ul></li>
+<li><a href="#non-functional-requirements" id="toc-non-functional-requirements">4. Non-functional
+requirements</a></li>
+<li><a href="#data-migration-requirements" id="toc-data-migration-requirements">5. Data migration
+requirements</a></li>
+<li><a href="#wave-exit-criteria" id="toc-wave-exit-criteria">6. Wave
+exit criteria</a></li>
+<li><a href="#untraceable-deferred" id="toc-untraceable-deferred">7.
+Untraceable / deferred</a></li>
+</ul></nav>
+</aside>
+<main id="content">
+  <header class="doc"><h1>URS W0 —
+Foundation</h1><div class="sub">Rheinwerk MES Consolidation — User
+Requirements Specification</div></header>
+<p><strong>Rheinwerk MES Consolidation — User Requirements
+Specification</strong> Wave: W0 (Foundation) · Source backlog:
+<code>docs/waves/W0-foundation.md</code> (W0-1…W0-8) · Status: Draft for
+review</p>
+<hr />
+<h2 id="purpose-scope">1. Purpose &amp; scope</h2>
+<p>Wave W0 delivers the platform foundation of the consolidated
+Rheinwerk MES: the scaffolded Frappe app <code>rheinwerk_mes</code> with
+CI, the canonical master-data entities (Item/Product with UoM
+conversions, Work Centre, BOM/recipe and production-order anchors),
+master-data migration tooling with round-trip fixtures for all three
+legacy sources (Qcadoo/Plant A, OFBiz/Plant B, ERPNext/Plant C), the
+characterisation-test harness that encodes Qcadoo parity contracts, the
+evidence-pack generator, and the recorded naming/numbering scheme
+decision. W0 exit means: canonical entities live, master data from all
+three sources round-trips, and the regression floor is executing
+(<code>docs/waves/W0-foundation.md</code>, exit statement).</p>
+<p><strong>Out of scope for W0</strong> (delivered by later waves —
+listed so scope creep is visible):</p>
+<ul>
+<li>Production-order <code>exec_state</code> workflow, execution gating
+hooks, recipe governance workflow, warehouse physical fidelity (Handling
+Unit / Storage Location / disposal algorithms), draft reservations,
+shop-floor operator journey, role model, expiry policy decision —
+<strong>W1</strong>
+(<code>docs/waves/W1-production-core.md</code>).</li>
+<li>Batch genealogy, unified batch object with <code>qa_state</code>,
+batch blocking/quarantine, Quality Inspection wiring, CoA, ISA-88
+recipes, hazmat data — <strong>W2</strong>
+(<code>docs/waves/W2-traceability-quality.md</code>).</li>
+<li>Planning/MRP, finite capacity, group-ERP interface, SCADA/OPC-UA —
+<strong>W3</strong>
+(<code>docs/waves/W3-planning-boundary.md</code>).</li>
+<li>Per-plant cutover, open-batch/genealogy/history backfills, legacy
+decommission — <strong>W4</strong>
+(<code>docs/waves/W4-cutover-decommission.md</code>). W0 migrates
+<strong>master data only</strong>; transactional and historical data
+migration is W2/W4.</li>
+</ul>
+<h2 id="personas-in-scope">2. Personas in scope</h2>
+<p>Subset of the six programme personas relevant to W0 (role model
+evidence: dossier ch. 3.1 §B.2 — Qcadoo 151-role security model; ch. 3.2
+— ERPNext shipped permission model):</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Persona</th>
+<th>Fixture name</th>
+<th>W0 relevance</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Technologist</td>
+<td>T. Schmid</td>
+<td>Owns item master, UoM conversions, BOM/recipe entities</td>
+<td>dossier ch. 3.1 §B.2 (master-data / product manager roles
+<code>ROLE_PRODUCTS</code>, <code>ROLE_PRODUCT_FAMILIES</code>); ch. 3.2
+(<code>Item Manager</code>, <code>Manufacturing Manager</code>)</td>
+</tr>
+<tr>
+<td>Planner</td>
+<td>P. Krüger</td>
+<td>Consumes work centres and production-order entities created in
+W0</td>
+<td>dossier ch. 3.1 §B.2 (production planner roles); ch. 3.2
+(<code>Manufacturing User</code>)</td>
+</tr>
+<tr>
+<td>Warehouse clerk</td>
+<td>W. Braun</td>
+<td>Validates migrated warehouse master data (warehouses, items,
+UoM)</td>
+<td>dossier ch. 3.1 §B.2 (warehouse operator roles)</td>
+</tr>
+<tr>
+<td>Business viewer</td>
+<td>B. Vogel</td>
+<td>Reads the wave-exit evidence pack</td>
+<td>dossier §6.2 platform-substrate row (reporting)</td>
+</tr>
+</tbody>
+</table>
+<p>Shop-floor operator (O. Weber) and quality inspector (Q. Fischer)
+enter scope in W1 and W2 respectively.</p>
+<h2 id="requirements">3. Requirements</h2>
+<h3 id="platform-scaffold-ci-w0-1">3.1 Platform scaffold &amp; CI
+(W0-1)</h3>
+<h4 id="urs-w0-001-scaffold-the-rheinwerk_mes-frappe-app">URS-W0-001 —
+Scaffold the <code>rheinwerk_mes</code> Frappe app</h4>
+<p>The system shall provide a Frappe application
+<code>rheinwerk_mes</code> with module skeletons for the target modules
+named in the disposition table (manufacturing_core, execution_gating,
+genealogy, quality, warehouse, recipe_isa88, regulatory_hazmat,
+integration), installable on the ERPNext substrate without modifying
+(forking) any anchor DocType, so that the technologist and planner work
+on one platform.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Adopt · ERPNext substrate · dossier
+ch. 3.2 §D (healthiest platform: 515 test files, CI workflows); ADR-001;
+module list from <code>CONSOLIDATION.md</code></li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given a clean ERPNext site, When
+<code>rheinwerk_mes</code> is installed, Then installation completes
+without error and all eight module skeletons are registered in the app’s
+<code>modules.txt</code>.</li>
+<li><strong>AC-2</strong> Given the installed app, When the list of
+anchor DocTypes (Item, Workstation, BOM, Work Order, Warehouse, UOM) is
+compared to stock ERPNext, Then no anchor DocType schema file inside
+ERPNext has been modified — all extensions exist only as custom fields
+or linked DocTypes in <code>rheinwerk_mes</code>.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> none (wave entry).</li>
+</ul>
+<h4 id="urs-w0-002-continuous-integration-with-lint-and-test-runner">URS-W0-002
+— Continuous integration with lint and test runner</h4>
+<p>The system shall run an automated CI pipeline (lint + test runner) on
+every change to the <code>rheinwerk_mes</code> app, so that the
+regression floor required by the W0 exit criterion is executing from the
+first commit.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Adopt · ERPNext substrate practices ·
+dossier ch. 3.2 §D (GitHub Actions
+<code>server-tests-mariadb.yml</code>, <code>linters.yml</code>); W0-1
+backlog item</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given a pull request that introduces a lint
+violation, When CI runs, Then the lint job fails and the pipeline result
+is red.</li>
+<li><strong>AC-2</strong> Given a pull request that breaks an existing
+test, When CI runs, Then the test job fails and reports the failing test
+by name.</li>
+<li><strong>AC-3</strong> Given a clean pull request, When CI runs, Then
+lint and test jobs both pass and the pipeline result is green.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W0-001.</li>
+</ul>
+<h3 id="canonical-master-data-w0-2">3.2 Canonical master data
+(W0-2)</h3>
+<h4 id="urs-w0-003-canonical-itemproduct-master">URS-W0-003 — Canonical
+Item/Product master</h4>
+<p>The system shall provide the canonical Item master on the anchor
+ERPNext <code>Item</code> DocType, with field mappings recorded from
+Qcadoo <code>product</code>, ERPNext <code>Item</code>, and OFBiz
+<code>Product</code>, so that the technologist maintains one item master
+for all plants.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Adopt · ERPNext master data · dossier §5.2
+(master data Rich in all three); §6.2 master-data row;
+<code>docs/canonical-model/README.md</code> conventions</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given the installed app, When the technologist
+T. Schmid creates item RW-CHM-0001 “Rheinol 40 Basisharz” with stock UoM
+kg and default pack “25 kg sack”, Then the item saves and appears in the
+Item list with those values.</li>
+<li><strong>AC-2</strong> Given items RW-CHM-0001, RW-CHM-0002 “Additiv
+K7” and RW-CHM-0003 “Rheinol 40 Compound” exist, When each is opened,
+Then a <code>legacy_refs</code>-style mapping record shows its source
+system identifier (Qcadoo product number / ERPNext item_code / OFBiz
+productId) where migrated.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W0-001.</li>
+</ul>
+<h4 id="urs-w0-004-unit-of-measure-conversions">URS-W0-004 —
+Unit-of-measure conversions</h4>
+<p>The system shall support item-level UoM conversion factors (e.g. sack
+↔︎ kg) equivalent to Qcadoo <code>unitConversionItem</code> semantics on
+the anchor UoM conversion mechanism, so that quantities entered in pack
+units resolve deterministically to stock UoM.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Adopt · ERPNext master data · dossier
+ch. 3.1 §B.3 (<code>basic/model/product.xml:55</code> unit conversions);
+§5.2 master-data comparison</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given item RW-CHM-0001 with conversion 1 sack
+= 25 kg, When the planner enters a quantity of 20 sack on any W0 fixture
+transaction, Then the system resolves it to 500 kg stock UoM with no
+rounding drift.</li>
+<li><strong>AC-2</strong> Given item RW-CHM-0002 with conversion 1 pail
+= 5 kg, When an invalid conversion factor 0 is entered, Then the save is
+rejected with a field-level validation message.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W0-003.</li>
+</ul>
+<h3 id="canonical-work-centre-w0-3">3.3 Canonical Work Centre
+(W0-3)</h3>
+<h4 id="urs-w0-005-canonical-work-centre-entity">URS-W0-005 — Canonical
+Work Centre entity</h4>
+<p>The system shall provide the canonical Work Centre on the anchor
+<code>Workstation</code> (+ <code>Workstation Type</code>), extended
+with <code>production_line</code> (Link) and <code>division</code>
+(Link, plant-area tree), mapping Qcadoo workstation/productionLine,
+ERPNext Workstation, and OFBiz FixedAsset machine groups, so that
+planners address machines as operational resources while asset
+accounting stays with the group ERP.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Adopt · ERPNext Workstation · ADR-010 /
+CDM-08; dossier §5.2 work-centre row (OFBiz models machines as
+accounting assets)</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given the installed app, When work centres
+LINE-1/MIX-01 and LINE-1/FILL-01 are created with
+<code>production_line</code> = LINE-1, Then both save and a filter on
+<code>production_line</code> = LINE-1 returns exactly these two
+workstations.</li>
+<li><strong>AC-2</strong> Given an OFBiz FixedAsset machine-group
+extract, When it is migrated, Then a Workstation record is created and
+no asset-ledger (accounting) record is created in the MES.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W0-001.</li>
+</ul>
+<h3 id="canonical-bomrecipe-production-order-entities-w0-4">3.4
+Canonical BOM/recipe &amp; production-order entities (W0-4)</h3>
+<h4 id="urs-w0-006-canonical-bomrecipe-anchor-entities">URS-W0-006 —
+Canonical BOM/recipe anchor entities</h4>
+<p>The system shall use the anchor ERPNext <code>BOM</code> and
+<code>Routing</code> DocTypes, unforked, as the canonical recipe base,
+so that recipe data for all plants lands on one versioned model
+(governance workflow follows in W1).</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Adopt · ERPNext BOM/Work Order · dossier
+§6.2 recipe/BOM golden source = ERPNext (<code>bom.py:429-440</code>,
+<code>bom.py:620-637</code>); ADR-006 / CDM-04</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given items RW-CHM-0001, RW-CHM-0002 and
+RW-CHM-0003 exist, When the technologist creates BOM-RW-CHM-0003-001 for
+RW-CHM-0003 consuming RW-CHM-0001 and RW-CHM-0002 with routing
+RT-COMPOUND-01 (operations at LINE-1/MIX-01 then LINE-1/FILL-01), Then
+the BOM and Routing save and submit on anchor DocTypes with no schema
+fork.</li>
+<li><strong>AC-2</strong> Given the submitted BOM, When a new BOM
+version for RW-CHM-0003 is created, Then the anchor versioned naming
+(<code>BOM-&lt;item&gt;-&lt;n&gt;</code>) distinguishes the
+versions.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W0-003, URS-W0-005.</li>
+</ul>
+<h4 id="urs-w0-007-canonical-production-order-anchor-entity">URS-W0-007
+— Canonical production-order anchor entity</h4>
+<p>The system shall use the anchor ERPNext <code>Work Order</code>
+DocType, unforked, as the canonical production-order base, with the
+CDM-02 extension fields (<code>production_line</code>,
+<code>master_order</code>, <code>state_history</code> container) present
+but the <code>exec_state</code> workflow deferred to W1, so that W1 can
+layer the state machine without schema rework.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Adopt (anchor) · ERPNext Work Order ·
+ADR-004 / CDM-02; dossier §5.2 production-order row</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given BOM-RW-CHM-0003-001 exists, When the
+planner P. Krüger creates production order PO-2026-0001 for 500 kg
+RW-CHM-0003 on <code>production_line</code> LINE-1, Then the Work Order
+saves with the extension fields populated and the anchor DocType remains
+unforked.</li>
+<li><strong>AC-2</strong> Given PO-2026-0001, When its fields are
+inspected via the API, Then <code>production_line</code> and
+<code>master_order</code> are exposed as <code>rheinwerk_mes</code>
+custom fields, not anchor-schema modifications.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W0-005, URS-W0-006.</li>
+</ul>
+<h3 id="master-data-migration-tooling-w0-5">3.5 Master-data migration
+tooling (W0-5)</h3>
+<h4 id="urs-w0-008-qcadoo-plant-a-master-data-extractor">URS-W0-008 —
+Qcadoo (Plant A) master-data extractor</h4>
+<p>The system shall provide an extractor that reads item/product,
+UoM-conversion, work-centre (workstation/productionLine/division) and
+technology-header master data from the Qcadoo PostgreSQL schema into the
+canonical import format, so that Plant A master data migrates as a
+data-model migration, not a copy.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Migration (no disposition) · source Qcadoo
+· dossier §7 implication 4; ch. 3.1 §B.3
+(<code>basic/model/product.xml</code>,
+<code>basic/model/division.xml</code>); CDM-03/CDM-08 mapping rows</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given the Plant A round-trip fixture set
+(containing a product mapping to RW-CHM-0001 with unit conversion 1 sack
+= 25 kg), When the extractor runs, Then a canonical import file is
+produced whose record count equals the fixture source count.</li>
+<li><strong>AC-2</strong> Given the extract, When it is imported, Then
+RW-CHM-0001 exists with the conversion intact and its Qcadoo product
+number recorded in the legacy mapping.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W0-003, URS-W0-004,
+URS-W0-005.</li>
+</ul>
+<h4 id="urs-w0-009-erpnext-plant-c-master-data-extractor">URS-W0-009 —
+ERPNext (Plant C) master-data extractor</h4>
+<p>The system shall provide an extractor for ERPNext DocType master data
+(Item, UOM Conversion, Workstation, BOM headers, Warehouse) from the
+Plant C instance into the canonical import format, preserving identity
+fields unchanged where the anchor model is identical.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Migration · source ERPNext · dossier §7
+implication 4; CDM mapping legend (<code>=</code> direct)
+<code>docs/canonical-model/README.md</code></li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given the Plant C fixture export containing
+item RW-CHM-0002 and warehouse “FG Lager Süd”, When the extractor runs
+and the import is executed, Then both records exist in the target with
+field values byte-identical for directly-mapped (<code>=</code>)
+fields.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W0-003, URS-W0-005,
+URS-W0-006.</li>
+</ul>
+<h4 id="urs-w0-010-ofbiz-plant-b-master-data-extractor">URS-W0-010 —
+OFBiz (Plant B) master-data extractor</h4>
+<p>The system shall provide an extractor for OFBiz entity XML/Derby
+exports covering Product, FixedAsset machine groups, and facility
+(warehouse) master data into the canonical import format, applying the
+CDM-08 rule that machine FixedAssets import as Workstations only (asset
+accounting stays with group ERP).</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Migration (Retire OFBiz per
+CONSOLIDATION.md) · source OFBiz · dossier §7 implication 4 and
+implication 9; ADR-010 consequence; ch. 3.3
+(<code>product-entitymodel.xml</code>,
+<code>accounting-entitymodel.xml:630</code>)</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given the Plant B fixture export containing a
+Product mapping to RW-CHM-0003 and one machine FixedAsset, When the
+extractor runs and the import executes, Then the item exists and exactly
+one Workstation is created for the FixedAsset with no accounting
+record.</li>
+<li><strong>AC-2</strong> Given a Product without a UoM equivalent, When
+extracted, Then the record is written to an exceptions report rather
+than silently defaulted.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W0-003, URS-W0-005.</li>
+</ul>
+<h4 id="urs-w0-011-master-data-round-trip-reconciliation">URS-W0-011 —
+Master-data round-trip reconciliation</h4>
+<p>The system shall verify the master-data migration by round-trip: for
+each of the three sources, extract → import → re-export and reconcile
+against the source fixture with record counts and field-level spot
+checks, producing a per-source reconciliation report with a
+deterministic pass/fail, so that the W0 exit criterion “master data from
+all three sources round-trips” is demonstrable.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Migration · all three sources · W0-5
+backlog item; dossier §7 implication 4; wave exit statement
+<code>docs/waves/W0-foundation.md</code></li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given the three fixture sets, When the
+round-trip runs for each source, Then each reconciliation report shows
+source count = imported count = re-exported count for items, work
+centres and warehouses, and status PASS.</li>
+<li><strong>AC-2</strong> Given a fixture deliberately mutated after
+import (one item renamed), When reconciliation runs, Then the report
+shows status FAIL naming the mismatched record.</li>
+<li><strong>AC-3</strong> Given a PASS report, When rollback is invoked
+on a failed run, Then all records imported by that run are removed and a
+re-run reconciliation of the untouched fixtures still passes (rollback
+condition).</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W0-008, URS-W0-009,
+URS-W0-010.</li>
+</ul>
+<h3 id="characterisation-test-harness-w0-6">3.6 Characterisation-test
+harness (W0-6)</h3>
+<h4 id="urs-w0-012-characterisation-harness-with-executable-parity-contracts">URS-W0-012
+— Characterisation harness with executable parity contracts</h4>
+<p>The system shall provide a characterisation-test harness that
+encodes, as executable parity contracts against fixture data: (a) Qcadoo
+order-acceptance/completion gating, (b) Qcadoo technology structural
+validators, and (c) Qcadoo FEFO picking order — so that W1
+re-implementations are validated against legacy behaviour, never ported
+code.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Absorb · Qcadoo semantics ·
+<code>OrderStateValidationService.java:44-63</code>;
+<code>TechnologyValidationService.java:91-707</code>;
+<code>ResourceManagementServiceImpl.java:1015-1027</code> +
+<code>WarehouseAlgorithm.java:26-27</code>; ADR-001 consequence
+(characterisation tests are the parity contract); dossier §7 implication
+1</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given the harness fixture “order without
+dateFrom/dateTo/production line/technology”, When the acceptance-gate
+contract executes, Then it asserts refusal — matching
+<code>OrderStateValidationService.java:44-47</code>.</li>
+<li><strong>AC-2</strong> Given the harness fixture “order with
+doneQuantity = 0”, When the completion-gate contract executes, Then it
+asserts refusal — matching
+<code>OrderStateValidationService.java:54-63</code>.</li>
+<li><strong>AC-3</strong> Given fixture batches BATCH-A-0001 (expiry
+31.12.2026) and BATCH-A-0002 (expiry 30.06.2026) in an FEFO warehouse
+fixture, When the FEFO contract executes, Then it asserts pick order
+BATCH-A-0002 before BATCH-A-0001 — matching
+<code>ResourceManagementServiceImpl.java:1015-1027</code>.</li>
+<li><strong>AC-4</strong> Given the CI pipeline (URS-W0-002), When any
+pipeline run executes, Then the harness contracts run as part of the
+regression floor and a contract failure fails the pipeline.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W0-001, URS-W0-002.</li>
+</ul>
+<h3 id="evidence-pack-generator-w0-7">3.7 Evidence-pack generator
+(W0-7)</h3>
+<h4 id="urs-w0-013-wave-exit-evidence-pack-generator">URS-W0-013 —
+Wave-exit evidence-pack generator</h4>
+<p>The system shall generate a wave-exit evidence report linking each
+backlog item of a wave to its dossier findings and to the code/tests
+that implement and verify it, so that the business viewer can audit wave
+exit without reading source code.</p>
+<ul>
+<li><strong>Priority:</strong> Should</li>
+<li><strong>Lineage:</strong> Programme tooling (no disposition) · — ·
+<code>docs/evidence/README.md</code> audit spine; W0-7 backlog item</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given W0 items W0-1…W0-8 with their URS and
+test IDs recorded, When the generator runs for W0, Then it emits a
+report with one row per backlog item showing item → dossier citation →
+URS ID(s) → test ID(s), with zero unlinked items.</li>
+<li><strong>AC-2</strong> Given a backlog item deliberately stripped of
+its test link in fixture data, When the generator runs, Then that item
+is flagged as evidence-incomplete rather than omitted.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W0-002, URS-W0-012.</li>
+</ul>
+<h3 id="namingnumbering-scheme-w0-8">3.8 Naming/numbering scheme
+(W0-8)</h3>
+<h4 id="urs-w0-014-naming-series-decision-applied-estate-wide">URS-W0-014 —
+Naming-series decision applied estate-wide</h4>
+<p>The system shall use ERPNext naming series (not DB-trigger sequences)
+for all canonical entities, with the series formats for batches
+(<code>BATCH-{plant}-{#}</code>), production orders
+(<code>PO-{YYYY}-{#}</code>) and handling units (<code>HU-{#}</code>)
+recorded in a decision note, and legacy Qcadoo trigger-generated numbers
+preserved in <code>legacy_refs</code>, so that numbering is
+platform-native and legacy identifiers remain queryable.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Adopt · ERPNext naming series · dossier
+ch. 3.1 §C.3 (<code>mes_db_en.sql:1044</code>, <code>:1140-1183</code>
+trigger-generated numbers) vs ch. 3.2 naming series; CDM-01
+<code>batch_id</code> series; W0-8 backlog item</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given the naming decision note exists in the
+repo, When production order PO-2026-0001 and (in W2 fixture form) batch
+BATCH-A-0001 are created, Then their identifiers match the recorded
+series formats.</li>
+<li><strong>AC-2</strong> Given a migrated Plant A record with Qcadoo
+trigger number “000123/2025”, When the record is opened, Then the legacy
+number is visible in its <code>legacy_refs</code> entry.</li>
+</ul></li>
+<li><strong>Dependencies:</strong> URS-W0-003, URS-W0-006,
+URS-W0-007.</li>
+</ul>
+<h2 id="non-functional-requirements">4. Non-functional requirements</h2>
+<h4 id="urs-w0-015-audit-trail-on-canonical-master-data-changes">URS-W0-015
+— Audit trail on canonical master-data changes</h4>
+<p>The system shall record every create/update/delete of canonical
+master-data entities (Item, Workstation, BOM, Work Order) with user,
+timestamp and changed fields, using the platform version/audit
+mechanism, retrievable per record.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Adopt · ERPNext substrate (Frappe document
+versioning, dossier ch. 3.2 §D persistence model) · supports dossier
+§6.3 e-signature white-space boundary (audit rows exist; e-signatures
+are a W2 decision)</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given item RW-CHM-0001, When T. Schmid changes
+the item name and saves, Then the version log shows T. Schmid, the
+timestamp, and the old→new value of the changed field.</li>
+</ul></li>
+</ul>
+<h4 id="urs-w0-016-german-first-internationalisation-baseline">URS-W0-016 —
+German-first internationalisation baseline</h4>
+<p>The system shall externalise all <code>rheinwerk_mes</code> UI
+strings with German as the first-class locale, and render dates as
+DD.MM.YYYY and mass quantities in kg on all W0 screens.</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Design conformance ·
+<code>rheinwerk-mes-design-SKILL.md</code> §“Content and language”
+(German-first i18n discipline, DD.MM.YYYY, kg) · dossier ch. 3.1 §B.1
+(legacy locale files incl. de)</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given the site locale is de, When batch
+fixture BATCH-A-0001’s expiry is displayed on any W0 screen, Then it
+renders as 31.12.2026.</li>
+<li><strong>AC-2</strong> Given the <code>rheinwerk_mes</code> codebase,
+When scanned for hard-coded user-facing strings and string concatenation
+in translatable text, Then zero occurrences are found.</li>
+</ul></li>
+<li><strong>Design conformance:</strong> status pills, when present on
+W0 list views, render icon + label + colour per design skill §“Component
+rules”; identifiers (item codes, order numbers) render in mono per
+§“Typography”.</li>
+</ul>
+<h4 id="urs-w0-017-access-control-baseline">URS-W0-017 — Access control
+baseline</h4>
+<p>The system shall restrict creation and modification of canonical
+master data to the technologist role set, with the planner and warehouse
+clerk read-only on master data, using per-DocType RBAC as the W0
+baseline (workflow-state-level permissions follow in W1).</p>
+<ul>
+<li><strong>Priority:</strong> Must</li>
+<li><strong>Lineage:</strong> Adopt · ERPNext RBAC (dossier ch. 3.2
+personas/roles; §6.2 platform-substrate row) · role-model levelling
+deferred per dossier §7 implication 7</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given P. Krüger holds only the planner role,
+When she attempts to edit item RW-CHM-0001, Then the save is refused
+with a permission error.</li>
+<li><strong>AC-2</strong> Given T. Schmid holds the technologist role,
+When he edits RW-CHM-0001, Then the save succeeds.</li>
+</ul></li>
+</ul>
+<h4 id="urs-w0-018-migration-tooling-performance-and-determinism">URS-W0-018
+— Migration tooling performance and determinism</h4>
+<p>The system shall complete a full master-data round-trip (extract →
+import → re-export → reconcile) for each source fixture set in under 30
+minutes on the CI runner, and shall produce byte-identical canonical
+import files on repeated runs over unchanged fixtures.</p>
+<ul>
+<li><strong>Priority:</strong> Should</li>
+<li><strong>Lineage:</strong> Migration tooling NFR · derived from W0-5
+and the CI regression-floor exit statement
+(<code>docs/waves/W0-foundation.md</code>)</li>
+<li><strong>Acceptance criteria:</strong>
+<ul>
+<li><strong>AC-1</strong> Given the three fixture sets, When the
+round-trip runs in CI, Then each source completes within 30 minutes
+wall-clock.</li>
+<li><strong>AC-2</strong> Given an unchanged fixture set, When the
+extractor runs twice, Then the two output files are byte-identical
+(deterministic ordering).</li>
+</ul></li>
+</ul>
+<h2 id="data-migration-requirements">5. Data migration requirements</h2>
+<p>W0 lands <strong>master data</strong> from all three sources (W0-5).
+The migration requirements are URS-W0-008…URS-W0-011 above; this section
+states the mapping, reconciliation and rollback frame they must
+satisfy:</p>
+<ul>
+<li><strong>Source → canonical mapping:</strong> per CDM sections —
+Item/UoM (CDM-03 conventions,
+<code>docs/canonical-model/README.md</code> §CDM-03 mapping), Work
+Centre (CDM-08 mapping table), BOM headers (CDM-04 mapping), warehouse
+structure (CDM-03). Mapping legend
+<code>=</code>/<code>≈</code>/<code>∅</code>/<code>✕</code> applies;
+every <code>≈</code> transform is documented in the extractor.</li>
+<li><strong>Reconciliation criteria:</strong> record counts per entity
+per source; field-level spot checks on a deterministic 5 % sample
+(minimum 10 records) per entity; checksum comparison on directly-mapped
+(<code>=</code>) fields. Report per source per URS-W0-011.</li>
+<li><strong>Rollback condition:</strong> any FAIL reconciliation report
+blocks W0 exit; the failed run’s imports are reversed per URS-W0-011
+AC-3 before re-run.</li>
+</ul>
+<h2 id="wave-exit-criteria">6. Wave exit criteria</h2>
+<p>Restated from <code>docs/waves/W0-foundation.md</code> (“canonical
+entities live; master data from all three sources round-trips;
+regression floor executing”) and decomposed:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>ID</th>
+<th>Check</th>
+<th>Verified by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>EXIT-W0-1</td>
+<td>Canonical Item, Work Centre, BOM/Routing and Work Order (anchor +
+extensions) are live: creatable via UI/API with fixture data</td>
+<td>URS-W0-003…007 acceptance criteria</td>
+</tr>
+<tr>
+<td>EXIT-W0-2</td>
+<td>Master data from Qcadoo, ERPNext and OFBiz fixture sets round-trips
+with PASS reconciliation reports for all three sources</td>
+<td>URS-W0-008…011</td>
+</tr>
+<tr>
+<td>EXIT-W0-3</td>
+<td>Regression floor executing: CI runs lint, tests and the
+characterisation contracts on every change and fails on any contract
+breach</td>
+<td>URS-W0-002, URS-W0-012</td>
+</tr>
+<tr>
+<td>EXIT-W0-4</td>
+<td>Naming-series decision recorded and applied; evidence pack for W0
+generated with zero unlinked backlog items</td>
+<td>URS-W0-013, URS-W0-014</td>
+</tr>
+</tbody>
+</table>
+<h2 id="untraceable-deferred">7. Untraceable / deferred</h2>
+<ul>
+<li>None untraceable. All requirements above trace to W0 backlog items,
+ADRs or the design skill.</li>
+<li>Deferred by design: <code>exec_state</code> workflow (W1),
+<code>qa_state</code>/Batch object (W2 — referenced by fixtures only),
+workflow-state-level permissions (W1 per dossier §7 implication 7).</li>
+<li>Open question dependency: dossier §8.2 Q1 (Plant C operated
+settings) does not block W0 but must be answered before W1 gating
+exits.</li>
+</ul>
+  <footer class="doc">Rheinwerk Chemie GmbH — MES consolidation programme. Generated from the Markdown source of record in SachetCognition/rheinwerk-mes-core.</footer>
+</main>
+<button id="top-btn" title="Back to top">⇧</button>
+<script>
+const links=[...document.querySelectorAll('#sidebar nav a')];
+const targets=links.map(a=>document.getElementById(decodeURIComponent(a.hash.slice(1)))).filter(Boolean);
+function onScroll(){
+  const y=window.scrollY+90;let cur=targets[0];
+  for(const t of targets){if(t.offsetTop<=y)cur=t;else break}
+  links.forEach(a=>a.classList.toggle('active',cur&&decodeURIComponent(a.hash.slice(1))===cur.id));
+  document.getElementById('top-btn').classList.toggle('show',window.scrollY>500);
+}
+document.addEventListener('scroll',onScroll,{passive:true});onScroll();
+document.getElementById('top-btn').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
+</script>
+</body>
+</html>

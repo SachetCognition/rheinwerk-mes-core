@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TST W0 — Foundation</title>
+<style>
+:root{--accent:#1f4e79;--accent2:#2e74b5;--bg:#f7f9fb;--card:#ffffff;--text:#24292f;--muted:#6a737d;--border:#e1e6eb;--sidebar-w:300px}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",Calibri,Arial,sans-serif;color:var(--text);background:var(--bg);line-height:1.55;font-size:15px}
+#sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:var(--accent);color:#fff;overflow-y:auto;padding:22px 18px}
+#sidebar .brand{font-size:15px;font-weight:600;letter-spacing:.4px;border-bottom:1px solid rgba(255,255,255,.25);padding-bottom:12px;margin-bottom:12px}
+#sidebar .brand small{display:block;font-weight:400;opacity:.75;margin-top:4px}
+#sidebar nav ul{list-style:none;margin:0;padding-left:0}
+#sidebar nav ul ul{padding-left:14px}
+#sidebar nav a{display:block;color:rgba(255,255,255,.85);text-decoration:none;font-size:12.6px;padding:4px 8px;border-radius:5px;border-left:3px solid transparent}
+#sidebar nav a:hover{background:rgba(255,255,255,.12);color:#fff}
+#sidebar nav a.active{background:rgba(255,255,255,.18);color:#fff;border-left-color:#9cc3e5;font-weight:600}
+#content{margin-left:var(--sidebar-w);padding:42px 56px;max-width:1080px}
+header.doc{border-bottom:3px solid var(--accent);padding-bottom:18px;margin-bottom:30px}
+header.doc h1{color:var(--accent);font-size:30px;margin:0 0 6px}
+header.doc .sub{color:var(--accent2);font-size:15.5px;font-weight:600}
+h1,h2{color:var(--accent);margin-top:2.1em;border-bottom:1px solid var(--border);padding-bottom:.25em}
+h3,h4{color:var(--accent2);margin-top:1.7em}
+a{color:var(--accent2)}
+table{border-collapse:collapse;width:100%;margin:1.1em 0;background:var(--card);font-size:13.2px;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+th{background:var(--accent);color:#fff;text-align:left;padding:8px 10px;font-weight:600}
+td{border:1px solid var(--border);padding:7px 10px;vertical-align:top}
+tr:nth-child(even) td{background:#f2f6fa}
+code{background:#eef2f6;border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:12px;font-family:Consolas,Menlo,monospace;color:#0b3d66}
+pre{background:#0f2a43;color:#dce8f5;padding:14px 16px;border-radius:8px;overflow-x:auto;font-size:12.5px}
+pre code{background:none;border:none;color:inherit;padding:0}
+blockquote{margin:1em 0;padding:10px 16px;background:#eaf1f8;border-left:5px solid var(--accent2);border-radius:0 6px 6px 0;color:#243b53}
+img.diagram,p img{max-width:100%;background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px;box-shadow:0 1px 3px rgba(0,0,0,.08);display:block;margin:1.2em auto}
+#top-btn{position:fixed;right:26px;bottom:26px;background:var(--accent);color:#fff;border:none;border-radius:50%;width:46px;height:46px;font-size:19px;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .25s;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+#top-btn.show{opacity:.92;pointer-events:auto}
+footer.doc{margin-top:60px;border-top:1px solid var(--border);padding-top:14px;color:var(--muted);font-size:12px}
+@media(max-width:900px){#sidebar{display:none}#content{margin-left:0;padding:24px}}
+</style>
+</head>
+<body>
+<aside id="sidebar">
+  <div class="brand">TST W0 — Foundation<small>Rheinwerk MES
+Consolidation — Test &amp; Verification</small></div>
+  <nav><ul>
+<li><a href="#test-strategy" id="toc-test-strategy">1. Test
+strategy</a></li>
+<li><a href="#traceability-matrix" id="toc-traceability-matrix">2.
+Traceability matrix</a></li>
+<li><a href="#test-cases" id="toc-test-cases">3. Test cases</a>
+<ul>
+<li><a href="#tc-w0-001-app-installs-with-module-skeletons-integration" id="toc-tc-w0-001-app-installs-with-module-skeletons-integration">TC-W0-001
+— App installs with module skeletons <em>(Integration)</em></a></li>
+<li><a href="#tc-w0-002-no-anchor-doctype-fork-integration" id="toc-tc-w0-002-no-anchor-doctype-fork-integration">TC-W0-002 — No
+anchor DocType fork <em>(Integration)</em></a></li>
+<li><a href="#tc-w0-003-ci-gates-lint-and-test-failures-integration" id="toc-tc-w0-003-ci-gates-lint-and-test-failures-integration">TC-W0-003
+— CI gates lint and test failures <em>(Integration)</em></a></li>
+<li><a href="#tc-w0-004-item-master-with-legacy-refs-journey" id="toc-tc-w0-004-item-master-with-legacy-refs-journey">TC-W0-004 — Item
+master with legacy refs <em>(Journey)</em></a></li>
+<li><a href="#tc-w0-005-uom-conversion-resolution-integration" id="toc-tc-w0-005-uom-conversion-resolution-integration">TC-W0-005 — UoM
+conversion resolution <em>(Integration)</em></a></li>
+<li><a href="#tc-w0-006-work-centre-with-production-line-ofbiz-asset-separation-integration" id="toc-tc-w0-006-work-centre-with-production-line-ofbiz-asset-separation-integration">TC-W0-006
+— Work Centre with production line; OFBiz asset separation
+<em>(Integration)</em></a></li>
+<li><a href="#tc-w0-007-bomrouting-anchors-and-versioning-integration" id="toc-tc-w0-007-bomrouting-anchors-and-versioning-integration">TC-W0-007
+— BOM/Routing anchors and versioning <em>(Integration)</em></a></li>
+<li><a href="#tc-w0-008-work-order-anchor-with-extension-fields-integration" id="toc-tc-w0-008-work-order-anchor-with-extension-fields-integration">TC-W0-008
+— Work Order anchor with extension fields
+<em>(Integration)</em></a></li>
+<li><a href="#tc-w0-009-qcadoo-extractor-round-trip-migration" id="toc-tc-w0-009-qcadoo-extractor-round-trip-migration">TC-W0-009 —
+Qcadoo extractor round trip <em>(Migration)</em></a></li>
+<li><a href="#tc-w0-010-erpnext-extractor-identity-preservation-migration" id="toc-tc-w0-010-erpnext-extractor-identity-preservation-migration">TC-W0-010
+— ERPNext extractor identity preservation <em>(Migration)</em></a></li>
+<li><a href="#tc-w0-011-ofbiz-extractor-with-exceptions-report-migration" id="toc-tc-w0-011-ofbiz-extractor-with-exceptions-report-migration">TC-W0-011
+— OFBiz extractor with exceptions report <em>(Migration)</em></a></li>
+<li><a href="#tc-w0-012-three-source-round-trip-reconciliation-passfail-migration" id="toc-tc-w0-012-three-source-round-trip-reconciliation-passfail-migration">TC-W0-012
+— Three-source round-trip reconciliation PASS/FAIL
+<em>(Migration)</em></a></li>
+<li><a href="#tc-w0-013-migration-rollback-migration" id="toc-tc-w0-013-migration-rollback-migration">TC-W0-013 — Migration
+rollback <em>(Migration)</em></a></li>
+<li><a href="#tc-w0-014-characterisation-contracts-encode-legacy-gates-parity" id="toc-tc-w0-014-characterisation-contracts-encode-legacy-gates-parity">TC-W0-014
+— Characterisation contracts encode legacy gates
+<em>(Parity)</em></a></li>
+<li><a href="#tc-w0-015-contract-failure-fails-ci-parity" id="toc-tc-w0-015-contract-failure-fails-ci-parity">TC-W0-015 — Contract
+failure fails CI <em>(Parity)</em></a></li>
+<li><a href="#tc-w0-016-evidence-pack-completeness-integration" id="toc-tc-w0-016-evidence-pack-completeness-integration">TC-W0-016 —
+Evidence pack completeness <em>(Integration)</em></a></li>
+<li><a href="#tc-w0-017-naming-series-applied-legacy-numbers-preserved-integration" id="toc-tc-w0-017-naming-series-applied-legacy-numbers-preserved-integration">TC-W0-017
+— Naming series applied; legacy numbers preserved
+<em>(Integration)</em></a></li>
+<li><a href="#tc-w0-018-master-data-audit-trail-nfr" id="toc-tc-w0-018-master-data-audit-trail-nfr">TC-W0-018 — Master-data
+audit trail <em>(NFR)</em></a></li>
+<li><a href="#tc-w0-019-german-first-rendering-design-conformance" id="toc-tc-w0-019-german-first-rendering-design-conformance">TC-W0-019 —
+German-first rendering <em>(Design-conformance)</em></a></li>
+<li><a href="#tc-w0-020-access-control-baseline-nfr" id="toc-tc-w0-020-access-control-baseline-nfr">TC-W0-020 —
+Access-control baseline <em>(NFR)</em></a></li>
+<li><a href="#tc-w0-021-tooling-performance-and-determinism-nfr" id="toc-tc-w0-021-tooling-performance-and-determinism-nfr">TC-W0-021 —
+Tooling performance and determinism <em>(NFR)</em></a></li>
+</ul></li>
+<li><a href="#parity-test-section-absorb-scope" id="toc-parity-test-section-absorb-scope">4. Parity test section (Absorb
+scope)</a></li>
+<li><a href="#wave-acceptance-checklist" id="toc-wave-acceptance-checklist">5. Wave acceptance checklist</a></li>
+</ul></nav>
+</aside>
+<main id="content">
+  <header class="doc"><h1>TST W0 —
+Foundation</h1><div class="sub">Rheinwerk MES Consolidation — Test &amp;
+Verification</div></header>
+<p><strong>Rheinwerk MES Consolidation — Test &amp;
+Verification</strong> Wave: W0 (Foundation) · Verifies:
+<code>docs/urs/URS-W0-foundation.md</code> · Status: Draft for
+review</p>
+<hr />
+<h2 id="test-strategy">1. Test strategy</h2>
+<p><strong>Levels.</strong> Unit tests are assumed inside the
+<code>rheinwerk_mes</code> app (CI-enforced, URS-W0-002) and are not
+enumerated here. This document specifies:</p>
+<ul>
+<li><strong>Integration</strong> — canonical entities on the ERPNext
+substrate (DocType creation, no-fork checks, naming series).</li>
+<li><strong>Journey/acceptance</strong> — persona-driven flows
+(technologist creates master data; business viewer reads evidence
+pack).</li>
+<li><strong>Migration reconciliation</strong> — extract → import →
+re-export round-trips for all three sources with
+count/checksum/spot-check reports and rollback.</li>
+<li><strong>Characterisation-parity</strong> — the harness itself is
+under test in W0: contracts must encode the legacy behaviours and fail
+correctly.</li>
+<li><strong>NFR</strong> — audit trail, i18n, access control, tooling
+performance/determinism.</li>
+<li><strong>Design-conformance</strong> — W0 baseline (mono identifiers,
+status pills on list views, DD.MM.YYYY/kg rendering).</li>
+</ul>
+<p><strong>Environments.</strong> (1) CI runner: clean ERPNext site +
+<code>rheinwerk_mes</code>, fixture-seeded, MariaDB/PostgreSQL per CI
+matrix; (2) integration site for manual journey checks. Migration tests
+run against the committed fixture exports for Plant A (Qcadoo PostgreSQL
+dump subset), Plant B (OFBiz entity XML), Plant C (ERPNext DocType
+export) — never against live plants.</p>
+<p><strong>Test data.</strong> Shared programme fixtures: items
+RW-CHM-0001 “Rheinol 40 Basisharz” (25 kg sack), RW-CHM-0002 “Additiv
+K7” (5 kg pail), RW-CHM-0003 “Rheinol 40 Compound” (FG); batches
+BATCH-A-0001 (500 kg, expiry 31.12.2026) and BATCH-A-0002 (50 kg, expiry
+30.06.2026) as harness fixtures; production orders
+PO-2026-0001/PO-2026-0002; work centres LINE-1/MIX-01, LINE-1/FILL-01;
+warehouses RM Lager Nord (FEFO), FG Lager Süd (FIFO); storage location
+NORD-A-01-01; BOM-RW-CHM-0003-001 with routing RT-COMPOUND-01. Personas:
+T. Schmid (technologist), P. Krüger (planner), W. Braun (warehouse
+clerk), B. Vogel (business viewer).</p>
+<h2 id="traceability-matrix">2. Traceability matrix</h2>
+<table>
+<thead>
+<tr>
+<th>URS ID</th>
+<th>Test cases</th>
+<th></th>
+<th>Test case</th>
+<th>URS ID(s)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>URS-W0-001</td>
+<td>TC-W0-001, TC-W0-002</td>
+<td></td>
+<td>TC-W0-001</td>
+<td>URS-W0-001</td>
+</tr>
+<tr>
+<td>URS-W0-002</td>
+<td>TC-W0-003</td>
+<td></td>
+<td>TC-W0-002</td>
+<td>URS-W0-001</td>
+</tr>
+<tr>
+<td>URS-W0-003</td>
+<td>TC-W0-004</td>
+<td></td>
+<td>TC-W0-003</td>
+<td>URS-W0-002</td>
+</tr>
+<tr>
+<td>URS-W0-004</td>
+<td>TC-W0-005</td>
+<td></td>
+<td>TC-W0-004</td>
+<td>URS-W0-003</td>
+</tr>
+<tr>
+<td>URS-W0-005</td>
+<td>TC-W0-006</td>
+<td></td>
+<td>TC-W0-005</td>
+<td>URS-W0-004</td>
+</tr>
+<tr>
+<td>URS-W0-006</td>
+<td>TC-W0-007</td>
+<td></td>
+<td>TC-W0-006</td>
+<td>URS-W0-005</td>
+</tr>
+<tr>
+<td>URS-W0-007</td>
+<td>TC-W0-008</td>
+<td></td>
+<td>TC-W0-007</td>
+<td>URS-W0-006</td>
+</tr>
+<tr>
+<td>URS-W0-008</td>
+<td>TC-W0-009</td>
+<td></td>
+<td>TC-W0-008</td>
+<td>URS-W0-007</td>
+</tr>
+<tr>
+<td>URS-W0-009</td>
+<td>TC-W0-010</td>
+<td></td>
+<td>TC-W0-009</td>
+<td>URS-W0-008</td>
+</tr>
+<tr>
+<td>URS-W0-010</td>
+<td>TC-W0-011</td>
+<td></td>
+<td>TC-W0-010</td>
+<td>URS-W0-009</td>
+</tr>
+<tr>
+<td>URS-W0-011</td>
+<td>TC-W0-012, TC-W0-013</td>
+<td></td>
+<td>TC-W0-011</td>
+<td>URS-W0-010</td>
+</tr>
+<tr>
+<td>URS-W0-012</td>
+<td>TC-W0-014, TC-W0-015</td>
+<td></td>
+<td>TC-W0-012</td>
+<td>URS-W0-011</td>
+</tr>
+<tr>
+<td>URS-W0-013</td>
+<td>TC-W0-016</td>
+<td></td>
+<td>TC-W0-013</td>
+<td>URS-W0-011</td>
+</tr>
+<tr>
+<td>URS-W0-014</td>
+<td>TC-W0-017</td>
+<td></td>
+<td>TC-W0-014</td>
+<td>URS-W0-012</td>
+</tr>
+<tr>
+<td>URS-W0-015</td>
+<td>TC-W0-018</td>
+<td></td>
+<td>TC-W0-015</td>
+<td>URS-W0-012</td>
+</tr>
+<tr>
+<td>URS-W0-016</td>
+<td>TC-W0-019</td>
+<td></td>
+<td>TC-W0-016</td>
+<td>URS-W0-013</td>
+</tr>
+<tr>
+<td>URS-W0-017</td>
+<td>TC-W0-020</td>
+<td></td>
+<td>TC-W0-017</td>
+<td>URS-W0-014</td>
+</tr>
+<tr>
+<td>URS-W0-018</td>
+<td>TC-W0-021</td>
+<td></td>
+<td>TC-W0-018</td>
+<td>URS-W0-015</td>
+</tr>
+<tr>
+<td>—</td>
+<td>—</td>
+<td></td>
+<td>TC-W0-019</td>
+<td>URS-W0-016</td>
+</tr>
+<tr>
+<td>—</td>
+<td>—</td>
+<td></td>
+<td>TC-W0-020</td>
+<td>URS-W0-017</td>
+</tr>
+<tr>
+<td>—</td>
+<td>—</td>
+<td></td>
+<td>TC-W0-021</td>
+<td>URS-W0-018</td>
+</tr>
+</tbody>
+</table>
+<p>No orphans in either direction (18 URS ↔︎ 21 TC).</p>
+<h2 id="test-cases">3. Test cases</h2>
+<h3 id="tc-w0-001-app-installs-with-module-skeletons-integration">TC-W0-001
+— App installs with module skeletons <em>(Integration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> verify <code>rheinwerk_mes</code>
+installs and registers all eight modules. <strong>URS:</strong>
+URS-W0-001.</li>
+<li><strong>Preconditions:</strong> clean ERPNext site.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Install app <code>rheinwerk_mes</code>. → Install completes exit
+code 0, no error log entries.</li>
+<li>Read the app’s <code>modules.txt</code>. → Contains
+manufacturing_core, execution_gating, genealogy, quality, warehouse,
+recipe_isa88, regulatory_hazmat, integration.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> all eight modules present and install
+clean; else fail.</li>
+</ul>
+<h3 id="tc-w0-002-no-anchor-doctype-fork-integration">TC-W0-002 — No
+anchor DocType fork <em>(Integration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> anchor DocTypes are unmodified.
+<strong>URS:</strong> URS-W0-001.</li>
+<li><strong>Preconditions:</strong> TC-W0-001 passed.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Diff Item, Workstation, BOM, Work Order, Warehouse, UOM schema files
+against stock ERPNext at the pinned version. → Zero diffs.</li>
+<li>List <code>rheinwerk_mes</code> custom fields on those DocTypes. →
+All extensions are Custom Field / linked DocType records owned by
+<code>rheinwerk_mes</code>.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> zero anchor schema diffs; else
+fail.</li>
+</ul>
+<h3 id="tc-w0-003-ci-gates-lint-and-test-failures-integration">TC-W0-003
+— CI gates lint and test failures <em>(Integration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> regression floor is executing.
+<strong>URS:</strong> URS-W0-002.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Push a branch with a deliberate lint violation. → Lint job fails,
+pipeline red.</li>
+<li>Push a branch breaking one test. → Test job fails naming the test,
+pipeline red.</li>
+<li>Push a clean branch. → Both jobs pass, pipeline green.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> all three outcomes as expected.</li>
+</ul>
+<h3 id="tc-w0-004-item-master-with-legacy-refs-journey">TC-W0-004 — Item
+master with legacy refs <em>(Journey)</em></h3>
+<ul>
+<li><strong>Objective:</strong> technologist creates canonical items.
+<strong>URS:</strong> URS-W0-003.</li>
+<li><strong>Preconditions:</strong> T. Schmid logged in with
+technologist role.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Create RW-CHM-0001 “Rheinol 40 Basisharz”, stock UoM kg, pack “25 kg
+sack”. → Saves; appears in Item list.</li>
+<li>Create RW-CHM-0002 “Additiv K7” and RW-CHM-0003 “Rheinol 40
+Compound” (FG). → Both save.</li>
+<li>Open a migrated fixture item. → Legacy mapping shows the
+source-system identifier.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> all three items exist with correct
+values and legacy refs where migrated.</li>
+</ul>
+<h3 id="tc-w0-005-uom-conversion-resolution-integration">TC-W0-005 — UoM
+conversion resolution <em>(Integration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> pack-unit quantities resolve
+deterministically. <strong>URS:</strong> URS-W0-004.</li>
+<li><strong>Preconditions:</strong> RW-CHM-0001 with 1 sack = 25 kg;
+RW-CHM-0002 with 1 pail = 5 kg.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Enter 20 sack of RW-CHM-0001 on a fixture transaction. → Resolves to
+exactly 500 kg.</li>
+<li>Attempt to save conversion factor 0 on RW-CHM-0002. → Field-level
+validation rejects the save.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> exact 500 kg with no rounding drift and
+factor-0 rejected.</li>
+</ul>
+<h3 id="tc-w0-006-work-centre-with-production-line-ofbiz-asset-separation-integration">TC-W0-006
+— Work Centre with production line; OFBiz asset separation
+<em>(Integration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> CDM-08 entity behaviour.
+<strong>URS:</strong> URS-W0-005.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Create LINE-1/MIX-01 and LINE-1/FILL-01 with
+<code>production_line</code> = LINE-1. → Both save; filter on LINE-1
+returns exactly these two.</li>
+<li>Import the Plant B FixedAsset machine-group fixture. → Workstation
+created; query asset/accounting tables → zero MES asset records.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> filter result exact and no accounting
+record created.</li>
+</ul>
+<h3 id="tc-w0-007-bomrouting-anchors-and-versioning-integration">TC-W0-007 —
+BOM/Routing anchors and versioning <em>(Integration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> canonical recipe base on unforked
+anchors. <strong>URS:</strong> URS-W0-006.</li>
+<li><strong>Preconditions:</strong> TC-W0-004, TC-W0-006 passed.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Create BOM-RW-CHM-0003-001 (consumes RW-CHM-0001 + RW-CHM-0002;
+routing RT-COMPOUND-01 with MIX at LINE-1/MIX-01, FILL at
+LINE-1/FILL-01); submit. → Saves and submits.</li>
+<li>Create a second BOM version for RW-CHM-0003. → Anchor versioned
+naming <code>BOM-…-2</code> distinguishes it.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> both steps as expected on anchor
+DocTypes.</li>
+</ul>
+<h3 id="tc-w0-008-work-order-anchor-with-extension-fields-integration">TC-W0-008
+— Work Order anchor with extension fields <em>(Integration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> production-order base ready for W1
+layering. <strong>URS:</strong> URS-W0-007.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>As P. Krüger create PO-2026-0001, 500 kg RW-CHM-0003,
+<code>production_line</code> LINE-1, BOM-RW-CHM-0003-001. → Saves with
+extension fields populated.</li>
+<li>Fetch PO-2026-0001 via API; inspect field ownership. →
+<code>production_line</code>, <code>master_order</code> are
+<code>rheinwerk_mes</code> custom fields.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> order saves and fields are custom, not
+anchor-schema.</li>
+</ul>
+<h3 id="tc-w0-009-qcadoo-extractor-round-trip-migration">TC-W0-009 —
+Qcadoo extractor round trip <em>(Migration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> Plant A master data extracts and
+imports. <strong>URS:</strong> URS-W0-008.</li>
+<li><strong>Preconditions:</strong> Plant A fixture set loaded.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Run the Qcadoo extractor. → Canonical import file produced; record
+count = fixture source count.</li>
+<li>Import; open RW-CHM-0001. → Conversion 1 sack = 25 kg intact; Qcadoo
+product number in legacy mapping.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> counts equal and mapped fields
+intact.</li>
+</ul>
+<h3 id="tc-w0-010-erpnext-extractor-identity-preservation-migration">TC-W0-010
+— ERPNext extractor identity preservation <em>(Migration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> Plant C direct-mapped fields
+byte-identical. <strong>URS:</strong> URS-W0-009.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Run extractor on the Plant C fixture (contains RW-CHM-0002,
+warehouse “FG Lager Süd”); import. → Both records exist.</li>
+<li>Compare <code>=</code>-mapped field values source vs target. →
+Byte-identical.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> zero differences on direct-mapped
+fields.</li>
+</ul>
+<h3 id="tc-w0-011-ofbiz-extractor-with-exceptions-report-migration">TC-W0-011
+— OFBiz extractor with exceptions report <em>(Migration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> Plant B extraction honours CDM-08 rule
+and reports exceptions. <strong>URS:</strong> URS-W0-010.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Run extractor on Plant B fixture (Product → RW-CHM-0003, one machine
+FixedAsset); import. → Item exists; exactly one Workstation; no
+accounting record.</li>
+<li>Include a Product with unmappable UoM; re-run. → Record lands in
+exceptions report, not silently defaulted.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> both behaviours exact.</li>
+</ul>
+<h3 id="tc-w0-012-three-source-round-trip-reconciliation-passfail-migration">TC-W0-012
+— Three-source round-trip reconciliation PASS/FAIL
+<em>(Migration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> W0 exit reconciliation works and detects
+mismatches. <strong>URS:</strong> URS-W0-011.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Run extract → import → re-export → reconcile for Qcadoo, ERPNext,
+OFBiz fixtures. → Three reports; each shows source = imported =
+re-exported counts for items, work centres, warehouses; status
+PASS.</li>
+<li>Rename one imported item; re-run reconciliation. → Status FAIL
+naming the mismatched record.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> three PASS reports in step 1 and a named
+FAIL in step 2.</li>
+</ul>
+<h3 id="tc-w0-013-migration-rollback-migration">TC-W0-013 — Migration
+rollback <em>(Migration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> failed runs are reversible.
+<strong>URS:</strong> URS-W0-011 (AC-3).</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Force a FAIL run (mutated fixture); invoke rollback. → All records
+imported by that run removed.</li>
+<li>Re-run reconciliation on untouched fixtures. → PASS.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> rollback complete and clean re-run
+passes.</li>
+</ul>
+<h3 id="tc-w0-014-characterisation-contracts-encode-legacy-gates-parity">TC-W0-014
+— Characterisation contracts encode legacy gates <em>(Parity)</em></h3>
+<ul>
+<li><strong>Objective:</strong> harness asserts Qcadoo gating and FEFO
+order. <strong>URS:</strong> URS-W0-012.</li>
+<li><strong>Legacy baseline cited:</strong>
+<code>OrderStateValidationService.java:44-47</code> (accept),
+<code>:54-63</code> (complete),
+<code>ResourceManagementServiceImpl.java:1015-1027</code> (FEFO),
+<code>TechnologyValidationService.java:91-707</code> (validators).</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Run the acceptance-gate contract on fixture “order missing
+dates/line/technology”. → Asserts refusal.</li>
+<li>Run the completion-gate contract on fixture “doneQuantity = 0”. →
+Asserts refusal.</li>
+<li>Run the FEFO contract on BATCH-A-0001 (31.12.2026) + BATCH-A-0002
+(30.06.2026). → Asserts pick order BATCH-A-0002 first.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> all contracts execute and assert the
+legacy behaviour.</li>
+</ul>
+<h3 id="tc-w0-015-contract-failure-fails-ci-parity">TC-W0-015 — Contract
+failure fails CI <em>(Parity)</em></h3>
+<ul>
+<li><strong>Objective:</strong> parity contracts are part of the
+regression floor. <strong>URS:</strong> URS-W0-012 (AC-4).</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Introduce a deliberate contract-breaking change on a branch; push. →
+CI runs the harness; pipeline red naming the contract.</li>
+<li>Revert; push. → Pipeline green.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> red then green as expected.</li>
+</ul>
+<h3 id="tc-w0-016-evidence-pack-completeness-integration">TC-W0-016 —
+Evidence pack completeness <em>(Integration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> wave-exit report links items → findings
+→ code/tests. <strong>URS:</strong> URS-W0-013.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Run generator for W0. → One row per W0-1…W0-8: item → dossier
+citation → URS ID(s) → test ID(s); zero unlinked.</li>
+<li>Strip one item’s test link in fixture data; re-run. → Item flagged
+evidence-incomplete, not omitted.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> complete report and correct
+flagging.</li>
+</ul>
+<h3 id="tc-w0-017-naming-series-applied-legacy-numbers-preserved-integration">TC-W0-017
+— Naming series applied; legacy numbers preserved
+<em>(Integration)</em></h3>
+<ul>
+<li><strong>Objective:</strong> W0-8 decision enforced.
+<strong>URS:</strong> URS-W0-014.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Verify decision note exists in repo; create PO-2026-0001 and fixture
+batch BATCH-A-0001. → Identifiers match recorded series formats.</li>
+<li>Open a migrated Plant A record with trigger number “000123/2025”. →
+Legacy number visible in <code>legacy_refs</code>.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> formats match and legacy number
+visible.</li>
+</ul>
+<h3 id="tc-w0-018-master-data-audit-trail-nfr">TC-W0-018 — Master-data
+audit trail <em>(NFR)</em></h3>
+<ul>
+<li><strong>Objective:</strong> version log on changes.
+<strong>URS:</strong> URS-W0-015.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>As T. Schmid rename RW-CHM-0001; save. → Version log records T.
+Schmid, timestamp, old→new value.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> all three elements present.</li>
+</ul>
+<h3 id="tc-w0-019-german-first-rendering-design-conformance">TC-W0-019 —
+German-first rendering <em>(Design-conformance)</em></h3>
+<ul>
+<li><strong>Objective:</strong> i18n baseline. <strong>URS:</strong>
+URS-W0-016.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>With locale de, display BATCH-A-0001 expiry on a W0 screen. →
+Renders 31.12.2026.</li>
+<li>Scan <code>rheinwerk_mes</code> code for hard-coded user-facing
+strings / concatenation. → Zero occurrences.</li>
+<li>Inspect a W0 list view: identifiers mono; any status pill = icon +
+label + colour.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> all three checks pass.</li>
+</ul>
+<h3 id="tc-w0-020-access-control-baseline-nfr">TC-W0-020 —
+Access-control baseline <em>(NFR)</em></h3>
+<ul>
+<li><strong>Objective:</strong> role restrictions on master data.
+<strong>URS:</strong> URS-W0-017.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>As P. Krüger (planner only) edit RW-CHM-0001. → Permission error; no
+change saved.</li>
+<li>As T. Schmid (technologist) edit RW-CHM-0001. → Save succeeds.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> refusal then success exactly as
+specified.</li>
+</ul>
+<h3 id="tc-w0-021-tooling-performance-and-determinism-nfr">TC-W0-021 —
+Tooling performance and determinism <em>(NFR)</em></h3>
+<ul>
+<li><strong>Objective:</strong> migration NFRs. <strong>URS:</strong>
+URS-W0-018.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Run full round-trip per source on the CI runner; measure wall-clock.
+→ Each &lt; 30 minutes.</li>
+<li>Run the extractor twice on unchanged fixtures; compare outputs. →
+Byte-identical.</li>
+</ol></li>
+<li><strong>Pass/fail:</strong> both thresholds met.</li>
+</ul>
+<h2 id="parity-test-section-absorb-scope">4. Parity test section (Absorb
+scope)</h2>
+<p>W0’s Absorb scope is the characterisation harness itself (W0-6). The
+parity baseline is Qcadoo legacy code, encoded as executable
+contracts:</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Contract</th>
+<th>Legacy code path (baseline)</th>
+<th>Target assertion</th>
+<th>Verified by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Order acceptance gate (dates/line/technology required)</td>
+<td><code>orders/states/OrderStateValidationService.java:44-47</code></td>
+<td>Refusal on missing fields</td>
+<td>TC-W0-014 step 1</td>
+</tr>
+<tr>
+<td>Order completion gate (doneQuantity = 0 blocks)</td>
+<td><code>OrderStateValidationService.java:54-63</code></td>
+<td>Refusal on zero output</td>
+<td>TC-W0-014 step 2</td>
+</tr>
+<tr>
+<td>FEFO picking order (expiry ascending)</td>
+<td><code>ResourceManagementServiceImpl.java:1015-1027</code>;
+<code>WarehouseAlgorithm.java:26-27</code></td>
+<td>BATCH-A-0002 (30.06.2026) picked before BATCH-A-0001
+(31.12.2026)</td>
+<td>TC-W0-014 step 3</td>
+</tr>
+<tr>
+<td>Technology structural validators (tree/units/in-use)</td>
+<td><code>TechnologyValidationService.java:91-707</code></td>
+<td>Validator refusal fixtures encoded</td>
+<td>TC-W0-014 (fixtures), consumed by W1</td>
+</tr>
+</tbody>
+</table>
+<p>Deliberate deviations: <strong>none in W0</strong>. (The
+expiry-policy divergence is a W1 decision, URS-W1-030; its
+characterisation delta is recorded there.)</p>
+<h2 id="wave-acceptance-checklist">5. Wave acceptance checklist</h2>
+<p>Executable form of the W0 exit criteria
+(<code>docs/urs/URS-W0-foundation.md</code> §6); this checklist closes
+the W0 Epic.</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Exit ID</th>
+<th>Check</th>
+<th>Test cases</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>EXIT-W0-1</td>
+<td>Canonical Item, Work Centre, BOM/Routing, Work Order live with
+fixture data</td>
+<td>TC-W0-001, TC-W0-002, TC-W0-004…008</td>
+<td>☐</td>
+</tr>
+<tr>
+<td>EXIT-W0-2</td>
+<td>Master data from all three sources round-trips (PASS reports,
+rollback proven)</td>
+<td>TC-W0-009…013</td>
+<td>☐</td>
+</tr>
+<tr>
+<td>EXIT-W0-3</td>
+<td>Regression floor executing (CI + characterisation contracts gate
+merges)</td>
+<td>TC-W0-003, TC-W0-014, TC-W0-015</td>
+<td>☐</td>
+</tr>
+<tr>
+<td>EXIT-W0-4</td>
+<td>Naming decision recorded/applied; W0 evidence pack complete</td>
+<td>TC-W0-016, TC-W0-017</td>
+<td>☐</td>
+</tr>
+<tr>
+<td>— (NFR floor)</td>
+<td>Audit, i18n, access control, tooling NFRs</td>
+<td>TC-W0-018…021</td>
+<td>☐</td>
+</tr>
+</tbody>
+</table>
+  <footer class="doc">Rheinwerk Chemie GmbH — MES consolidation programme. Generated from the Markdown source of record in SachetCognition/rheinwerk-mes-core.</footer>
+</main>
+<button id="top-btn" title="Back to top">⇧</button>
+<script>
+const links=[...document.querySelectorAll('#sidebar nav a')];
+const targets=links.map(a=>document.getElementById(decodeURIComponent(a.hash.slice(1)))).filter(Boolean);
+function onScroll(){
+  const y=window.scrollY+90;let cur=targets[0];
+  for(const t of targets){if(t.offsetTop<=y)cur=t;else break}
+  links.forEach(a=>a.classList.toggle('active',cur&&decodeURIComponent(a.hash.slice(1))===cur.id));
+  document.getElementById('top-btn').classList.toggle('show',window.scrollY>500);
+}
+document.addEventListener('scroll',onScroll,{passive:true});onScroll();
+document.getElementById('top-btn').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
+</script>
+</body>
+</html>
