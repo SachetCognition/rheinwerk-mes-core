@@ -1,0 +1,22 @@
+{
+ "content": null,
+ "creation": "2026-05-01 09:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Page",
+ "modified": "2026-05-01 09:00:00.000000",
+ "module": "Regulatory Hazmat",
+ "name": "dispatch-label",
+ "owner": "Administrator",
+ "page_name": "dispatch-label",
+ "roles": [
+  {"role": "Rheinwerk Warehouse Clerk"},
+  {"role": "Rheinwerk Technologist"},
+  {"role": "Stock User"},
+  {"role": "System Manager"}
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Versandetikett Gefahrgut"
+}

@@ -1,0 +1,71 @@
+/* Dispatch-station label preview (W3-6 · URS-W3-018 design conformance).
+ * Layered on the Terminal tokens of shopfloor.css (.rw-terminal: Desk 14px/32px targets,
+ * Terminal 18px/48px targets) — this sheet only adds the label-preview layout and the
+ * blocking gate card. Nothing here is colour-only: the gate card carries a heading and the
+ * three named parts (rule, record, resolution). */
+
+.rw-dispatch__station {
+	font-weight: 600;
+	letter-spacing: 0.02em;
+}
+
+.rw-dispatch__focus {
+	flex: 1;
+}
+
+.rw-dispatch__label {
+	padding: 0.75rem;
+	background: #fff;
+	border: 1px solid #d5dcde;
+}
+
+.rw-dispatch__gate {
+	margin: 0.5rem 0;
+	padding: 0.75rem 1rem;
+	border: 3px solid var(--rw-signal-red);
+	background: #fdf1f2;
+	color: var(--rw-signal-red);
+}
+
+.rw-dispatch__gate h2 {
+	font-size: calc(var(--rw-base-font) + 4px);
+	margin: 0 0 0.5rem 0;
+}
+
+.rw-dispatch__gate p {
+	color: #14181a;
+	margin: 0 0 0.25rem 0;
+}
+
+.rw-dispatch__actions {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	padding: 0.75rem 0;
+}
+
+.rw-dispatch__print {
+	min-height: var(--rw-target);
+	min-width: calc(var(--rw-target) * 4);
+	font-size: calc(var(--rw-base-font) + 2px);
+	font-weight: 600;
+}
+
+.rw-dispatch__print:disabled {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+
+.rw-dispatch__hint {
+	font-size: calc(var(--rw-base-font) - 2px);
+	color: #4a5558;
+}
+
+/* Only the label itself goes on paper — the station chrome does not. */
+@media print {
+	.rw-dispatch .rw-terminal__header,
+	.rw-dispatch .rw-terminal__scan,
+	.rw-dispatch .rw-dispatch__actions {
+		display: none;
+	}
+}
