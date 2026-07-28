@@ -9,8 +9,9 @@ TC-W2-034 (URS-W2-026) — the `draft → in progress → accepted` journey, dri
 
 from __future__ import annotations
 
-import frappe
 import pytest
+
+frappe = pytest.importorskip("frappe")
 
 COMPANY = "Rheinwerk Chemie GmbH"
 RM = "RM Lager Nord - RWC"
