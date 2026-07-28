@@ -226,8 +226,13 @@ Executable form of the W0 exit criteria (`docs/urs/URS-W0-foundation.md` §6); t
 
 | Exit ID | Check | Test cases | Result |
 |---|---|---|---|
-| EXIT-W0-1 | Canonical Item, Work Centre, BOM/Routing, Work Order live with fixture data | TC-W0-001, TC-W0-002, TC-W0-004…008 | ☐ |
-| EXIT-W0-2 | Master data from all three sources round-trips (PASS reports, rollback proven) | TC-W0-009…013 | ☐ |
-| EXIT-W0-3 | Regression floor executing (CI + characterisation contracts gate merges) | TC-W0-003, TC-W0-014, TC-W0-015 | ☐ |
-| EXIT-W0-4 | Naming decision recorded/applied; W0 evidence pack complete | TC-W0-016, TC-W0-017 | ☐ |
-| — (NFR floor) | Audit, i18n, access control, tooling NFRs | TC-W0-018…021 | ☐ |
+| EXIT-W0-1 | Canonical Item, Work Centre, BOM/Routing, Work Order live with fixture data | TC-W0-001, TC-W0-002, TC-W0-004…008 | ☑ |
+| EXIT-W0-2 | Master data from all three sources round-trips (PASS reports, rollback proven) | TC-W0-009…013 | ☑ |
+| EXIT-W0-3 | Regression floor executing (CI + characterisation contracts gate merges) | TC-W0-003, TC-W0-014, TC-W0-015 | ☑ |
+| EXIT-W0-4 | Naming decision recorded/applied; W0 evidence pack complete | TC-W0-016, TC-W0-017 | ☑ |
+| — (NFR floor) | Audit, i18n, access control, tooling NFRs | TC-W0-018…021 | ☑ |
+
+Confirmed at W0 fan-in on the merged wave branch: every mapped TC executes green offline and against a
+from-scratch site, `python -m tools.evidence.generate --wave W0` reports 8/8 backlog items complete with
+zero unlinked items, and `rheinwerk_mes.integration.migration.cli.run_all` returns PASS for Plant A
+(Qcadoo), Plant B (OFBiz) and Plant C (ERPNext). W1 may open.
