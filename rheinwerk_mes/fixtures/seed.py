@@ -459,6 +459,24 @@ def _complete_setup_wizard() -> None:
 	accounts, stock settings) exist before fixtures are seeded."""
 	from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
 
+	# When `frappe` is already flagged setup-complete, its stage is skipped and the wizard
+	# refills every later stage's locale from System Settings, so the German conventions
+	# must be present before it runs — otherwise the ERPNext stage receives an empty
+	# country and aborts, and readings render as 1.04 rather than 1,04.
+	system_settings = frappe.get_doc("System Settings")
+	system_settings.update(
+		{
+			"language": "en",
+			"country": "Germany",
+			"currency": "EUR",
+			"time_zone": "Europe/Berlin",
+			"date_format": "dd.mm.yyyy",
+			"number_format": "#.###,##",
+			"float_precision": 3,
+		}
+	)
+	system_settings.save(ignore_permissions=True)
+
 	setup_complete(
 		{
 			"language": "English",
