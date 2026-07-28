@@ -130,6 +130,21 @@ Hazmat is a *density* requirement, not a new screen, and both surfaces are produ
 | Trace Ribbon | `regulatory_hazmat.views.ribbon(batch, levels=None)` | the W2-1 model from `genealogy.ribbon.ribbon`, decorated: every node gains `hazmat`, `hazmat_un_number`, `hazmat_storage_class` and a hazmat **pill** *in addition to* its `qa_state` pill |
 | Item / Batch form | `views.batch_hazmat(batch)` + `public/js/hazmat.js` | one shared chip component (`doctype_js` on the anchors, no fork) |
 
+The Trace Ribbon *page* (`genealogy/page/trace_ribbon`) fetches `genealogy.ribbon.ribbon`. The
+decoration reaches it through the additive hook
+
+```python
+override_whitelisted_methods = {
+	"rheinwerk_mes.genealogy.ribbon.ribbon": "rheinwerk_mes.regulatory_hazmat.views.ribbon",
+}
+```
+
+so the page renders hazmat chips **without a single edit to `genealogy/`**, and
+`genealogy.ribbon.ribbon` remains the only producer of the trace model (the override calls it,
+it does not reimplement it). The hazmat pill's `tone`/`icon` are the ones the existing pill
+markup renders; `public/css/hazmat.css` adds only the blue tone and the two icon glyphs the
+sibling stylesheets do not already define.
+
 Signal mapping (`contracts.signal_for_storage_class`), always **icon + label + colour**,
 never colour alone:
 

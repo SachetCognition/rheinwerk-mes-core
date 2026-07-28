@@ -81,6 +81,19 @@ def test_tc_w2_032_trace_ribbon_nodes_carry_the_hazmat_chip(site):
 	assert hazmat_node["qa_state"] in pill_states
 
 
+def test_tc_w2_032_the_ribbon_page_receives_the_decorated_model(site):
+	"""TC-W2-032 (URS-W2-024 AC-1): the W2-1 Trace Ribbon page fetches
+	`genealogy.ribbon.ribbon`; the hazmat decoration reaches that page through the additive
+	`override_whitelisted_methods` hook, so no genealogy code is restructured."""
+	overrides = frappe.get_hooks("override_whitelisted_methods")
+	assert overrides.get("rheinwerk_mes.genealogy.ribbon.ribbon") == [
+		"rheinwerk_mes.regulatory_hazmat.views.ribbon"
+	]
+	# The chip's tone/icon names must be ones the pill markup can render.
+	chip = profiles.batch_chip(BATCH)
+	assert chip["icon"] == "alert-octagon" and chip["tone"] == "red"
+
+
 def test_tc_w2_032_hazmat_fields_are_not_behind_progressive_disclosure(site):
 	"""TC-W2-032 (URS-W2-024 AC-1): the hazmat fields render in list views and their section is
 	neither collapsible nor conditionally hidden — nothing hides on desktop."""

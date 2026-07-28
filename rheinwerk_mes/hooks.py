@@ -86,6 +86,8 @@ doctype_js = {
 app_include_css = [
 	"/assets/rheinwerk_mes/css/shopfloor.css",
 	"/assets/rheinwerk_mes/css/trace_ribbon.css",
+	# W2-7: the hazmat chip's signal tone and icons (URS-W2-024).
+	"/assets/rheinwerk_mes/css/hazmat.css",
 ]
 
 # W2-7: one hazmat chip component shared by the Item/Batch forms, stock views and the
@@ -93,6 +95,14 @@ app_include_css = [
 app_include_js = [
 	"/assets/rheinwerk_mes/js/hazmat.js",
 ]
+
+# W2-7: the Trace Ribbon page fetches its model from `genealogy.ribbon.ribbon`; the hazmat
+# decoration is layered on through this additive override rather than by editing the
+# genealogy package, so the ribbon shows Lagerklasse and UN number as chips (URS-W2-024)
+# while `genealogy.ribbon.ribbon` itself stays the single producer of the trace model.
+override_whitelisted_methods = {
+	"rheinwerk_mes.genealogy.ribbon.ribbon": "rheinwerk_mes.regulatory_hazmat.views.ribbon",
+}
 
 doc_events = {
 	# W0-2: item-level UoM conversion invariants (URS-W0-004).
