@@ -1,0 +1,68 @@
+{
+	"contract": "CHAR-ORDER-COMPLETE-01",
+	"urs": ["URS-W0-012"],
+	"test_cases": ["TC-W0-014"],
+	"legacy_source": "mes-plugins/mes-plugins-orders/src/main/java/com/qcadoo/mes/orders/states/OrderStateValidationService.java:54-63",
+	"notes": "dateTo, dateFrom and doneQuantity are required; doneQuantity equal to zero is refused (quantities in kg).",
+	"cases": [
+		{
+			"id": "COMPLETE-01-done-quantity-zero",
+			"description": "PO-2026-0001 reported with 0 kg output — the TC-W0-014 step 2 fixture",
+			"order": {
+				"number": "PO-2026-0001",
+				"date_from": "02.02.2026",
+				"date_to": "06.02.2026",
+				"done_quantity": 0
+			},
+			"expected": {
+				"allowed": false,
+				"errors": ["orders.order.orderStates.doneQuantityMustBeGreaterThanZero"]
+			}
+		},
+		{
+			"id": "COMPLETE-02-done-quantity-positive",
+			"description": "480 kg of RW-CHM-0003 reported — completion passes",
+			"order": {
+				"number": "PO-2026-0001",
+				"date_from": "02.02.2026",
+				"date_to": "06.02.2026",
+				"done_quantity": 480
+			},
+			"expected": {
+				"allowed": true,
+				"errors": []
+			}
+		},
+		{
+			"id": "COMPLETE-03-done-quantity-null",
+			"description": "No output reported at all — required-field refusal, not the zero-quantity refusal",
+			"order": {
+				"number": "PO-2026-0001",
+				"date_from": "02.02.2026",
+				"date_to": "06.02.2026",
+				"done_quantity": null
+			},
+			"expected": {
+				"allowed": false,
+				"errors": ["orders.order.orderStates.fieldRequired"]
+			}
+		},
+		{
+			"id": "COMPLETE-04-date-to-missing-and-zero-quantity",
+			"description": "Both refusals accumulate, required-field first (legacy evaluation order)",
+			"order": {
+				"number": "PO-2026-0001",
+				"date_from": "02.02.2026",
+				"date_to": null,
+				"done_quantity": 0
+			},
+			"expected": {
+				"allowed": false,
+				"errors": [
+					"orders.order.orderStates.fieldRequired",
+					"orders.order.orderStates.doneQuantityMustBeGreaterThanZero"
+				]
+			}
+		}
+	]
+}
