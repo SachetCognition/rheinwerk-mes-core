@@ -11,6 +11,7 @@
   "column_break_rw1",
   "changed_by",
   "changed_at",
+  "reason",
   "remarks"
  ],
  "fields": [
@@ -18,13 +19,13 @@
    "fieldname": "from_state",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Von Status"
+   "label": "Von Zustand"
   },
   {
    "fieldname": "to_state",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Nach Status",
+   "label": "Nach Zustand",
    "reqd": 1
   },
   {
@@ -43,6 +44,12 @@
    "fieldtype": "Datetime",
    "in_list_view": 1,
    "label": "Ge\u00e4ndert am"
+  },
+  {
+   "fieldname": "reason",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Begr\u00fcndung"
   },
   {
    "fieldname": "remarks",

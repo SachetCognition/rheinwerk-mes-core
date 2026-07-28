@@ -4,6 +4,7 @@ import frappe
 from frappe import _
 
 from rheinwerk_mes.setup.w0 import setup_w0
+from rheinwerk_mes.setup.w1_exec_state import setup_w1_exec_state
 from rheinwerk_mes.setup.w1_warehouse import setup_w1_warehouse
 
 MODULES = (
@@ -24,4 +25,5 @@ def after_install() -> None:
 	if missing:
 		frappe.throw(_("rheinwerk_mes Module sind nicht registriert: {0}").format(", ".join(missing)))
 	setup_w0()
+	setup_w1_exec_state()
 	setup_w1_warehouse()

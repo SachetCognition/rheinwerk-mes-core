@@ -11,7 +11,7 @@ from the same data:
 * plant-area divisions and production line LINE-1
 * work centres LINE-1/MIX-01 and LINE-1/FILL-01
 * routing RT-COMPOUND-01 and BOM-RW-CHM-0003-001
-* production order PO-2026-0001 (500 kg RW-CHM-0003 on LINE-1)
+* production orders PO-2026-0001 (500 kg RW-CHM-0003 on LINE-1) and PO-2026-0002 (200 kg)
 * `legacy_refs` source-identifier examples incl. the Qcadoo trigger number 000123/2025
 * personas T. Schmid, P. Krüger, W. Braun, Q. Fischer, O. Weber, B. Vogel
 
@@ -113,6 +113,17 @@ PRODUCTION_ORDER = {
 	"wip_warehouse": "RM Lager Nord",
 	"fg_warehouse": "FG Lager Süd",
 	"planned_start_date": "2026-02-02 06:00:00",
+}
+
+# Second order used by the W1 state-machine and gating suites (TST-W1 §1).
+SECOND_PRODUCTION_ORDER = {
+	"name": "PO-2026-0002",
+	"production_item": "RW-CHM-0003",
+	"qty": 200.0,
+	"production_line": "LINE-1",
+	"wip_warehouse": "RM Lager Nord",
+	"fg_warehouse": "FG Lager Süd",
+	"planned_start_date": "2026-03-10 06:00:00",
 }
 
 # Source-system identifiers preserved out of the primary key (URS-W0-003, URS-W0-014).
@@ -555,6 +566,30 @@ def seed_production_order(bom_no: str) -> str:
 	return doc.name
 
 
+def seed_second_production_order(bom_no: str) -> str:
+	"""Anchor `Work Order` PO-2026-0002 (W1 fixtures — TST-W1-production-core §1)."""
+	if frappe.db.exists("Work Order", SECOND_PRODUCTION_ORDER["name"]):
+		return SECOND_PRODUCTION_ORDER["name"]
+	doc = frappe.get_doc(
+		{
+			"doctype": "Work Order",
+			"naming_series": WORK_ORDER_SERIES,
+			"company": COMPANY,
+			"production_item": SECOND_PRODUCTION_ORDER["production_item"],
+			"bom_no": bom_no,
+			"qty": SECOND_PRODUCTION_ORDER["qty"],
+			"stock_uom": frappe.db.get_value("Item", SECOND_PRODUCTION_ORDER["production_item"], "stock_uom"),
+			"wip_warehouse": f"{SECOND_PRODUCTION_ORDER['wip_warehouse']} - {COMPANY_ABBR}",
+			"fg_warehouse": f"{SECOND_PRODUCTION_ORDER['fg_warehouse']} - {COMPANY_ABBR}",
+			"planned_start_date": SECOND_PRODUCTION_ORDER["planned_start_date"],
+		}
+	)
+	if _has_field("Work Order", "production_line"):
+		doc.production_line = SECOND_PRODUCTION_ORDER["production_line"]
+	doc.insert(ignore_permissions=True)
+	return doc.name
+
+
 def _reset_work_order_series() -> None:
 	"""Make the first seeded order land on PO-2026-0001 on a fresh site; a site that
 	already issued numbers from this prefix keeps its counter."""
@@ -721,6 +756,7 @@ def seed_all() -> dict:
 	summary["routing"] = seed_routing()
 	summary["bom"] = seed_bom()
 	summary["production_order"] = seed_production_order(summary["bom"])
+	summary["second_production_order"] = seed_second_production_order(summary["bom"])
 	summary["legacy_refs"] = seed_legacy_refs()
 	summary["personas"] = seed_personas()
 	frappe.db.commit()
