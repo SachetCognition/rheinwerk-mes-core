@@ -1198,6 +1198,59 @@ def seed_genealogy_fixture(orders: dict[str, str]) -> list[str]:
 	return produced
 
 
+# W2-8: a pallet (Handling Unit) for the pallet-balance / repacking journeys (URS-W2-025/027).
+# The pallet is a *reference* over the ledger — its content mirrors the BATCH-A-0001 opening
+# balance and is never a second quantity store. A second, empty pallet gives a repack target.
+PALLETS = (
+	{
+		"barcode": "HU-000123",
+		"hu_type": "Palette",
+		"warehouse": "RM Lager Nord",
+		"storage_location": "NORD-A-01-01",
+		"contents": (("RW-CHM-0001", "BATCH-A-0001", 500.0),),
+	},
+	{
+		"barcode": "HU-000124",
+		"hu_type": "Palette",
+		"warehouse": "RM Lager Nord",
+		"storage_location": "NORD-A-01-01",
+		"contents": (),
+	},
+)
+
+
+def seed_pallets() -> list[str]:
+	"""Handling-Unit pallets for the W2-8 warehouse journeys; safe to re-run (URS-W2-025)."""
+	if not frappe.db.exists("DocType", "Handling Unit"):
+		return []
+	seeded = []
+	for spec in PALLETS:
+		warehouse = f"{spec['warehouse']} - {COMPANY_ABBR}"
+		if not frappe.db.exists("Warehouse", warehouse):
+			continue
+		existing = frappe.db.get_value("Handling Unit", {"barcode": spec["barcode"]})
+		if existing:
+			seeded.append(existing)
+			continue
+		unit = frappe.get_doc(
+			{
+				"doctype": "Handling Unit",
+				"barcode": spec["barcode"],
+				"hu_type": spec["hu_type"],
+				"warehouse": warehouse,
+				"storage_location": spec["storage_location"],
+				"company": COMPANY,
+				"contents": [
+					{"item": item, "batch_no": batch, "qty": qty, "uom": "Kg"}
+					for item, batch, qty in spec["contents"]
+				],
+			}
+		)
+		unit.insert(ignore_permissions=True)
+		seeded.append(unit.name)
+	return seeded
+
+
 def seed_all() -> dict:
 	"""Seed every programme fixture; safe to re-run."""
 	summary = {
@@ -1234,6 +1287,7 @@ def seed_all() -> dict:
 		}
 	)
 	summary["legacy_refs"] = seed_legacy_refs()
+	summary["pallets"] = seed_pallets()
 	summary["personas"] = seed_personas()
 	# W1-8: the personas only exist now, so their transition roles are granted here as well
 	# as from the installer (URS-W1-029).
