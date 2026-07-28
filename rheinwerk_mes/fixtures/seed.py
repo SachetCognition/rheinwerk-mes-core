@@ -399,8 +399,10 @@ PERSONAS = (
 		"email": "p.krueger@rheinwerk-chemie.example",
 		"first_name": "P.",
 		"last_name": "Krüger",
-		# Planner: read-only on master data, owns production orders (URS-W0-017).
-		"roles": ["Rheinwerk Planner"],
+		# Planner: read-only on master data, owns production orders (URS-W0-017). Also the
+		# Plant C interface administrator, so message replay is hers (URS-W3-023 AC-2,
+		# TC-W3-017); the role itself is created by the W3 boundary installer at install time.
+		"roles": ["Rheinwerk Planner", "Rheinwerk Interface Admin"],
 	},
 	{
 		"email": "w.braun@rheinwerk-chemie.example",
