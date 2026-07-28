@@ -475,8 +475,9 @@ def seed_bom() -> str:
 
 def seed_production_order(bom_no: str) -> str:
 	"""Anchor `Work Order` PO-2026-0001 with the CDM-02 extension fields populated."""
-	if frappe.db.exists("Work Order", PRODUCTION_ORDER["name"]):
-		return PRODUCTION_ORDER["name"]
+	existing = _existing_production_order(bom_no)
+	if existing:
+		return existing
 	_reset_work_order_series()
 	doc = frappe.get_doc(
 		{
@@ -497,6 +498,22 @@ def seed_production_order(bom_no: str) -> str:
 		doc.production_line = PRODUCTION_ORDER["production_line"]
 	doc.insert(ignore_permissions=True)
 	return doc.name
+
+
+def _existing_production_order(bom_no: str) -> str | None:
+	"""Recognise an already-seeded order by its fixture attributes: the generated name
+	depends on the calendar year and on the series counter, so it is not a stable key."""
+	return frappe.db.get_value(
+		"Work Order",
+		{
+			"production_item": PRODUCTION_ORDER["production_item"],
+			"bom_no": bom_no,
+			"qty": PRODUCTION_ORDER["qty"],
+			"planned_start_date": PRODUCTION_ORDER["planned_start_date"],
+		},
+		"name",
+		order_by="creation",
+	)
 
 
 def _reset_work_order_series() -> None:

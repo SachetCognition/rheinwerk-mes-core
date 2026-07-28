@@ -8,6 +8,9 @@ from __future__ import annotations
 
 ORDER = "PO-2026-0001"
 EXTENSION_FIELDS = ("production_line", "master_order", "state_history")
+# The offline CI job has no Frappe installed, so app modules are resolved through the
+# connected site (`frappe.get_attr`) rather than imported at collection time.
+SEED_PRODUCTION_ORDER = "rheinwerk_mes.fixtures.seed.seed_production_order"
 
 
 def test_tc_w0_008_production_order_saved_with_extension_fields(site):
@@ -34,6 +37,15 @@ def test_tc_w0_008_extension_fields_are_custom_not_anchor_schema(site):
 			{"dt": "Work Order", "fieldname": fieldname, "module": "Manufacturing Core"},
 		)
 		assert not site.db.exists("DocField", {"parent": "Work Order", "fieldname": fieldname})
+
+
+def test_tc_w0_008_reseeding_does_not_duplicate_the_production_order(site):
+	"""TC-W0-008 (URS-W0-007): re-seeding recognises the existing order by its fixture
+	attributes, not by the generated name, which depends on year and series counter."""
+	bom_no = site.db.get_value("Work Order", ORDER, "bom_no")
+	before = site.get_all("Work Order", filters={"bom_no": bom_no}, pluck="name")
+	assert site.get_attr(SEED_PRODUCTION_ORDER)(bom_no) == ORDER
+	assert site.get_all("Work Order", filters={"bom_no": bom_no}, pluck="name") == before
 
 
 def test_tc_w0_008_state_history_container_without_w1_workflow(site):
