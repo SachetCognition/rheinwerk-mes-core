@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wave Task Lists</title>
+<style>
+:root{--accent:#1f4e79;--accent2:#2e74b5;--bg:#f7f9fb;--card:#ffffff;--text:#24292f;--muted:#6a737d;--border:#e1e6eb;--sidebar-w:300px}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",Calibri,Arial,sans-serif;color:var(--text);background:var(--bg);line-height:1.55;font-size:15px}
+#sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:var(--accent);color:#fff;overflow-y:auto;padding:22px 18px}
+#sidebar .brand{font-size:15px;font-weight:600;letter-spacing:.4px;border-bottom:1px solid rgba(255,255,255,.25);padding-bottom:12px;margin-bottom:12px}
+#sidebar .brand small{display:block;font-weight:400;opacity:.75;margin-top:4px}
+#sidebar nav ul{list-style:none;margin:0;padding-left:0}
+#sidebar nav ul ul{padding-left:14px}
+#sidebar nav a{display:block;color:rgba(255,255,255,.85);text-decoration:none;font-size:12.6px;padding:4px 8px;border-radius:5px;border-left:3px solid transparent}
+#sidebar nav a:hover{background:rgba(255,255,255,.12);color:#fff}
+#sidebar nav a.active{background:rgba(255,255,255,.18);color:#fff;border-left-color:#9cc3e5;font-weight:600}
+#content{margin-left:var(--sidebar-w);padding:42px 56px;max-width:1080px}
+header.doc{border-bottom:3px solid var(--accent);padding-bottom:18px;margin-bottom:30px}
+header.doc h1{color:var(--accent);font-size:30px;margin:0 0 6px}
+header.doc .sub{color:var(--accent2);font-size:15.5px;font-weight:600}
+h1,h2{color:var(--accent);margin-top:2.1em;border-bottom:1px solid var(--border);padding-bottom:.25em}
+h3,h4{color:var(--accent2);margin-top:1.7em}
+a{color:var(--accent2)}
+table{border-collapse:collapse;width:100%;margin:1.1em 0;background:var(--card);font-size:13.2px;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+th{background:var(--accent);color:#fff;text-align:left;padding:8px 10px;font-weight:600}
+td{border:1px solid var(--border);padding:7px 10px;vertical-align:top}
+tr:nth-child(even) td{background:#f2f6fa}
+code{background:#eef2f6;border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:12px;font-family:Consolas,Menlo,monospace;color:#0b3d66}
+pre{background:#0f2a43;color:#dce8f5;padding:14px 16px;border-radius:8px;overflow-x:auto;font-size:12.5px}
+pre code{background:none;border:none;color:inherit;padding:0}
+blockquote{margin:1em 0;padding:10px 16px;background:#eaf1f8;border-left:5px solid var(--accent2);border-radius:0 6px 6px 0;color:#243b53}
+img.diagram,p img{max-width:100%;background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px;box-shadow:0 1px 3px rgba(0,0,0,.08);display:block;margin:1.2em auto}
+#top-btn{position:fixed;right:26px;bottom:26px;background:var(--accent);color:#fff;border:none;border-radius:50%;width:46px;height:46px;font-size:19px;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .25s;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+#top-btn.show{opacity:.92;pointer-events:auto}
+footer.doc{margin-top:60px;border-top:1px solid var(--border);padding-top:14px;color:var(--muted);font-size:12px}
+@media(max-width:900px){#sidebar{display:none}#content{margin-left:0;padding:24px}}
+</style>
+</head>
+<body>
+<aside id="sidebar">
+  <div class="brand">Wave Task Lists<small>W0–W4 backlogs with
+dispositions and dossier evidence</small></div>
+  <nav><ul>
+<li><a href="#wave-w0-foundation" id="toc-wave-w0-foundation">Wave W0 —
+Foundation</a>
+<ul>
+<li><a href="#backlog" id="toc-backlog">Backlog</a></li>
+</ul></li>
+<li><a href="#wave-w1-production-core" id="toc-wave-w1-production-core">Wave W1 — Production Core</a>
+<ul>
+<li><a href="#backlog-1" id="toc-backlog-1">Backlog</a></li>
+</ul></li>
+<li><a href="#wave-w2-traceability-quality" id="toc-wave-w2-traceability-quality">Wave W2 — Traceability &amp;
+Quality</a>
+<ul>
+<li><a href="#backlog-2" id="toc-backlog-2">Backlog</a></li>
+</ul></li>
+<li><a href="#wave-w3-planning-boundary" id="toc-wave-w3-planning-boundary">Wave W3 — Planning &amp; Boundary</a>
+<ul>
+<li><a href="#backlog-3" id="toc-backlog-3">Backlog</a></li>
+</ul></li>
+<li><a href="#wave-w4-cutover-decommission" id="toc-wave-w4-cutover-decommission">Wave W4 — Cutover &amp;
+Decommission</a>
+<ul>
+<li><a href="#backlog-4" id="toc-backlog-4">Backlog</a></li>
+</ul></li>
+</ul></nav>
+</aside>
+<main id="content">
+  <header class="doc"><h1>Wave Task Lists</h1><div class="sub">W0–W4
+backlogs with dispositions and dossier evidence</div></header>
+<p>Programme task list for the consolidation, populated from the
+<em>Production Systems Landscape — Reverse Engineering &amp; Fit-Gap
+Dossier</em> (<code>docs/dossier/production-systems-dossier.md</code>).
+Each wave file carries its backlog with per-item disposition and dossier
+evidence.</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Wave</th>
+<th>Theme</th>
+<th>Status</th>
+<th>Backlog</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>—</td>
+<td>Reverse engineering &amp; fit-gap dossier (programme input)</td>
+<td><strong>Done</strong> — dossier v1.0 committed
+(<code>docs/dossier/</code>)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><a href="W0-foundation.md">W0</a></td>
+<td>Foundation: scaffold, canonical entities, migration tooling,
+characterisation harness</td>
+<td>Next up</td>
+<td>8 items (W0-1…W0-8)</td>
+</tr>
+<tr>
+<td><a href="W1-production-core.md">W1</a></td>
+<td>Production core: order state machine, gating, recipe governance,
+warehouse fidelity base</td>
+<td>Pending W0 exit</td>
+<td>10 items (W1-1…W1-10)</td>
+</tr>
+<tr>
+<td><a href="W2-traceability-quality.md">W2</a></td>
+<td>Traceability &amp; quality: genealogy, blocking, QI, CoA, ISA-88,
+hazmat</td>
+<td>Pending W1 exit</td>
+<td>10 items (W2-1…W2-10)</td>
+</tr>
+<tr>
+<td><a href="W3-planning-boundary.md">W3</a></td>
+<td>Planning &amp; boundary: MRP, finite capacity, ERP interface,
+SCADA/OPC-UA</td>
+<td>Pending W2 exit</td>
+<td>7 items (W3-1…W3-7)</td>
+</tr>
+<tr>
+<td><a href="W4-cutover-decommission.md">W4</a></td>
+<td>Cutover &amp; decommission: per-plant cutover, backfill, legacy
+archival</td>
+<td>Pending W3 exit</td>
+<td>7 items (W4-1…W4-7)</td>
+</tr>
+</tbody>
+</table>
+<p>Cross-wave rules (from the dossier’s consolidation implications,
+§7):</p>
+<ol type="1">
+<li>Absorbed Qcadoo behaviour is always a re-implementation validated by
+characterisation tests — never a code port (implication 1).</li>
+<li>Anchor DocTypes are never forked; absorbed semantics land as
+hooks/workflows/custom DocTypes (ARCHITECTURE.md layering).</li>
+<li>Open questions in dossier §8.2 (plant settings, genealogy
+completeness, lot coverage at Plant B, external syncs) must be answered
+before the wave that depends on them exits.</li>
+</ol>
+<hr />
+<h2 id="wave-w0-foundation">Wave W0 — Foundation</h2>
+<p>Platform scaffold; canonical entities (item, work centre, BOM/recipe,
+production order); master-data migration tooling; CI + characterisation
+harness.</p>
+<p><strong>Exit:</strong> canonical entities live; master data from all
+three sources round-trips; regression floor executing.</p>
+<h3 id="backlog">Backlog</h3>
+<p>Source: <em>Production Systems Landscape — Reverse Engineering &amp;
+Fit-Gap Dossier</em>
+(<code>docs/dossier/production-systems-dossier.md</code>); citations
+refer to chapter evidence indices at the pinned commits.</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Item</th>
+<th>Disposition / golden source</th>
+<th>Dossier finding (evidence)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>W0-1</td>
+<td>Scaffold Frappe app <code>rheinwerk_mes</code> with module skeletons
+and CI (lint + test runner)</td>
+<td>Adopt (ERPNext substrate)</td>
+<td>ERPNext is the healthiest platform: CI workflows, 515 test files
+(ch. 3.2 §D)</td>
+</tr>
+<tr>
+<td>W0-2</td>
+<td>Canonical Item/Product master + UoM conversions, with field mapping
+from Qcadoo <code>product</code> model, ERPNext <code>Item</code>, OFBiz
+<code>Product</code></td>
+<td>Adopt ERPNext master data</td>
+<td>Master data Rich in all three; semantic map in dossier §5.2</td>
+</tr>
+<tr>
+<td>W0-3</td>
+<td>Canonical Work Centre entity (map: Qcadoo
+workstation/productionLine, ERPNext Workstation, OFBiz FixedAsset
+machine group)</td>
+<td>Adopt ERPNext Workstation</td>
+<td>§5.2 work-centre row — OFBiz models machines as accounting
+assets</td>
+</tr>
+<tr>
+<td>W0-4</td>
+<td>Canonical BOM/recipe &amp; production-order entities (anchor
+DocTypes, no forks)</td>
+<td>Adopt ERPNext BOM/Work Order</td>
+<td>§6.2 recipe/BOM golden source = ERPNext</td>
+</tr>
+<tr>
+<td>W0-5</td>
+<td>Master-data migration tooling: extractors for Qcadoo PostgreSQL
+schema, ERPNext DocTypes, OFBiz entity XML/derby exports; round-trip
+fixtures for all three</td>
+<td>—</td>
+<td>§7 implication 4 (data-model migration, not copy)</td>
+</tr>
+<tr>
+<td>W0-6</td>
+<td>Characterisation-test harness: encode Qcadoo order gating
+(<code>OrderStateValidationService</code>), technology validators, FEFO
+picking order as executable parity contracts</td>
+<td>Absorb (Qcadoo semantics)</td>
+<td>ch. 3.1 §C.3 rules table; ADR-001 consequence</td>
+</tr>
+<tr>
+<td>W0-7</td>
+<td>Evidence-pack generator: wave-exit report linking backlog items →
+dossier findings → code/tests</td>
+<td>—</td>
+<td><code>docs/evidence/README.md</code> audit spine</td>
+</tr>
+<tr>
+<td>W0-8</td>
+<td>Decide + record naming/numbering scheme (Qcadoo DB-trigger sequences
+vs ERPNext naming series)</td>
+<td>Adopt ERPNext naming series</td>
+<td>ch. 3.1 §C.3 (trigger-generated numbers) vs ch. 3.2 (naming
+series)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="wave-w1-production-core">Wave W1 — Production Core</h2>
+<p>Plan/release and execute journeys end to end; execution gating hooks;
+recipe governance workflow; warehouse physical fidelity base.</p>
+<p><strong>Exit:</strong> planner + operator journeys pass acceptance;
+behaviour choices vs characterisation tests documented.</p>
+<h3 id="backlog-1">Backlog</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Item</th>
+<th>Disposition / golden source</th>
+<th>Dossier finding (evidence)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>W1-1</td>
+<td>Explicit production-order state machine layered over Work Order
+(pending/accepted/inProgress/completed/interrupted/abandoned/declined
+semantics) as Frappe workflow + hooks — never forking the anchor
+DocType</td>
+<td>Absorb Qcadoo</td>
+<td>ch. 3.1 <code>OrderState.java:31-81</code>; §7 implication 1</td>
+</tr>
+<tr>
+<td>W1-2</td>
+<td>Execution gating hooks: accept requires dates/line/technology;
+complete requires recorded output &gt; 0; material-availability gate on
+release</td>
+<td>Absorb Qcadoo</td>
+<td>ch. 3.1 <code>OrderStateValidationService.java:44-63</code>;
+<code>OrderStatesListenerServicePFTD.java:580</code></td>
+</tr>
+<tr>
+<td>W1-3</td>
+<td>Keep/verify anchor hard stops: over-production errors, stopped-WO
+freeze, closed-terminal, expired-batch throw</td>
+<td>Adopt ERPNext</td>
+<td>ch. 3.2 §C rules table (<code>services/status.py:29-47</code>;
+<code>stock_ledger_entry.py:287-299</code>)</td>
+</tr>
+<tr>
+<td>W1-4</td>
+<td>Recipe governance workflow on BOM/Routing:
+draft→checked→accepted→outdated with structural validators (tree
+completeness, unit match, in-use lock)</td>
+<td>Absorb Qcadoo</td>
+<td>ch. 3.1 <code>TechnologyState.java:33-66</code>,
+<code>TechnologyValidationService.java:91-707</code>; §7 implication
+5</td>
+</tr>
+<tr>
+<td>W1-5</td>
+<td>Warehouse physical fidelity base: pallet/handling-unit +
+storage-location DocTypes; per-warehouse disposal algorithm
+(FIFO/LIFO/FEFO/LEFO)</td>
+<td>Absorb Qcadoo</td>
+<td>ch. 3.1 <code>ResourceFields.java:32-90</code>,
+<code>WarehouseAlgorithm.java:26-27</code>; §7 implication 4</td>
+</tr>
+<tr>
+<td>W1-6</td>
+<td>Draft-document stock reservations semantics reconciled with Stock
+Reservation Entry</td>
+<td>Absorb Qcadoo + Adopt ERPNext</td>
+<td>ch. 3.1 <code>ReservationsService.java:81-247</code>; ch. 3.2
+<code>stock_reservation_entry.py:530-553</code>; §5.2 reservation
+row</td>
+</tr>
+<tr>
+<td>W1-7</td>
+<td>Shop-floor operator journey on ERPNext Shop Floor/Job Cards
+incl. pause/resume and time logs</td>
+<td>Adopt ERPNext</td>
+<td>ch. 3.2 <code>job_card.py:1280-1397</code></td>
+</tr>
+<tr>
+<td>W1-8</td>
+<td>Role model: workflow-state-level permissions expressing Qcadoo’s
+per-transition roles in Frappe RBAC</td>
+<td>Absorb Qcadoo semantics</td>
+<td>§7 implication 7; ch. 3.1 §B.2 (151 roles)</td>
+</tr>
+<tr>
+<td>W1-9</td>
+<td>Expiry-enforcement policy decision (hard stop vs FEFO-advisory)
+recorded with business sign-off + characterisation deltas</td>
+<td>Decision</td>
+<td>§5.4 expired-stock divergence; §7 implication 6</td>
+</tr>
+<tr>
+<td>W1-10</td>
+<td>Characterisation-vs-behaviour choices documented per gate (parity or
+intentional divergence)</td>
+<td>—</td>
+<td>Wave exit criterion</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="wave-w2-traceability-quality">Wave W2 — Traceability &amp;
+Quality</h2>
+<p>Genealogy object model; batch blocking; QI adoption; CoA rebuild;
+ISA-88 recipes; hazmat master data.</p>
+<p><strong>Exit:</strong> full multi-level trace demonstrable; CoA
+generated from inspection results; recipe scaling functional.</p>
+<h3 id="backlog-2">Backlog</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Item</th>
+<th>Disposition / golden source</th>
+<th>Dossier finding (evidence)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>W2-1</td>
+<td>Genealogy object model as system-of-record: Batch DocType extensions
++ Tracking Record (produced batch ↔︎ used batches) with forward/backward
+tree browsing</td>
+<td>Absorb Qcadoo</td>
+<td>ch. 3.1 <code>TrackingRecordFields.java:31-49</code>,
+<code>AdvancedGenealogyTreeViewListeners.java:71-73</code></td>
+</tr>
+<tr>
+<td>W2-2</td>
+<td>Unified batch object: identity + QA state
+(released/quarantined/blocked) + expiry + genealogy links — collapsing
+Qcadoo’s dual model and ERPNext’s stateless Batch</td>
+<td>Absorb + extend</td>
+<td>§7 implication 2; ch. 3.1 §B.4; ch. 3.2
+<code>batch.py:97-115</code></td>
+</tr>
+<tr>
+<td>W2-3</td>
+<td>Batch blocking/quarantine with propagation through genealogy trees
+and exclusion from picking</td>
+<td>Absorb + extend</td>
+<td>ch. 3.1 <code>BatchState.java:31-44</code>,
+<code>ResourceCriteriaModifiers.java:59,70</code>; §7 implication 3</td>
+</tr>
+<tr>
+<td>W2-4</td>
+<td>Adopt Quality Inspection engine (typed inspections, parametric
+readings, templates) and wire QI gates to the W1 state machine</td>
+<td>Adopt ERPNext</td>
+<td>ch. 3.2 <code>quality_inspection.py:265-336</code>,
+<code>quality_inspection_service.py:21-127</code></td>
+</tr>
+<tr>
+<td>W2-5</td>
+<td>Certificates of Analysis: generate CoA from inspection results per
+batch (white space — net-new)</td>
+<td>Rebuild</td>
+<td>§6.3 (absent in all three)</td>
+</tr>
+<tr>
+<td>W2-6</td>
+<td>ISA-88 batch recipes: unit procedures/phases + recipe scaling over
+BOM/Routing (white space — net-new)</td>
+<td>Rebuild</td>
+<td>§6.3; ch. G ratings (Absent in all three)</td>
+</tr>
+<tr>
+<td>W2-7</td>
+<td>Hazmat/regulatory master data (UN numbers, SDS references, storage
+classes) on Item/Batch (white space — net-new; completes in W3)</td>
+<td>Rebuild</td>
+<td>§6.3</td>
+</tr>
+<tr>
+<td>W2-8</td>
+<td>Warehouse fidelity completion: quarantine locations, pallet
+balances, stocktaking/repacking journeys</td>
+<td>Absorb Qcadoo</td>
+<td>ch. 3.1 <code>storageLocation.xml:37-54</code>,
+<code>RepackingState.java</code>,
+<code>StocktakingState.java</code></td>
+</tr>
+<tr>
+<td>W2-9</td>
+<td>Multi-level trace demo: acceptance test proving full forward +
+backward trace incl. blocked-batch propagation</td>
+<td>—</td>
+<td>Wave exit criterion</td>
+</tr>
+<tr>
+<td>W2-10</td>
+<td>E-signature decision for compliance-critical transitions (no legacy
+precedent — white space)</td>
+<td>Decision / Rebuild</td>
+<td>§6.3; audit findings ch. §E of all three</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="wave-w3-planning-boundary">Wave W3 — Planning &amp;
+Boundary</h2>
+<p>Production Plan/MRP + finite capacity; group-ERP interface;
+SCADA/OPC-UA adapter.</p>
+<p><strong>Exit:</strong> planning journey complete; ERP interface
+contract tested with fixtures.</p>
+<h3 id="backlog-3">Backlog</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Item</th>
+<th>Disposition / golden source</th>
+<th>Dossier finding (evidence)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>W3-1</td>
+<td>Production Plan/MRP journey (sales input → explosion → material
+requests → orders) on anchor</td>
+<td>Adopt ERPNext</td>
+<td>ch. 3.2
+<code>production_plan/services/material_request.py:141</code>,
+MPS/forecast doctypes</td>
+</tr>
+<tr>
+<td>W3-2</td>
+<td>Finite-capacity layer: line schedules, changeover norms,
+TJ/TPZ-style realization times over anchor slot search</td>
+<td>Absorb Qcadoo (partial)</td>
+<td>ch. 3.1 <code>ScheduleState.java:8-24</code>,
+<code>OrderRealizationTimeServiceImpl.java</code>; §6.2 (no optimiser
+anywhere)</td>
+</tr>
+<tr>
+<td>W3-3</td>
+<td>Group-ERP interface: orders in, confirmations out, GL postings out;
+contract fixtures + tests</td>
+<td>Rebuild (boundary)</td>
+<td>ADR-002; ch. 3.2 costing/GL evidence
+(<code>stock_controller.py</code>)</td>
+</tr>
+<tr>
+<td>W3-4</td>
+<td>Costing/valuation at the boundary: perpetual-inventory GL postings
+mapped to group ERP accounts</td>
+<td>Adopt ERPNext (boundary)</td>
+<td>ch. 3.2 <code>item.json:387-390</code>,
+<code>stock_ledger.py:1726-1729</code></td>
+</tr>
+<tr>
+<td>W3-5</td>
+<td>SCADA/OPC-UA adapter (white space — net-new): tracking events from
+process control into production records</td>
+<td>Rebuild</td>
+<td>§6.3 (absent in all three)</td>
+</tr>
+<tr>
+<td>W3-6</td>
+<td>Hazmat/regulatory completion: shipping/ADR data at the boundary,
+label data</td>
+<td>Rebuild</td>
+<td>§6.3</td>
+</tr>
+<tr>
+<td>W3-7</td>
+<td>Survey + contract-freeze of existing external syncs (Qcadoo
+<code>externalNumber/externalSynchronized</code> consumers, ERPNext
+integrations)</td>
+<td>—</td>
+<td>ch. 3.1 <code>OrderFields.java:48,88</code>; open question 6
+(§8.2)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="wave-w4-cutover-decommission">Wave W4 — Cutover &amp;
+Decommission</h2>
+<p>Per-plant cutover by journey; data backfill; legacy systems read-only
+then archived (Qcadoo, legacy ERPNext instance, OFBiz).</p>
+<p><strong>Exit:</strong> all personas on target; decommission
+complete.</p>
+<h3 id="backlog-4">Backlog</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Item</th>
+<th>Disposition / golden source</th>
+<th>Dossier finding (evidence)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>W4-1</td>
+<td>Per-plant cutover runbooks by journey (Plant A Qcadoo, Plant B
+OFBiz, Plant C legacy ERPNext instance)</td>
+<td>—</td>
+<td>Journey comparison §5.3</td>
+</tr>
+<tr>
+<td>W4-2</td>
+<td>Plant A data backfill: decompose lot-level <code>Resource</code>
+rows into target batch/bundle/bin representation preserving
+pallet/location/expiry/price</td>
+<td>Absorb migration</td>
+<td>ch. 3.1 <code>ResourceFields.java:32-90</code>; §7 implication
+4</td>
+</tr>
+<tr>
+<td>W4-3</td>
+<td>Plant B backfill: parties/products/inventory balances/open
+production runs from OFBiz; record genealogy trace-boundary date for
+optional-lot history</td>
+<td>Retire OFBiz</td>
+<td>ch. 3.3 <code>product-entitymodel.xml:1967,2419</code>; §7
+implication 9</td>
+</tr>
+<tr>
+<td>W4-4</td>
+<td>Plant A genealogy backfill from TrackingRecords incl. archived
+(<code>arch_*</code>) orders</td>
+<td>Absorb migration</td>
+<td>ch. 3.1 <code>mes_db_en.sql:292-648</code> archiving machinery</td>
+</tr>
+<tr>
+<td>W4-5</td>
+<td>Legacy read-only period: freeze legacy writes, keep query access;
+then archive</td>
+<td>—</td>
+<td>Wave definition</td>
+</tr>
+<tr>
+<td>W4-6</td>
+<td>Archive Qcadoo build artefacts + <code>nexus.qcadoo.org</code>
+snapshot dependencies before decommission (build unreproducibility
+risk)</td>
+<td>—</td>
+<td>§7 implication 10; ch. 3.1 §E</td>
+</tr>
+<tr>
+<td>W4-7</td>
+<td>Decommission evidence pack: per-plant persona sign-off,
+data-reconciliation reports, trace-boundary register</td>
+<td>—</td>
+<td>Wave exit criterion</td>
+</tr>
+</tbody>
+</table>
+  <footer class="doc">Rheinwerk Chemie GmbH — MES consolidation programme. Generated from the Markdown source of record in SachetCognition/rheinwerk-mes-core.</footer>
+</main>
+<button id="top-btn" title="Back to top">⇧</button>
+<script>
+const links=[...document.querySelectorAll('#sidebar nav a')];
+const targets=links.map(a=>document.getElementById(decodeURIComponent(a.hash.slice(1)))).filter(Boolean);
+function onScroll(){
+  const y=window.scrollY+90;let cur=targets[0];
+  for(const t of targets){if(t.offsetTop<=y)cur=t;else break}
+  links.forEach(a=>a.classList.toggle('active',cur&&decodeURIComponent(a.hash.slice(1))===cur.id));
+  document.getElementById('top-btn').classList.toggle('show',window.scrollY>500);
+}
+document.addEventListener('scroll',onScroll,{passive:true});onScroll();
+document.getElementById('top-btn').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
+</script>
+</body>
+</html>
