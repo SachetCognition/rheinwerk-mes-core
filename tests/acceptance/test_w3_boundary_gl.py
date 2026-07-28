@@ -18,6 +18,7 @@ from test_w3_boundary_support import (
 	ITEM,
 	QUANTITY,
 	RM_WAREHOUSE,
+	clear_messages,
 	loopback,
 	messages,
 )
@@ -38,7 +39,7 @@ EXPECTED_TOTAL = 2100.00
 
 @pytest.fixture
 def endpoint(site, monkeypatch):
-	site.db.delete("Boundary Message")
+	clear_messages(site)
 	return loopback(monkeypatch)
 
 

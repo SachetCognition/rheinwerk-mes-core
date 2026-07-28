@@ -17,6 +17,7 @@ from test_w3_boundary_support import (
 	PLANNER_USER,
 	RM_WAREHOUSE,
 	VIEWER_USER,
+	clear_messages,
 	loopback,
 )
 
@@ -33,7 +34,7 @@ UNKNOWN_ITEM = "erp-in-002-unknown-item.json"
 @pytest.fixture
 def rejected_message(site, monkeypatch):
 	"""The precondition of TC-W3-017: exactly one rejected message from TC-W3-013 step 3."""
-	site.db.delete("Boundary Message")
+	clear_messages(site)
 	site.db.delete("ERP Sales Input")
 	loopback(monkeypatch)
 	result = inbound.play_fixture(UNKNOWN_ITEM)
@@ -148,7 +149,7 @@ def test_tc_w3_017_step_2_an_unauthorised_replay_is_refused_and_audited(site, re
 def test_tc_w3_017_replaying_a_held_posting_touches_only_that_message(site, monkeypatch):
 	"""TC-W3-017 step 2 (URS-W3-014 AC-3, URS-W3-012 AC-2): a held GL posting is replayed
 	individually — the second held posting of the same unmapped warehouse stays held."""
-	site.db.delete("Boundary Message")
+	clear_messages(site)
 	endpoint = loopback(monkeypatch)
 
 	from rheinwerk_mes.integration.boundary import gl, queues

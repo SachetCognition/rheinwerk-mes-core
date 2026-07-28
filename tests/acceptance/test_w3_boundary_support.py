@@ -97,6 +97,17 @@ def complete(site: Any, order: Any):
 	return order
 
 
+def clear_messages(site: Any) -> None:
+	"""Empty the message store *and* its gate audit, so a case starts from a known trail.
+
+	The audit is deliberately a separate, append-only doctype, so dropping the messages of an
+	earlier run alone would leave their `Execution Gate Log` entries behind and make the trail
+	of a re-created message id (`confirmation-out:CONF-PO-2026-0001`) depend on run history.
+	"""
+	site.db.delete("Execution Gate Log", {"reference_doctype": "Boundary Message"})
+	site.db.delete("Boundary Message")
+
+
 def messages(site: Any, message_type: str, **filters: Any) -> list[dict]:
 	"""Stored boundary messages of one type, oldest first."""
 	return site.get_all(

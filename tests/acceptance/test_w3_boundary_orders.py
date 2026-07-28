@@ -11,7 +11,7 @@ Every processed, duplicated and rejected message writes the W1 gate audit (URS-W
 from __future__ import annotations
 
 import pytest
-from test_w3_boundary_support import ITEM, messages
+from test_w3_boundary_support import ITEM, clear_messages, messages
 
 frappe = pytest.importorskip("frappe")
 audit = pytest.importorskip("rheinwerk_mes.execution_gating.audit")
@@ -28,7 +28,7 @@ MASTER_ORDER = "erp-in-003-master-order.json"
 @pytest.fixture
 def clean_boundary(site):
 	"""Start from an empty message store; the `site` fixture rolls the deletion back."""
-	site.db.delete("Boundary Message")
+	clear_messages(site)
 	site.db.delete("ERP Sales Input")
 	yield site
 

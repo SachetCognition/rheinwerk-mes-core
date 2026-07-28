@@ -20,6 +20,7 @@ from test_w3_boundary_support import (
 	QUANTITY,
 	SECOND_ORDER,
 	book_production,
+	clear_messages,
 	complete,
 	loopback,
 	messages,
@@ -37,7 +38,7 @@ schema = pytest.importorskip("rheinwerk_mes.integration.boundary.schema")
 @pytest.fixture
 def endpoint(site, monkeypatch):
 	"""A fresh loopback endpoint and an empty message store for one test."""
-	site.db.delete("Boundary Message")
+	clear_messages(site)
 	return loopback(monkeypatch)
 
 
