@@ -300,6 +300,53 @@ BATCHES = (
 	},
 )
 
+# W2-7: hazmat master data (URS-W2-023). Realistic German chemical-industry values: UN 1866
+# is the ADR entry for resin solutions, UN 1263 for paint-related material; both are TRGS 510
+# Lagerklasse 3 (entzündbare Flüssigkeiten) with CLP signal word "Gefahr". Additiv K7
+# (RW-CHM-0002) deliberately carries no profile — it is the non-hazardous control the
+# acceptance suite needs.
+HAZMAT_PROFILES = (
+	{
+		"profile_name": "HAZ-RW-CHM-0001",
+		"item": "RW-CHM-0001",
+		"un_number": "UN 1866",
+		"proper_shipping_name": "Harzlösung, entzündbar",
+		"storage_class": "3",
+		"water_hazard_class": "2",
+		"signal_word": "Gefahr",
+		"sds_reference": "SDS-RW-0001",
+		"sds_version": "3.1",
+		"sds_revision_date": "2026-01-15",
+		"pictograms": ("GHS02", "GHS07"),
+		"statements": (
+			("H", "H226", "Flüssigkeit und Dampf entzündbar."),
+			("H", "H336", "Kann Schläfrigkeit und Benommenheit verursachen."),
+			("P", "P210", "Von Hitze, heißen Oberflächen, Funken, offenen Flammen fernhalten."),
+			("P", "P261", "Einatmen von Dampf vermeiden."),
+		),
+		"mandatory": 1,
+	},
+	{
+		"profile_name": "HAZ-RW-CHM-0003",
+		"item": "RW-CHM-0003",
+		"un_number": "UN 1263",
+		"proper_shipping_name": "Farbe (entzündbar)",
+		"storage_class": "3",
+		"water_hazard_class": "2",
+		"signal_word": "Gefahr",
+		"sds_reference": "SDS-RW-0003",
+		"sds_version": "1.4",
+		"sds_revision_date": "2026-02-20",
+		"pictograms": ("GHS02",),
+		"statements": (
+			("H", "H226", "Flüssigkeit und Dampf entzündbar."),
+			("H", "H319", "Verursacht schwere Augenreizung."),
+			("P", "P280", "Schutzhandschuhe und Augenschutz tragen."),
+		),
+		"mandatory": 1,
+	},
+)
+
 PERSONAS = (
 	{
 		"email": "t.schmid@rheinwerk-chemie.example",
@@ -981,6 +1028,53 @@ def seed_supplier_batch() -> str | None:
 	return spec["batch_id"]
 
 
+def seed_hazmat_profiles() -> list[str]:
+	"""W2-7: hazmat profiles for RW-CHM-0001/0003 linked to their items (URS-W2-023 AC-1)."""
+	from rheinwerk_mes.regulatory_hazmat.profiles import ITEM_MANDATORY_FIELD, ITEM_PROFILE_FIELD
+
+	if not _has_field("Item", ITEM_PROFILE_FIELD):
+		return []
+	seeded: list[str] = []
+	for spec in HAZMAT_PROFILES:
+		name = spec["profile_name"]
+		if not frappe.db.exists("Item", spec["item"]):
+			continue
+		if not frappe.db.exists("Hazmat Profile", name):
+			doc = frappe.get_doc(
+				{
+					"doctype": "Hazmat Profile",
+					"profile_name": name,
+					"un_number": spec["un_number"],
+					"proper_shipping_name": spec["proper_shipping_name"],
+					"storage_class": spec["storage_class"],
+					"water_hazard_class": spec["water_hazard_class"],
+					"signal_word": spec["signal_word"],
+					"sds_reference": spec["sds_reference"],
+					"sds_version": spec["sds_version"],
+					"sds_revision_date": spec["sds_revision_date"],
+					"pictograms": [{"pictogram": code} for code in spec["pictograms"]],
+					"statements": [
+						{"statement_type": kind, "code": code, "statement_text": text}
+						for kind, code, text in spec["statements"]
+					],
+				}
+			)
+			doc.insert(ignore_permissions=True)
+		frappe.db.set_value(
+			"Item",
+			spec["item"],
+			{ITEM_PROFILE_FIELD: name, ITEM_MANDATORY_FIELD: spec["mandatory"]},
+			update_modified=False,
+		)
+		seeded.append(name)
+	# The batches exist by now, so their derived UN-number/Lagerklasse mirrors are refreshed
+	# from the freshly linked profiles (URS-W2-024).
+	from rheinwerk_mes.setup.w2_hazmat import backfill_batch_mirrors
+
+	backfill_batch_mirrors()
+	return seeded
+
+
 def seed_quarantine_location() -> str | None:
 	"""Quarantine storage location NORD-Q-01 (URS-W2-012 AC-1)."""
 	if not _has_field("Storage Location", "is_quarantine_location"):
@@ -1233,6 +1327,8 @@ def seed_all() -> dict:
 			"third": summary["third_production_order"],
 		}
 	)
+	# W2-7: hazmat master data on the item masters and their batches (URS-W2-023/024).
+	summary["hazmat_profiles"] = seed_hazmat_profiles()
 	summary["legacy_refs"] = seed_legacy_refs()
 	summary["personas"] = seed_personas()
 	# W1-8: the personas only exist now, so their transition roles are granted here as well

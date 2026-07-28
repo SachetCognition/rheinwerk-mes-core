@@ -1,0 +1,216 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 0,
+ "autoname": "field:profile_name",
+ "creation": "2026-04-01 09:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "profile_name",
+  "un_number",
+  "proper_shipping_name",
+  "column_break_rw1",
+  "storage_class",
+  "storage_class_designation",
+  "water_hazard_class",
+  "rw_ghs_section",
+  "signal_word",
+  "pictograms",
+  "statements",
+  "rw_sds_section",
+  "sds_reference",
+  "sds_version",
+  "column_break_rw2",
+  "sds_revision_date",
+  "sds_attachment",
+  "rw_audit_section",
+  "revision",
+  "revisions"
+ ],
+ "fields": [
+  {
+   "fieldname": "profile_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Bezeichnung des Gefahrstoffprofils",
+   "reqd": 1,
+   "set_only_once": 1,
+   "unique": 1
+  },
+  {
+   "description": "Vier Ziffern nach ADR/UN-Empfehlungen, z. B. UN 1866.",
+   "fieldname": "un_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "UN-Nummer",
+   "reqd": 1
+  },
+  {
+   "description": "Stammdatum; die Versand-/Etikettendaten selbst folgen in W3-6.",
+   "fieldname": "proper_shipping_name",
+   "fieldtype": "Data",
+   "label": "Offizielle Benennung (ADR)"
+  },
+  {
+   "fieldname": "column_break_rw1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "storage_class",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Lagerklasse (TRGS 510)",
+   "options": "1\n2A\n2B\n3\n4.1A\n4.1B\n4.2\n4.3\n5.1A\n5.1B\n5.1C\n5.2\n6.1A\n6.1B\n6.1C\n6.1D\n6.2\n7\n8A\n8B\n10\n11\n12\n13",
+   "reqd": 1
+  },
+  {
+   "fieldname": "storage_class_designation",
+   "fieldtype": "Data",
+   "label": "Bezeichnung der Lagerklasse",
+   "read_only": 1
+  },
+  {
+   "fieldname": "water_hazard_class",
+   "fieldtype": "Select",
+   "label": "Wassergefährdungsklasse (AwSV)",
+   "options": "\n1\n2\n3\nnwg"
+  },
+  {
+   "fieldname": "rw_ghs_section",
+   "fieldtype": "Section Break",
+   "label": "GHS/CLP-Einstufung"
+  },
+  {
+   "fieldname": "signal_word",
+   "fieldtype": "Select",
+   "label": "Signalwort",
+   "options": "\nGefahr\nAchtung"
+  },
+  {
+   "fieldname": "pictograms",
+   "fieldtype": "Table",
+   "label": "GHS-Piktogramme",
+   "options": "Hazmat Pictogram"
+  },
+  {
+   "fieldname": "statements",
+   "fieldtype": "Table",
+   "label": "H- und P-Sätze",
+   "options": "Hazmat Statement"
+  },
+  {
+   "fieldname": "rw_sds_section",
+   "fieldtype": "Section Break",
+   "label": "Sicherheitsdatenblatt"
+  },
+  {
+   "description": "Dokumentenreferenz des SDB, z. B. SDS-RW-0001.",
+   "fieldname": "sds_reference",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Sicherheitsdatenblatt (Referenz)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sds_version",
+   "fieldtype": "Data",
+   "label": "SDB-Version"
+  },
+  {
+   "fieldname": "column_break_rw2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sds_revision_date",
+   "fieldtype": "Date",
+   "label": "SDB-Stand"
+  },
+  {
+   "fieldname": "sds_attachment",
+   "fieldtype": "Attach",
+   "label": "SDB-Datei"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "rw_audit_section",
+   "fieldtype": "Section Break",
+   "label": "Änderungsverlauf"
+  },
+  {
+   "default": "1",
+   "fieldname": "revision",
+   "fieldtype": "Int",
+   "label": "Aktuelle Version",
+   "read_only": 1
+  },
+  {
+   "fieldname": "revisions",
+   "fieldtype": "Table",
+   "label": "Versionsverlauf",
+   "options": "Hazmat Profile Revision",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-04-01 09:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Regulatory Hazmat",
+ "name": "Hazmat Profile",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Rheinwerk Technologist",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Quality Manager"
+  },
+  {
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Rheinwerk Warehouse Clerk"
+  },
+  {
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Rheinwerk Shop Floor Operator"
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "profile_name",
+ "track_changes": 1
+}
