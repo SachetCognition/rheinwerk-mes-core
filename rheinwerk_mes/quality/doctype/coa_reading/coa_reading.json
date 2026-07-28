@@ -1,0 +1,77 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "creation": "2026-04-01 09:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "parameter",
+  "unit",
+  "limit_text",
+  "column_break_rw1",
+  "reading",
+  "reading_result",
+  "reading_result_label"
+ ],
+ "fields": [
+  {
+   "fieldname": "parameter",
+   "fieldtype": "Data",
+   "label": "Prüfmerkmal",
+   "in_list_view": 1,
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Data",
+   "label": "Einheit",
+   "in_list_view": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "limit_text",
+   "fieldtype": "Data",
+   "label": "Spezifikation",
+   "in_list_view": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_rw1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reading",
+   "fieldtype": "Data",
+   "label": "Messwert",
+   "in_list_view": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "reading_result",
+   "fieldtype": "Data",
+   "label": "Ergebnis",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reading_result_label",
+   "fieldtype": "Data",
+   "label": "Ergebnis (Anzeige)",
+   "in_list_view": 1,
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-04-01 09:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Quality",
+ "name": "CoA Reading",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "creation",
+ "sort_order": "ASC",
+ "states": []
+}

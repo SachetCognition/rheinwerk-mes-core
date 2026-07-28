@@ -1,0 +1,265 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "naming_series:",
+ "creation": "2026-04-01 09:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "batch",
+  "item",
+  "item_name",
+  "column_break_rw1",
+  "certificate_status",
+  "version",
+  "supersedes",
+  "superseded_by",
+  "section_break_rw2",
+  "quality_inspection",
+  "inspection_template",
+  "inspection_date",
+  "column_break_rw3",
+  "issue_date",
+  "signatory",
+  "signatory_name",
+  "section_break_rw4",
+  "manufacturing_date",
+  "expiry_date",
+  "column_break_rw5",
+  "qty_original",
+  "stock_uom",
+  "section_break_rw6",
+  "readings",
+  "section_break_rw7",
+  "pdf_document"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Nummernkreis",
+   "options": "COA-.YYYY.-",
+   "default": "COA-.YYYY.-",
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "batch",
+   "fieldtype": "Link",
+   "options": "Batch",
+   "label": "Charge",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "options": "Item",
+   "label": "Artikel",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Artikelbezeichnung",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_rw1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "certificate_status",
+   "fieldtype": "Select",
+   "options": "Issued\nSuperseded",
+   "default": "Issued",
+   "label": "Zertifikatsstatus",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "version",
+   "fieldtype": "Int",
+   "label": "Version",
+   "default": "1",
+   "in_list_view": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "supersedes",
+   "fieldtype": "Link",
+   "options": "CoA Certificate",
+   "label": "Ersetzt",
+   "read_only": 1
+  },
+  {
+   "fieldname": "superseded_by",
+   "fieldtype": "Link",
+   "options": "CoA Certificate",
+   "label": "Ersetzt durch",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_rw2",
+   "fieldtype": "Section Break",
+   "label": "Zugrunde liegende Prüfung"
+  },
+  {
+   "fieldname": "quality_inspection",
+   "fieldtype": "Link",
+   "options": "Quality Inspection",
+   "label": "Qualitätsprüfung",
+   "read_only": 1
+  },
+  {
+   "fieldname": "inspection_template",
+   "fieldtype": "Data",
+   "label": "Prüfvorlage",
+   "read_only": 1
+  },
+  {
+   "fieldname": "inspection_date",
+   "fieldtype": "Date",
+   "label": "Prüfdatum",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_rw3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "issue_date",
+   "fieldtype": "Date",
+   "label": "Ausstellungsdatum",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "signatory",
+   "fieldtype": "Link",
+   "options": "User",
+   "label": "Freigebende Person",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "signatory_name",
+   "fieldtype": "Data",
+   "label": "Freigebende Person (Name)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_rw4",
+   "fieldtype": "Section Break",
+   "label": "Chargenidentität"
+  },
+  {
+   "fieldname": "manufacturing_date",
+   "fieldtype": "Date",
+   "label": "Herstelldatum",
+   "read_only": 1
+  },
+  {
+   "fieldname": "expiry_date",
+   "fieldtype": "Date",
+   "label": "Verfallsdatum",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_rw5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "qty_original",
+   "fieldtype": "Float",
+   "label": "Chargenmenge",
+   "precision": "3",
+   "read_only": 1
+  },
+  {
+   "fieldname": "stock_uom",
+   "fieldtype": "Link",
+   "options": "UOM",
+   "label": "Einheit",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_rw6",
+   "fieldtype": "Section Break",
+   "label": "Prüfergebnisse"
+  },
+  {
+   "fieldname": "readings",
+   "fieldtype": "Table",
+   "options": "CoA Reading",
+   "label": "Messwerte",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_rw7",
+   "fieldtype": "Section Break",
+   "label": "Dokument"
+  },
+  {
+   "fieldname": "pdf_document",
+   "fieldtype": "Attach",
+   "label": "PDF-Dokument",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 0,
+ "links": [],
+ "modified": "2026-04-01 09:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Quality",
+ "name": "CoA Certificate",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "Quality Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "print": 1,
+   "email": 1,
+   "export": 1,
+   "report": 1,
+   "share": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "print": 1,
+   "email": 1,
+   "export": 1,
+   "report": 1,
+   "share": 1
+  },
+  {
+   "role": "Rheinwerk Business Viewer",
+   "read": 1,
+   "print": 1,
+   "email": 1,
+   "export": 1,
+   "report": 1
+  }
+ ],
+ "search_fields": "batch,item,certificate_status",
+ "show_title_field_in_link": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "batch",
+ "track_changes": 1
+}

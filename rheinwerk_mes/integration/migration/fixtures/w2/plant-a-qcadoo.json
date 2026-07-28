@@ -1,0 +1,42 @@
+{
+	"description": "Plant A (Qcadoo) W2 migration pilot extract — dual batch model (advancedGenealogy.Batch + materialflowresources.Resource), TrackingRecord genealogy trees and the legacy quality flags. Semantics re-expressed from SachetCognition/Chem_mes@master (never ported): TrackingRecordFields.java:31-49, BatchState.java:31-44, ResourceFields.java. Field-level mapping: docs/canonical-model/README.md CDM-01/CDM-07.",
+	"plant": "A",
+	"source": "qcadoo",
+	"trace_boundary_date": null,
+	"genealogy_batches": [
+		{"number": "GB-100", "product": "RW-CHM-0001", "state": "01tracked"},
+		{"number": "GB-200", "product": "RW-CHM-0002", "state": "02blocked"},
+		{"number": "GB-400", "product": "RW-CHM-0002", "state": "01tracked"},
+		{"number": "GB-300", "product": "RW-CHM-0003", "state": "01tracked"},
+		{"number": "GB-310", "product": "RW-CHM-0003", "state": "01tracked"}
+	],
+	"resources": [
+		{"batch": "GB-100", "product": "RW-CHM-0001", "expirationDate": "2026-06-30", "blockedForQualityControl": false, "qualityRating": "accepted", "quantity": 300.0, "supplierBatch": "SUP-BH-01"},
+		{"batch": "GB-100", "product": "RW-CHM-0001", "expirationDate": "2026-07-31", "blockedForQualityControl": false, "qualityRating": "accepted", "quantity": 200.0, "supplierBatch": "SUP-BH-01"},
+		{"batch": "GB-200", "product": "RW-CHM-0002", "expirationDate": "2026-09-30", "blockedForQualityControl": false, "qualityRating": "blocked", "quantity": 50.0, "supplierBatch": "SUP-K7-09"},
+		{"batch": "GB-400", "product": "RW-CHM-0002", "expirationDate": "2026-10-31", "blockedForQualityControl": true, "qualityRating": "pending", "quantity": 25.0, "supplierBatch": "SUP-K7-10"},
+		{"batch": "GB-300", "product": "RW-CHM-0003", "expirationDate": "2027-06-30", "blockedForQualityControl": false, "qualityRating": "accepted", "quantity": 100.0, "supplierBatch": null},
+		{"batch": "GB-310", "product": "RW-CHM-0003", "expirationDate": "2027-07-31", "blockedForQualityControl": false, "qualityRating": "accepted", "quantity": 80.0, "supplierBatch": null},
+		{"batch": "RB-ORPHAN", "product": "RW-CHM-0001", "expirationDate": "2026-08-31", "blockedForQualityControl": false, "qualityRating": "accepted", "quantity": 40.0, "supplierBatch": "SUP-BH-07"}
+	],
+	"tracking_records": [
+		{
+			"number": "TR-A-0001",
+			"producedBatch": "GB-300",
+			"order": "000200/2025",
+			"used": [
+				{"batch": "GB-100", "product": "RW-CHM-0001", "quantity": 80.0, "uom": "Kg"},
+				{"batch": "GB-200", "product": "RW-CHM-0002", "quantity": 20.0, "uom": "Kg"}
+			]
+		},
+		{
+			"number": "TR-A-0002",
+			"producedBatch": "GB-310",
+			"order": "000201/2025",
+			"used": [
+				{"batch": "GB-100", "product": "RW-CHM-0001", "quantity": 60.0, "uom": "Kg"},
+				{"batch": "GB-400", "product": "RW-CHM-0002", "quantity": 15.0, "uom": "Kg"}
+			]
+		}
+	]
+}

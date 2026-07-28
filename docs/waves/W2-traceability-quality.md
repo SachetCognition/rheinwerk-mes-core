@@ -18,3 +18,4 @@ Genealogy object model; batch blocking; QI adoption; CoA rebuild; ISA-88 recipes
 | W2-8 | Warehouse fidelity completion: quarantine locations, pallet balances, stocktaking/repacking journeys | Absorb Qcadoo | ch. 3.1 `storageLocation.xml:37-54`, `RepackingState.java`, `StocktakingState.java` |
 | W2-9 | Multi-level trace demo: acceptance test proving full forward + backward trace incl. blocked-batch propagation | — | Wave exit criterion |
 | W2-10 | E-signature decision for compliance-critical transitions (no legacy precedent — white space) | Decision / Rebuild | §6.3; audit findings ch. §E of all three |
+| W2-11 | Pilot migration of open batches, genealogy history and legacy quality flags into the canonical Batch, incl. reconciliation report and rehearsed rollback | Migrate (Qcadoo + OFBiz) | ch. 3.1 `TrackingRecordFields.java`, `BatchState.java:31-44`; OFBiz `WorkEffortInventoryAssign`/`Produced` (`lotId` absence = trace boundary) |

@@ -1,0 +1,232 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-07-28 09:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "warehouse",
+  "state",
+  "column_break_rw1",
+  "company",
+  "posting_date",
+  "reason",
+  "source_section",
+  "source_handling_unit",
+  "item",
+  "batch_no",
+  "column_break_rw2",
+  "qty",
+  "uom",
+  "target_section",
+  "target_handling_unit",
+  "creates_new_lot",
+  "new_batch_id",
+  "column_break_rw3",
+  "new_batch",
+  "repack_stock_entry",
+  "history_section",
+  "state_history"
+ ],
+ "fields": [
+  {
+   "default": "REPACK-.YYYY.-.####.",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Nummernkreis",
+   "options": "REPACK-.YYYY.-.####.",
+   "reqd": 1
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Lager",
+   "options": "Warehouse",
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "default": "Draft",
+   "fieldname": "state",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Zustand",
+   "options": "Draft\nAccepted\nRejected",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_rw1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Unternehmen",
+   "options": "Company"
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Buchungsdatum"
+  },
+  {
+   "depends_on": "eval:doc.state==\"Rejected\"",
+   "fieldname": "reason",
+   "fieldtype": "Small Text",
+   "label": "Begr\u00fcndung"
+  },
+  {
+   "fieldname": "source_section",
+   "fieldtype": "Section Break",
+   "label": "Quelle"
+  },
+  {
+   "fieldname": "source_handling_unit",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Quell-Ladeeinheit",
+   "options": "Handling Unit",
+   "reqd": 1
+  },
+  {
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Artikel",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "batch_no",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Charge",
+   "options": "Batch",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_rw2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Umzupackende Menge (kg)",
+   "precision": "6",
+   "reqd": 1
+  },
+  {
+   "default": "Kg",
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "Einheit",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "target_section",
+   "fieldtype": "Section Break",
+   "label": "Ziel"
+  },
+  {
+   "fieldname": "target_handling_unit",
+   "fieldtype": "Link",
+   "label": "Ziel-Ladeeinheit",
+   "options": "Handling Unit",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "description": "Setzen, wenn beim Umpacken eine neue Chargenidentit\u00e4t entsteht (z. B. Umf\u00fcllen mit neuer Kennzeichnung).",
+   "fieldname": "creates_new_lot",
+   "fieldtype": "Check",
+   "label": "Neue Chargenidentit\u00e4t"
+  },
+  {
+   "depends_on": "eval:doc.creates_new_lot",
+   "fieldname": "new_batch_id",
+   "fieldtype": "Data",
+   "label": "Neue Charge (ID)"
+  },
+  {
+   "fieldname": "column_break_rw3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "new_batch",
+   "fieldtype": "Link",
+   "label": "Erzeugte Charge",
+   "options": "Batch",
+   "read_only": 1
+  },
+  {
+   "fieldname": "repack_stock_entry",
+   "fieldtype": "Link",
+   "label": "Umpack-Buchung",
+   "options": "Stock Entry",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "history_section",
+   "fieldtype": "Section Break",
+   "label": "Verlauf"
+  },
+  {
+   "fieldname": "state_history",
+   "fieldtype": "Table",
+   "label": "Zustandsverlauf",
+   "options": "Warehouse Journey History",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-28 09:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Warehouse",
+ "name": "Repacking",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Rheinwerk Warehouse Clerk",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock User"
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

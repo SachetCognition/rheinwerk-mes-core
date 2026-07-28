@@ -1,0 +1,100 @@
+{#- CoA body (W2-5 · URS-W2-017/018). One markup for the Desk view and the PDF, so the
+    printed certificate and the screen cannot drift apart. German-first throughout:
+    DD.MM.YYYY dates, kg masses, status as icon glyph + label (never colour alone). -#}
+<div class="rw-coa">
+	<style>
+		.rw-coa { font-family: Inter, Arial, sans-serif; color: #1a1a1a; font-size: 11pt; }
+		.rw-coa h1 { font-size: 16pt; margin: 0 0 2mm 0; }
+		.rw-coa .rw-coa-meta { width: 100%; border-collapse: collapse; margin-bottom: 6mm; }
+		.rw-coa .rw-coa-meta td { padding: 1mm 2mm 1mm 0; vertical-align: top; }
+		.rw-coa .rw-coa-meta .rw-label { color: #555; width: 38mm; }
+		.rw-coa table.rw-readings { width: 100%; border-collapse: collapse; margin-bottom: 6mm; }
+		.rw-coa table.rw-readings th, .rw-coa table.rw-readings td {
+			border-bottom: 0.3mm solid #cfcfcf; padding: 1.5mm 2mm; text-align: left;
+		}
+		.rw-coa .rw-ribbon { border-top: 0.3mm solid #cfcfcf; padding-top: 3mm; }
+		.rw-coa .rw-chip {
+			display: inline-block; border: 0.3mm solid #9a9a9a; border-radius: 2mm;
+			padding: 1mm 2mm; margin: 0 1.5mm 1.5mm 0; font-size: 9pt;
+		}
+		.rw-coa .rw-chip.rw-focus { border-width: 0.6mm; font-weight: 600; }
+		.rw-coa .rw-chip.rw-break { border-style: dashed; }
+		.rw-coa .rw-pill { font-size: 8pt; color: #333; display: block; }
+	</style>
+
+	<h1>{{ _("Analysenzertifikat") }} {{ coa.certificate }}</h1>
+
+	<table class="rw-coa-meta">
+		<tr>
+			<td class="rw-label">{{ _("Charge") }}</td><td><b>{{ coa.batch }}</b></td>
+			<td class="rw-label">{{ _("Ausstellungsdatum") }}</td><td>{{ coa.issue_date }}</td>
+		</tr>
+		<tr>
+			<td class="rw-label">{{ _("Artikel") }}</td>
+			<td>{{ coa.item }} — {{ coa.item_name }}</td>
+			<td class="rw-label">{{ _("Freigebende Person") }}</td>
+			<td>{{ coa.signatory_name or coa.signatory }}</td>
+		</tr>
+		<tr>
+			<td class="rw-label">{{ _("Herstelldatum") }}</td><td>{{ coa.manufacturing_date }}</td>
+			<td class="rw-label">{{ _("Prüfung") }}</td>
+			<td>{{ coa.inspection }} ({{ coa.inspection_date }})</td>
+		</tr>
+		<tr>
+			<td class="rw-label">{{ _("Verfallsdatum") }}</td><td>{{ coa.expiry_date }}</td>
+			<td class="rw-label">{{ _("Prüfvorlage") }}</td><td>{{ coa.inspection_template }}</td>
+		</tr>
+		<tr>
+			<td class="rw-label">{{ _("Chargenmenge") }}</td><td>{{ coa.qty }}</td>
+			<td class="rw-label">{{ _("Version") }}</td>
+			<td>{{ coa.version }} — {{ coa.status_label }}</td>
+		</tr>
+		<tr>
+			<td class="rw-label">{{ _("Qualitätszustand") }}</td>
+			<td colspan="3">{{ coa.qa_state_label }}</td>
+		</tr>
+	</table>
+
+	<table class="rw-readings">
+		<thead>
+			<tr>
+				<th>{{ _("Prüfmerkmal") }}</th>
+				<th>{{ _("Spezifikation") }}</th>
+				<th>{{ _("Messwert") }}</th>
+				<th>{{ _("Einheit") }}</th>
+				<th>{{ _("Ergebnis") }}</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for reading in coa.readings %}
+			<tr>
+				<td>{{ reading.parameter }}</td>
+				<td>{{ reading.limit_text }}</td>
+				<td>{{ reading.reading }}</td>
+				<td>{{ reading.unit }}</td>
+				<td>{{ "✓" if reading.status == "Accepted" else "✕" }} {{ reading.status_label }}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+
+	<div class="rw-ribbon">
+		<h2 style="font-size: 12pt;">{{ _("Chargen-Trace") }}</h2>
+		{% for chip in coa.ribbon.left %}
+			<span class="rw-chip{% if chip.branch_break %} rw-break{% endif %}">
+				{{ chip.batch }} · {{ chip.item }}
+				{% for pill in chip.pills %}<span class="rw-pill">{{ pill.label }}</span>{% endfor %}
+			</span>
+		{% endfor %}
+		<span class="rw-chip rw-focus{% if coa.ribbon.focus.branch_break %} rw-break{% endif %}">
+			{{ coa.ribbon.focus.batch }} · {{ coa.ribbon.focus.item }}
+			{% for pill in coa.ribbon.focus.pills %}<span class="rw-pill">{{ pill.label }}</span>{% endfor %}
+		</span>
+		{% for chip in coa.ribbon.right %}
+			<span class="rw-chip{% if chip.branch_break %} rw-break{% endif %}">
+				{{ chip.batch }} · {{ chip.item }}
+				{% for pill in chip.pills %}<span class="rw-pill">{{ pill.label }}</span>{% endfor %}
+			</span>
+		{% endfor %}
+	</div>
+</div>

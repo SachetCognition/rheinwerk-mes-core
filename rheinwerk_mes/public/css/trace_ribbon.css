@@ -1,0 +1,151 @@
+/* Trace Ribbon — horizontal genealogy band (W2-1 · URS-W2-003).
+ * Suppliers left, focus centred, downstream right. Status is icon + label + colour;
+ * a blocked chip additionally breaks its branch with a hard rule so the break survives
+ * greyscale printing (URS-W2-003 AC-2, AC-4). */
+
+.rw-ribbon {
+	--rw-petrol-900: #0e3038;
+	--rw-petrol-600: #16606e;
+	--rw-signal-amber: #b4690e;
+	--rw-signal-red: #a51d2d;
+	--rw-signal-green: #1a7f47;
+
+	font-size: 14px;
+	color: var(--rw-petrol-900);
+}
+
+.rw-ribbon__bar {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 0.5rem 0.75rem;
+	background: var(--rw-petrol-900);
+	color: #fff;
+}
+
+.rw-ribbon__hint {
+	margin-left: auto;
+	font-size: 12px;
+	opacity: 0.85;
+}
+
+.rw-ribbon__band {
+	display: flex;
+	align-items: stretch;
+	gap: 1.5rem;
+	overflow-x: auto;
+	padding: 1.25rem 0.75rem;
+}
+
+.rw-chip {
+	position: relative;
+	min-width: 13rem;
+	padding: 0.75rem;
+	border: 1px solid var(--rw-petrol-600);
+	border-radius: 6px;
+	background: #fff;
+}
+
+.rw-chip[data-side="focus"] {
+	border-width: 3px;
+	box-shadow: 0 0 0 3px rgba(22, 96, 110, 0.15);
+}
+
+.rw-chip[aria-current="true"] {
+	outline: 3px solid var(--rw-petrol-600);
+	outline-offset: 2px;
+}
+
+/* Hard visual break of a blocked branch — colour plus a doubled rule and the
+ * "Gesperrt" label carried by the pill. */
+.rw-chip[data-break="1"] {
+	border-color: var(--rw-signal-red);
+	border-left: 6px double var(--rw-signal-red);
+	background: repeating-linear-gradient(135deg, #fff, #fff 8px, #f7e6e8 8px, #f7e6e8 16px);
+}
+
+.rw-chip__id {
+	font-family: "IBM Plex Mono", ui-monospace, monospace;
+	font-size: 15px;
+	margin: 0 0 0.25rem;
+}
+
+.rw-chip__item,
+.rw-chip__qty,
+.rw-chip__expiry {
+	margin: 0;
+	font-size: 13px;
+}
+
+.rw-chip__pills {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.25rem;
+	margin-top: 0.5rem;
+}
+
+.rw-ribbon .rw-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+	padding: 0.1rem 0.5rem;
+	border-radius: 999px;
+	border: 1px solid currentColor;
+	font-size: 12px;
+}
+
+.rw-ribbon .rw-pill--green {
+	color: var(--rw-signal-green);
+}
+.rw-ribbon .rw-pill--amber {
+	color: var(--rw-signal-amber);
+}
+.rw-ribbon .rw-pill--red {
+	color: var(--rw-signal-red);
+}
+
+.rw-pill__icon::before {
+	content: "●";
+}
+.rw-pill__icon[data-icon="check"]::before {
+	content: "✓";
+}
+.rw-pill__icon[data-icon="clock"]::before {
+	content: "◷";
+}
+.rw-pill__icon[data-icon="octagon"]::before {
+	content: "⛔";
+}
+.rw-pill__icon[data-icon="alert-triangle"]::before {
+	content: "⚠";
+}
+
+.rw-ribbon__detail {
+	padding: 0.75rem;
+	border-top: 1px solid var(--rw-petrol-600);
+}
+
+.rw-ribbon__detail dl {
+	display: grid;
+	grid-template-columns: 12rem 1fr;
+	gap: 0.25rem 1rem;
+	margin: 0;
+}
+
+/* Print carries the same nodes, states and breaks as the screen (URS-W2-003 AC-4). */
+@media print {
+	.rw-ribbon__bar,
+	.rw-ribbon__hint {
+		display: none;
+	}
+
+	.rw-ribbon__band {
+		display: flex;
+		flex-wrap: wrap;
+		overflow: visible;
+	}
+
+	.rw-chip {
+		break-inside: avoid;
+	}
+}
