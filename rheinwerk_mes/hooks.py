@@ -88,6 +88,9 @@ after_install = [
 	# W3-3/W3-4: the group-ERP boundary's roles, account map and health surface
 	# (URS-W3-010 … URS-W3-014) — a fresh install skips patches, so it is registered here too.
 	"rheinwerk_mes.setup.w3_boundary.setup_w3_boundary",
+	# W3-1: the planning custom fields on the anchor Production Plan / Material Request
+	# (URS-W3-001 … URS-W3-004) — registered here so a fresh install matches a migration.
+	"rheinwerk_mes.setup.w3_planning.setup_w3_planning",
 ]
 
 # Client-side additions to anchor forms; W1-4 renders the recipe's `gov_state` pill on the
