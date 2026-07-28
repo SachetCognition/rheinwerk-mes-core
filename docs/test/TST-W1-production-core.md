@@ -370,7 +370,7 @@ Side-by-side assertions of target behaviour against the Qcadoo characterisation 
 | P-6 | Recipe 5-state lifecycle incl. immutable Accepted → Outdated | `TechnologyState.java:33-66` | Identical `gov_state` transition set | Parity | TC-W1-015, TC-W1-017 |
 | P-7 | FIFO/LIFO/FEFO/LEFO outbound pick order | `ResourceManagementServiceImpl.java:1015-1027`; `WarehouseAlgorithm.java:26-27` | Same ordering per warehouse algorithm | Parity | TC-W1-021, TC-W1-030 |
 | P-8 | Draft documents reserve stock; deletion releases | `ReservationsService.java:81-247` | `draft_reservation` SREs mirror create/release semantics | Parity | TC-W1-024, TC-W1-025 |
-| P-9 | Expired stock issuable under FEFO-advisory | Legacy: no hard stop in `ResourceManagementServiceImpl.java:1015-1027`; target: hard stop per `stock_ledger_entry.py:287-299` | Target **deviates deliberately**: hard stop estate-wide | **Intentional divergence — Business sign-off required (URS-W1-030)** | TC-W1-032, TC-W1-033 |
+| P-9 | Expired stock issuable under FEFO-advisory | Legacy: no hard stop in `ResourceManagementServiceImpl.java:1015-1027`; target: hard stop per `stock_ledger_entry.py:287-299` | Target **deviates deliberately**: hard stop estate-wide | **Intentional divergence — signed off (URS-W1-030): Sachet Agarwal, Programme Owner, 28.07.2026; `docs/decisions/DEC-W1-030-expiry-policy.md`)** | TC-W1-032, TC-W1-033 |
 
 Anchor-adopt behaviours (over-production, stopped freeze, closed terminal, expired-batch throw) are verified against the ERPNext baseline (`services/status.py:29-47,208-224`; `job_card.py:904-910`; `work_order.py:1131-1132`; `stock_ledger_entry.py:287-299`) by TC-W1-011…014 — these are Adopt, not parity-vs-Qcadoo.
 
@@ -380,9 +380,17 @@ Executable form of the W1 exit criteria (`docs/urs/URS-W1-production-core.md` §
 
 | Exit ID | Check | Test cases | Result |
 |---|---|---|---|
-| EXIT-W1-1 | Planner journey passes acceptance (create→accept→start with gates→monitor) | TC-W1-001…010, TC-W1-026, TC-W1-038 | ☐ |
-| EXIT-W1-2 | Operator journey passes acceptance (job cards, scanner, pause/resume, output→completion) | TC-W1-027…029, TC-W1-008, TC-W1-038 | ☐ |
-| EXIT-W1-3 | Recipe governance live with validators, immutability, in-use lock, order gate | TC-W1-007, TC-W1-015…018 | ☐ |
-| EXIT-W1-4 | Warehouse fidelity base live (HU, locations, disposal algorithms, reservations; ledger single truth) | TC-W1-019…026 | ☐ |
-| EXIT-W1-5 | Behaviour-choice record generated per gate; expiry divergence signed off | TC-W1-030, TC-W1-032…034 | ☐ |
-| EXIT-W1-6 | Role model, audit, latency, i18n, Desk/Terminal conformance verified | TC-W1-031, TC-W1-035…037, TC-W1-039 | ☐ |
+| EXIT-W1-1 | Planner journey passes acceptance (create→accept→start with gates→monitor) | TC-W1-001…010, TC-W1-026, TC-W1-038 | ☑ |
+| EXIT-W1-2 | Operator journey passes acceptance (job cards, scanner, pause/resume, output→completion) | TC-W1-027…029, TC-W1-008, TC-W1-038 | ☑ |
+| EXIT-W1-3 | Recipe governance live with validators, immutability, in-use lock, order gate | TC-W1-007, TC-W1-015…018 | ☑ |
+| EXIT-W1-4 | Warehouse fidelity base live (HU, locations, disposal algorithms, reservations; ledger single truth) | TC-W1-019…026 | ☑ |
+| EXIT-W1-5 | Behaviour-choice record generated per gate; expiry divergence signed off | TC-W1-030, TC-W1-032…034 | ☑ |
+| EXIT-W1-6 | Role model, audit, latency, i18n, Desk/Terminal conformance verified | TC-W1-031, TC-W1-035…037, TC-W1-039 | ☑ |
+
+Confirmed at W1 fan-in on the merged wave branch: every mapped TC executes green offline and against a
+from-scratch site (`./scripts/setup_stack.sh` then the full `pytest tests` run),
+`python -m tools.evidence.generate --wave W1` reports 10/10 backlog items complete with zero unlinked
+items, and `python -m tools.behaviour.generate --wave W1` generates all ten gate rows — nine parity, one
+intentional divergence (expiry policy) carrying its business sign-off. The `CHAR-EXPIRY-ISSUE-01`
+contract's divergent case runs as a strict xfail, so the divergence cannot silently disappear. W2 may
+open.

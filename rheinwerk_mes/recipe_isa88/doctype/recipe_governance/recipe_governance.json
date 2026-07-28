@@ -1,0 +1,199 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 0,
+ "autoname": "field:bom",
+ "creation": "2026-02-10 09:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "bom",
+  "item",
+  "column_break_rw1",
+  "routing",
+  "gov_state",
+  "rw_lock_section",
+  "in_use_lock",
+  "in_use_orders",
+  "rw_validation_section",
+  "validated_by",
+  "validated_on",
+  "validator_results",
+  "rw_history_section",
+  "transition_reason",
+  "state_history"
+ ],
+ "fields": [
+  {
+   "fieldname": "bom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Rezept (St\u00fcckliste)",
+   "options": "BOM",
+   "reqd": 1,
+   "set_only_once": 1,
+   "unique": 1
+  },
+  {
+   "fetch_from": "bom.item",
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Erzeugnis",
+   "options": "Item",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_rw1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "routing",
+   "fieldtype": "Link",
+   "label": "Arbeitsplan",
+   "options": "Routing"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "gov_state",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Freigabestatus",
+   "description": "Wird \u00fcber die Freigabeaktionen (Workflow) gesetzt.",
+   "no_copy": 1,
+   "options": "Draft\nChecked\nAccepted\nOutdated\nDeclined",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "rw_lock_section",
+   "fieldtype": "Section Break",
+   "label": "Verwendungssperre"
+  },
+  {
+   "default": "0",
+   "fieldname": "in_use_lock",
+   "fieldtype": "Check",
+   "label": "In Verwendung gesperrt",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "in_use_lock",
+   "fieldname": "in_use_orders",
+   "fieldtype": "Small Text",
+   "label": "Sperrende Fertigungsauftr\u00e4ge",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "rw_validation_section",
+   "fieldtype": "Section Break",
+   "label": "Strukturpr\u00fcfungen"
+  },
+  {
+   "fieldname": "validated_by",
+   "fieldtype": "Link",
+   "label": "Gepr\u00fcft von",
+   "no_copy": 1,
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "validated_on",
+   "fieldtype": "Datetime",
+   "label": "Gepr\u00fcft am",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "validator_results",
+   "fieldtype": "Table",
+   "label": "Pr\u00fcfergebnisse",
+   "no_copy": 1,
+   "options": "Recipe Validator Result",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rw_history_section",
+   "fieldtype": "Section Break",
+   "label": "Freigabehistorie"
+  },
+  {
+   "description": "Pflicht bei Ablehnung, Zur\u00fccksetzung und Au\u00dferkraftsetzung.",
+   "fieldname": "transition_reason",
+   "fieldtype": "Small Text",
+   "label": "Begr\u00fcndung der n\u00e4chsten Status\u00e4nderung",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "state_history",
+   "fieldtype": "Table",
+   "label": "Statusverlauf",
+   "no_copy": 1,
+   "options": "Recipe Governance State Change",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [
+  {
+   "link_doctype": "Work Order",
+   "link_fieldname": "bom_no",
+   "parent_doctype": "BOM"
+  }
+ ],
+ "modified": "2026-02-10 09:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Recipe ISA88",
+ "name": "Recipe Governance",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Rheinwerk Technologist",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Rheinwerk Planner"
+  },
+  {
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Rheinwerk Warehouse Clerk"
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "bom",
+ "track_changes": 1
+}

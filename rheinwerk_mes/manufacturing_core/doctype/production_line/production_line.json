@@ -1,0 +1,81 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "field:production_line_name",
+ "creation": "2026-01-05 09:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "production_line_name",
+  "division",
+  "column_break_rw1",
+  "company",
+  "disabled",
+  "description"
+ ],
+ "fields": [
+  {
+   "fieldname": "production_line_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Fertigungslinie",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "division",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Werksbereich",
+   "options": "Division"
+  },
+  {
+   "fieldname": "column_break_rw1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Unternehmen",
+   "options": "Company"
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Deaktiviert"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Beschreibung"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-01-05 09:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Manufacturing Core",
+ "name": "Production Line",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
