@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TST W3 — Planning &amp; Boundary</title>
+<style>
+:root{--accent:#1f4e79;--accent2:#2e74b5;--bg:#f7f9fb;--card:#ffffff;--text:#24292f;--muted:#6a737d;--border:#e1e6eb;--sidebar-w:300px}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",Calibri,Arial,sans-serif;color:var(--text);background:var(--bg);line-height:1.55;font-size:15px}
+#sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:var(--accent);color:#fff;overflow-y:auto;padding:22px 18px}
+#sidebar .brand{font-size:15px;font-weight:600;letter-spacing:.4px;border-bottom:1px solid rgba(255,255,255,.25);padding-bottom:12px;margin-bottom:12px}
+#sidebar .brand small{display:block;font-weight:400;opacity:.75;margin-top:4px}
+#sidebar nav ul{list-style:none;margin:0;padding-left:0}
+#sidebar nav ul ul{padding-left:14px}
+#sidebar nav a{display:block;color:rgba(255,255,255,.85);text-decoration:none;font-size:12.6px;padding:4px 8px;border-radius:5px;border-left:3px solid transparent}
+#sidebar nav a:hover{background:rgba(255,255,255,.12);color:#fff}
+#sidebar nav a.active{background:rgba(255,255,255,.18);color:#fff;border-left-color:#9cc3e5;font-weight:600}
+#content{margin-left:var(--sidebar-w);padding:42px 56px;max-width:1080px}
+header.doc{border-bottom:3px solid var(--accent);padding-bottom:18px;margin-bottom:30px}
+header.doc h1{color:var(--accent);font-size:30px;margin:0 0 6px}
+header.doc .sub{color:var(--accent2);font-size:15.5px;font-weight:600}
+h1,h2{color:var(--accent);margin-top:2.1em;border-bottom:1px solid var(--border);padding-bottom:.25em}
+h3,h4{color:var(--accent2);margin-top:1.7em}
+a{color:var(--accent2)}
+table{border-collapse:collapse;width:100%;margin:1.1em 0;background:var(--card);font-size:13.2px;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+th{background:var(--accent);color:#fff;text-align:left;padding:8px 10px;font-weight:600}
+td{border:1px solid var(--border);padding:7px 10px;vertical-align:top}
+tr:nth-child(even) td{background:#f2f6fa}
+code{background:#eef2f6;border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:12px;font-family:Consolas,Menlo,monospace;color:#0b3d66}
+pre{background:#0f2a43;color:#dce8f5;padding:14px 16px;border-radius:8px;overflow-x:auto;font-size:12.5px}
+pre code{background:none;border:none;color:inherit;padding:0}
+blockquote{margin:1em 0;padding:10px 16px;background:#eaf1f8;border-left:5px solid var(--accent2);border-radius:0 6px 6px 0;color:#243b53}
+img.diagram,p img{max-width:100%;background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px;box-shadow:0 1px 3px rgba(0,0,0,.08);display:block;margin:1.2em auto}
+#top-btn{position:fixed;right:26px;bottom:26px;background:var(--accent);color:#fff;border:none;border-radius:50%;width:46px;height:46px;font-size:19px;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .25s;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+#top-btn.show{opacity:.92;pointer-events:auto}
+footer.doc{margin-top:60px;border-top:1px solid var(--border);padding-top:14px;color:var(--muted);font-size:12px}
+@media(max-width:900px){#sidebar{display:none}#content{margin-left:0;padding:24px}}
+</style>
+</head>
+<body>
+<aside id="sidebar">
+  <div class="brand">TST W3 — Planning &amp; Boundary<small>Rheinwerk
+MES Consolidation — Test &amp; Verification</small></div>
+  <nav><ul>
+<li><a href="#test-strategy" id="toc-test-strategy">1. Test
+strategy</a></li>
+<li><a href="#traceability-matrix" id="toc-traceability-matrix">2.
+Traceability matrix</a></li>
+<li><a href="#test-cases" id="toc-test-cases">3. Test cases</a>
+<ul>
+<li><a href="#tc-w3-001-create-production-plan-from-sales-input-journey" id="toc-tc-w3-001-create-production-plan-from-sales-input-journey">TC-W3-001
+— Create Production Plan from sales input [Journey]</a></li>
+<li><a href="#tc-w3-002-bom-explosion-quantities-integration" id="toc-tc-w3-002-bom-explosion-quantities-integration">TC-W3-002 — BOM
+explosion quantities [Integration]</a></li>
+<li><a href="#tc-w3-003-non-accepted-recipe-refused-with-gate-refusal-presentation-design-conformance" id="toc-tc-w3-003-non-accepted-recipe-refused-with-gate-refusal-presentation-design-conformance">TC-W3-003
+— Non-Accepted recipe refused with gate-refusal presentation
+[Design-conformance]</a></li>
+<li><a href="#tc-w3-004-mrp-netting-vs-ledger-reservations-and-blocked-stock-integration" id="toc-tc-w3-004-mrp-netting-vs-ledger-reservations-and-blocked-stock-integration">TC-W3-004
+— MRP netting vs ledger, reservations and Blocked stock
+[Integration]</a></li>
+<li><a href="#tc-w3-005-order-generation-in-exec_state-pending-integration" id="toc-tc-w3-005-order-generation-in-exec_state-pending-integration">TC-W3-005
+— Order generation in exec_state Pending [Integration]</a></li>
+<li><a href="#tc-w3-006-line-schedule-lifecycle-draftapprovedrejected-journey" id="toc-tc-w3-006-line-schedule-lifecycle-draftapprovedrejected-journey">TC-W3-006
+— Line schedule lifecycle Draft→Approved/Rejected [Journey]</a></li>
+<li><a href="#tc-w3-007-schedule-state-transition-parity-vs-schedulestate.java-parity" id="toc-tc-w3-007-schedule-state-transition-parity-vs-schedulestate.java-parity">TC-W3-007
+— Schedule state-transition parity vs ScheduleState.java
+[Parity]</a></li>
+<li><a href="#tc-w3-008-tjtpz-realization-time-computation-integration" id="toc-tc-w3-008-tjtpz-realization-time-computation-integration">TC-W3-008
+— TJ/TPZ realization-time computation [Integration]</a></li>
+<li><a href="#tc-w3-009-realization-time-parity-vs-orderrealizationtimeserviceimpl-parity" id="toc-tc-w3-009-realization-time-parity-vs-orderrealizationtimeserviceimpl-parity">TC-W3-009
+— Realization-time parity vs OrderRealizationTimeServiceImpl
+[Parity]</a></li>
+<li><a href="#tc-w3-010-changeover-norms-applied-in-sequencing-integration" id="toc-tc-w3-010-changeover-norms-applied-in-sequencing-integration">TC-W3-010
+— Changeover norms applied in sequencing [Integration]</a></li>
+<li><a href="#tc-w3-011-capacity-refusal-names-work-centre-and-resolution-integration" id="toc-tc-w3-011-capacity-refusal-names-work-centre-and-resolution-integration">TC-W3-011
+— Capacity refusal names work centre and resolution
+[Integration]</a></li>
+<li><a href="#tc-w3-012-no-optimiser-scope-audit-nfr" id="toc-tc-w3-012-no-optimiser-scope-audit-nfr">TC-W3-012 — No-optimiser
+scope audit [NFR]</a></li>
+<li><a href="#tc-w3-013-orders-in-happy-path-duplicate-rejection-integration" id="toc-tc-w3-013-orders-in-happy-path-duplicate-rejection-integration">TC-W3-013
+— Orders-in: happy path, duplicate, rejection [Integration]</a></li>
+<li><a href="#tc-w3-014-confirmations-out-on-completed-with-durable-queue-integration" id="toc-tc-w3-014-confirmations-out-on-completed-with-durable-queue-integration">TC-W3-014
+— Confirmations out on Completed, with durable queue
+[Integration]</a></li>
+<li><a href="#tc-w3-015-gl-postings-out-with-account-map-and-unmapped-hold-integration" id="toc-tc-w3-015-gl-postings-out-with-account-map-and-unmapped-hold-integration">TC-W3-015
+— GL postings out with account map and unmapped hold
+[Integration]</a></li>
+<li><a href="#tc-w3-016-contract-fixture-suite-and-versioning-in-ci-integration" id="toc-tc-w3-016-contract-fixture-suite-and-versioning-in-ci-integration">TC-W3-016
+— Contract fixture suite and versioning in CI [Integration]</a></li>
+<li><a href="#tc-w3-017-interface-health-kpi-drill-down-and-audited-replay-journey" id="toc-tc-w3-017-interface-health-kpi-drill-down-and-audited-replay-journey">TC-W3-017
+— Interface health KPI drill-down and audited replay [Journey]</a></li>
+<li><a href="#tc-w3-018-opc-ua-event-ingestion-and-unmatched-queue-integration" id="toc-tc-w3-018-opc-ua-event-ingestion-and-unmatched-queue-integration">TC-W3-018
+— OPC-UA event ingestion and unmatched queue [Integration]</a></li>
+<li><a href="#tc-w3-019-tag-mapping-administration-and-validation-integration" id="toc-tc-w3-019-tag-mapping-administration-and-validation-integration">TC-W3-019
+— Tag-mapping administration and validation [Integration]</a></li>
+<li><a href="#tc-w3-020-store-and-forward-across-a-10-minute-outage-integration" id="toc-tc-w3-020-store-and-forward-across-a-10-minute-outage-integration">TC-W3-020
+— Store-and-forward across a 10-minute outage [Integration]</a></li>
+<li><a href="#tc-w3-021-hazmat-dispatch-label-content-journey" id="toc-tc-w3-021-hazmat-dispatch-label-content-journey">TC-W3-021 —
+Hazmat dispatch label content [Journey]</a></li>
+<li><a href="#tc-w3-022-incomplete-adr-profile-blocks-dispatch-design-conformance" id="toc-tc-w3-022-incomplete-adr-profile-blocks-dispatch-design-conformance">TC-W3-022
+— Incomplete ADR profile blocks dispatch [Design-conformance]</a></li>
+<li><a href="#tc-w3-023-external-sync-register-completeness-and-contract-coverage-integration" id="toc-tc-w3-023-external-sync-register-completeness-and-contract-coverage-integration">TC-W3-023
+— External-sync register completeness and contract coverage
+[Integration]</a></li>
+<li><a href="#tc-w3-024-performance-budgets-nfr" id="toc-tc-w3-024-performance-budgets-nfr">TC-W3-024 — Performance
+budgets [NFR]</a></li>
+<li><a href="#tc-w3-025-audit-coverage-of-gated-and-boundary-actions-nfr" id="toc-tc-w3-025-audit-coverage-of-gated-and-boundary-actions-nfr">TC-W3-025
+— Audit coverage of gated and boundary actions [NFR]</a></li>
+<li><a href="#tc-w3-026-german-first-i18n-and-formats-nfr" id="toc-tc-w3-026-german-first-i18n-and-formats-nfr">TC-W3-026 —
+German-first i18n and formats [NFR]</a></li>
+<li><a href="#tc-w3-027-permission-matrix-for-planningboundary-actions-nfr" id="toc-tc-w3-027-permission-matrix-for-planningboundary-actions-nfr">TC-W3-027
+— Permission matrix for planning/boundary actions [NFR]</a></li>
+</ul></li>
+<li><a href="#parity-test-section-absorb-scope" id="toc-parity-test-section-absorb-scope">4. Parity test section (Absorb
+scope)</a></li>
+<li><a href="#wave-acceptance-checklist" id="toc-wave-acceptance-checklist">5. Wave acceptance checklist</a></li>
+</ul></nav>
+</aside>
+<main id="content">
+  <header class="doc"><h1>TST W3 — Planning &amp;
+Boundary</h1><div class="sub">Rheinwerk MES Consolidation — Test &amp;
+Verification</div></header>
+<p><strong>Programme:</strong> Rheinwerk Chemie GmbH MES consolidation —
+Test &amp; Verification specification, Wave W3
+<strong>Verifies:</strong>
+<code>docs/urs/URS-W3-planning-boundary.md</code> (URS-W3-001…023)
+<strong>Test case count:</strong> 27 (TC-W3-001…TC-W3-027).</p>
+<hr />
+<h2 id="test-strategy">1. Test strategy</h2>
+<p><strong>Test levels</strong> (unit tests assumed per component and
+not enumerated here):</p>
+<ul>
+<li><strong>Integration</strong> — Production Plan ↔︎ recipe governance ↔︎
+ledger netting ↔︎ order generation; schedule layer ↔︎ anchor slot search;
+ERP interface ↔︎ message queue ↔︎ audit; OPC-UA adapter ↔︎ tracking
+records.</li>
+<li><strong>Journey / acceptance</strong> — the end-to-end planning
+journey (EXIT-W3-1) executed as the planner persona; dispatch hazmat
+journey as warehouse clerk.</li>
+<li><strong>Characterization-parity</strong> — target behaviour asserted
+against the Qcadoo characterization baseline recorded by the W0-6
+harness (schedule transitions, TJ/TPZ realization times); parity cases
+cite the legacy code path being matched (see §4).</li>
+<li><strong>Migration reconciliation</strong> — not applicable in W3 (no
+migrated data; see URS-W3 §5). Contract-fixture validation replaces it
+at the boundary.</li>
+<li><strong>NFR / Design-conformance</strong> — measured performance,
+audit sampling, i18n lint, permission matrix, and design-skill
+conformance checks (Desk/Terminal modes, status pills, gate-refusal
+presentation, scanner path).</li>
+</ul>
+<p><strong>Environments:</strong> (1) CI environment running
+contract-fixture and parity suites on every merge; (2) staging with the
+W1/W2 feature set deployed, a simulated group-ERP endpoint (fixture
+player), and an OPC-UA simulation server publishing the LINE-1 tag set;
+(3) a Terminal-mode dispatch station profile for design-conformance
+cases.</p>
+<p><strong>Test data strategy:</strong> the shared programme fixtures
+are the single test dataset — products RW-CHM-0001 “Rheinol 40
+Basisharz” (25 kg sack), RW-CHM-0002 “Additiv K7” (5 kg pail),
+RW-CHM-0003 “Rheinol 40 Compound”; raw batches BATCH-A-0001 (500 kg,
+expiry 31.12.2026), BATCH-A-0002 (50 kg, expiry 30.06.2026, Blocked
+where stated); FG batches BATCH-C-1001/1002; orders PO-2026-0001 (500 kg
+RW-CHM-0003 on LINE-1), PO-2026-0002; work centres LINE-1/MIX-01,
+LINE-1/FILL-01; warehouses RM Lager Nord (FEFO), FG Lager Süd (FIFO);
+storage location NORD-A-01-01; handling unit HU-000123;
+BOM-RW-CHM-0003-001 with routing RT-COMPOUND-01; QI template
+QIT-COMPOUND; personas P. Krüger (planner), O. Weber (operator), Q.
+Fischer (quality inspector), W. Braun (warehouse clerk), T. Schmid
+(technologist), B. Vogel (business viewer). ERP fixture set
+ERP-IN/OUT/GL per URS-W3-013 (external order reference
+GRP-SO-77001).</p>
+<h2 id="traceability-matrix">2. Traceability matrix</h2>
+<p>Every URS-W3 requirement maps to ≥ 1 test case and every TC maps back
+— no orphans in either direction.</p>
+<table>
+<thead>
+<tr>
+<th>URS ID</th>
+<th>Test cases</th>
+<th></th>
+<th>TC ID</th>
+<th>URS ID(s)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>URS-W3-001</td>
+<td>TC-W3-001</td>
+<td></td>
+<td>TC-W3-001</td>
+<td>URS-W3-001</td>
+</tr>
+<tr>
+<td>URS-W3-002</td>
+<td>TC-W3-002, TC-W3-003</td>
+<td></td>
+<td>TC-W3-002</td>
+<td>URS-W3-002</td>
+</tr>
+<tr>
+<td>URS-W3-003</td>
+<td>TC-W3-004</td>
+<td></td>
+<td>TC-W3-003</td>
+<td>URS-W3-002</td>
+</tr>
+<tr>
+<td>URS-W3-004</td>
+<td>TC-W3-005</td>
+<td></td>
+<td>TC-W3-004</td>
+<td>URS-W3-003</td>
+</tr>
+<tr>
+<td>URS-W3-005</td>
+<td>TC-W3-006, TC-W3-007</td>
+<td></td>
+<td>TC-W3-005</td>
+<td>URS-W3-004</td>
+</tr>
+<tr>
+<td>URS-W3-006</td>
+<td>TC-W3-008, TC-W3-009</td>
+<td></td>
+<td>TC-W3-006</td>
+<td>URS-W3-005</td>
+</tr>
+<tr>
+<td>URS-W3-007</td>
+<td>TC-W3-010</td>
+<td></td>
+<td>TC-W3-007</td>
+<td>URS-W3-005</td>
+</tr>
+<tr>
+<td>URS-W3-008</td>
+<td>TC-W3-011</td>
+<td></td>
+<td>TC-W3-008</td>
+<td>URS-W3-006</td>
+</tr>
+<tr>
+<td>URS-W3-009</td>
+<td>TC-W3-012</td>
+<td></td>
+<td>TC-W3-009</td>
+<td>URS-W3-006</td>
+</tr>
+<tr>
+<td>URS-W3-010</td>
+<td>TC-W3-013</td>
+<td></td>
+<td>TC-W3-010</td>
+<td>URS-W3-007</td>
+</tr>
+<tr>
+<td>URS-W3-011</td>
+<td>TC-W3-014</td>
+<td></td>
+<td>TC-W3-011</td>
+<td>URS-W3-008</td>
+</tr>
+<tr>
+<td>URS-W3-012</td>
+<td>TC-W3-015</td>
+<td></td>
+<td>TC-W3-012</td>
+<td>URS-W3-009</td>
+</tr>
+<tr>
+<td>URS-W3-013</td>
+<td>TC-W3-016</td>
+<td></td>
+<td>TC-W3-013</td>
+<td>URS-W3-010</td>
+</tr>
+<tr>
+<td>URS-W3-014</td>
+<td>TC-W3-017</td>
+<td></td>
+<td>TC-W3-014</td>
+<td>URS-W3-011</td>
+</tr>
+<tr>
+<td>URS-W3-015</td>
+<td>TC-W3-018</td>
+<td></td>
+<td>TC-W3-015</td>
+<td>URS-W3-012</td>
+</tr>
+<tr>
+<td>URS-W3-016</td>
+<td>TC-W3-019</td>
+<td></td>
+<td>TC-W3-016</td>
+<td>URS-W3-013</td>
+</tr>
+<tr>
+<td>URS-W3-017</td>
+<td>TC-W3-020</td>
+<td></td>
+<td>TC-W3-017</td>
+<td>URS-W3-014</td>
+</tr>
+<tr>
+<td>URS-W3-018</td>
+<td>TC-W3-021, TC-W3-022</td>
+<td></td>
+<td>TC-W3-018</td>
+<td>URS-W3-015</td>
+</tr>
+<tr>
+<td>URS-W3-019</td>
+<td>TC-W3-023</td>
+<td></td>
+<td>TC-W3-019</td>
+<td>URS-W3-016</td>
+</tr>
+<tr>
+<td>URS-W3-020</td>
+<td>TC-W3-024</td>
+<td></td>
+<td>TC-W3-020</td>
+<td>URS-W3-017</td>
+</tr>
+<tr>
+<td>URS-W3-021</td>
+<td>TC-W3-025</td>
+<td></td>
+<td>TC-W3-021</td>
+<td>URS-W3-018</td>
+</tr>
+<tr>
+<td>URS-W3-022</td>
+<td>TC-W3-026</td>
+<td></td>
+<td>TC-W3-022</td>
+<td>URS-W3-018</td>
+</tr>
+<tr>
+<td>URS-W3-023</td>
+<td>TC-W3-027</td>
+<td></td>
+<td>TC-W3-023</td>
+<td>URS-W3-019</td>
+</tr>
+<tr>
+<td>—</td>
+<td>—</td>
+<td></td>
+<td>TC-W3-024</td>
+<td>URS-W3-020</td>
+</tr>
+<tr>
+<td>—</td>
+<td>—</td>
+<td></td>
+<td>TC-W3-025</td>
+<td>URS-W3-021</td>
+</tr>
+<tr>
+<td>—</td>
+<td>—</td>
+<td></td>
+<td>TC-W3-026</td>
+<td>URS-W3-022</td>
+</tr>
+<tr>
+<td>—</td>
+<td>—</td>
+<td></td>
+<td>TC-W3-027</td>
+<td>URS-W3-023</td>
+</tr>
+</tbody>
+</table>
+<h2 id="test-cases">3. Test cases</h2>
+<p>Each case: objective, linked URS, preconditions &amp; fixtures,
+numbered steps with expected result per step, pass/fail rule, type
+tag.</p>
+<h3 id="tc-w3-001-create-production-plan-from-sales-input-journey">TC-W3-001
+— Create Production Plan from sales input [Journey]</h3>
+<p><strong>Objective:</strong> Verify Production Plan creation from a
+sales input. <strong>URS:</strong> URS-W3-001.
+<strong>Preconditions:</strong> Sales input for 500 kg RW-CHM-0003 → FG
+Lager Süd exists; user P. Krüger (planner role). 1. P. Krüger opens
+Planning work queue and creates a Production Plan from the sales input.
+→ Plan drafted with one row: RW-CHM-0003, 500 kg, FG Lager Süd. 2.
+Submit the plan. → Plan submitted, non-editable, visible in the planning
+work queue. 3. Verify the plan detail renders in Desk mode with kg
+suffix and DD.MM.YYYY dates. → Conforms. <strong>Pass/fail:</strong> all
+three expected results exact; any deviation in item/qty/warehouse
+fails.</p>
+<h3 id="tc-w3-002-bom-explosion-quantities-integration">TC-W3-002 — BOM
+explosion quantities [Integration]</h3>
+<p><strong>Objective:</strong> Verify explosion math through Accepted
+BOM incl. sub-assembly. <strong>URS:</strong> URS-W3-002.
+<strong>Preconditions:</strong> BOM-RW-CHM-0003-001 Accepted
+(<code>gov_state</code>), 20 kg RW-CHM-0001 + 1 kg RW-CHM-0002 per 25 kg
+output; plan from TC-W3-001. 1. Explode the plan. → Component
+requirements computed. 2. Read computed requirements. → Exactly 400 kg
+RW-CHM-0001 and 20 kg RW-CHM-0002. <strong>Pass/fail:</strong>
+quantities exact to 3 decimals; anything else fails.</p>
+<h3 id="tc-w3-003-non-accepted-recipe-refused-with-gate-refusal-presentation-design-conformance">TC-W3-003
+— Non-Accepted recipe refused with gate-refusal presentation
+[Design-conformance]</h3>
+<p><strong>Objective:</strong> Verify Draft-recipe planning refusal
+names rule/record/resolution modally. <strong>URS:</strong> URS-W3-002
+(AC-2). <strong>Preconditions:</strong> A Draft-<code>gov_state</code>
+BOM for RW-CHM-0003 exists. 1. P. Krüger attempts to plan RW-CHM-0003
+selecting the Draft BOM. → Refusal is modal (not a toast), names the
+rule (only Accepted recipes plannable), the record (Draft BOM id), and
+the resolution. 2. Check the audit log. → Refusal logged.
+<strong>Pass/fail:</strong> all four properties (modal, rule, record,
+resolution) + log entry present; missing any one fails.</p>
+<h3 id="tc-w3-004-mrp-netting-vs-ledger-reservations-and-blocked-stock-integration">TC-W3-004
+— MRP netting vs ledger, reservations and Blocked stock
+[Integration]</h3>
+<p><strong>Objective:</strong> Verify netting counts only available
+ledger stock. <strong>URS:</strong> URS-W3-003.
+<strong>Preconditions:</strong> BATCH-A-0001 500 kg Released in RM Lager
+Nord; BATCH-A-0002 50 kg <code>qa_state</code> Blocked; requirements
+from TC-W3-002. 1. Run netting. → No Material Request for RW-CHM-0001
+(500 ≥ 400). 2. Inspect RW-CHM-0002 result. → Material Request for 20 kg
+RW-CHM-0002 generated (Blocked stock not counted).
+<strong>Pass/fail:</strong> both outcomes exact; counting Blocked stock
+as available fails.</p>
+<h3 id="tc-w3-005-order-generation-in-exec_state-pending-integration">TC-W3-005
+— Order generation in exec_state Pending [Integration]</h3>
+<p><strong>Objective:</strong> Verify plan→order generation with state
+layer and pill rendering. <strong>URS:</strong> URS-W3-004.
+<strong>Preconditions:</strong> Plan from TC-W3-001 submitted. 1.
+Generate orders. → PO-2026-0001 exists: 500 kg RW-CHM-0003, LINE-1,
+<code>exec_state</code> Pending; <code>state_history</code> has creator
++ timestamp. 2. View the order row in the queue. → State shown as status
+pill (icon + label + colour), label exactly “Pending”, id PO-2026-0001
+in mono. <strong>Pass/fail:</strong> state value, history entry, and
+pill composition all exact.</p>
+<h3 id="tc-w3-006-line-schedule-lifecycle-draftapprovedrejected-journey">TC-W3-006
+— Line schedule lifecycle Draft→Approved/Rejected [Journey]</h3>
+<p><strong>Objective:</strong> Verify schedule creation and
+approval/rejection. <strong>URS:</strong> URS-W3-005.
+<strong>Preconditions:</strong> PO-2026-0001 and PO-2026-0002 in
+<code>exec_state</code> Accepted on LINE-1. 1. P. Krüger creates a
+LINE-1 schedule. → State Draft; both orders with computed start/end. 2.
+Approve. → State Approved; schedule is the operative LINE-1 sequence. 3.
+Create a second Draft schedule and reject it. → State Rejected; no
+operative effect. <strong>Pass/fail:</strong> the three state outcomes
+exact.</p>
+<h3 id="tc-w3-007-schedule-state-transition-parity-vs-schedulestate.java-parity">TC-W3-007
+— Schedule state-transition parity vs ScheduleState.java [Parity]</h3>
+<p><strong>Objective:</strong> Assert target schedule transitions equal
+the legacy set. <strong>URS:</strong> URS-W3-005 (AC-3). Legacy path:
+<code>Chem_mes</code>
+<code>orders/states/constants/ScheduleState.java:8-24</code>.
+<strong>Preconditions:</strong> W0-6 characterization baseline for
+ScheduleState loaded. 1. Enumerate target’s allowed schedule transitions
+programmatically. → Exactly {Draft→Approved, Draft→Rejected}. 2. Attempt
+Approved→Draft and Rejected→Approved. → Both refused.
+<strong>Pass/fail:</strong> transition set equality; any extra or
+missing transition fails.</p>
+<h3 id="tc-w3-008-tjtpz-realization-time-computation-integration">TC-W3-008
+— TJ/TPZ realization-time computation [Integration]</h3>
+<p><strong>Objective:</strong> Verify realization times from TJ/TPZ
+norms. <strong>URS:</strong> URS-W3-006. <strong>Preconditions:</strong>
+RT-COMPOUND-01: MIX @ LINE-1/MIX-01 TPZ 30 min, TJ 0.6 min/kg; FILL @
+LINE-1/FILL-01 TPZ 15 min, TJ 0.3 min/kg; PO-2026-0001 = 500 kg. 1.
+Compute realization time. → MIX = 330 min; FILL = 165 min; order total
+495 min (sequential). <strong>Pass/fail:</strong> all three values exact
+to the minute.</p>
+<h3 id="tc-w3-009-realization-time-parity-vs-orderrealizationtimeserviceimpl-parity">TC-W3-009
+— Realization-time parity vs OrderRealizationTimeServiceImpl
+[Parity]</h3>
+<p><strong>Objective:</strong> Assert target realization times match the
+legacy characterization baseline. <strong>URS:</strong> URS-W3-006
+(AC-2). Legacy path: <code>Chem_mes</code>
+<code>productionScheduling/OrderRealizationTimeServiceImpl.java</code>.
+<strong>Preconditions:</strong> W0-6 fixture matrix (≥ 10 TJ/TPZ input
+combinations incl. edge values qty=1, TPZ=0) with recorded legacy
+outputs. 1. Run the fixture matrix against the target calculator. →
+Every output equals the legacy value exactly (to the minute).
+<strong>Pass/fail:</strong> 100% match; a single mismatch fails.</p>
+<h3 id="tc-w3-010-changeover-norms-applied-in-sequencing-integration">TC-W3-010
+— Changeover norms applied in sequencing [Integration]</h3>
+<p><strong>Objective:</strong> Verify changeover time insertion.
+<strong>URS:</strong> URS-W3-007. <strong>Preconditions:</strong> 45-min
+changeover norm on LINE-1 for RW-CHM-0003→other; approved schedule with
+PO-2026-0001 then PO-2026-0002. 1. Read PO-2026-0002’s computed start. →
+≥ PO-2026-0001 end + 45 min. 2. Remove the norm, resequence two orders
+without a norm. → No changeover inserted; transition annotated “no
+changeover norm”. <strong>Pass/fail:</strong> both outcomes exact.</p>
+<h3 id="tc-w3-011-capacity-refusal-names-work-centre-and-resolution-integration">TC-W3-011
+— Capacity refusal names work centre and resolution [Integration]</h3>
+<p><strong>Objective:</strong> Verify anchor slot-search refusal
+presentation. <strong>URS:</strong> URS-W3-008.
+<strong>Preconditions:</strong> Capacity planning on; LINE-1/MIX-01
+<code>production_capacity</code> = 1 fully booked by PO-2026-0001 in the
+window. 1. Schedule PO-2026-0002’s MIX operation in the same window. →
+Capacity refusal: modal + logged, naming LINE-1/MIX-01, the blocking
+booking, and earliest feasible slot. <strong>Pass/fail:</strong> refusal
+raised with all three named elements; a toast-only error fails.</p>
+<h3 id="tc-w3-012-no-optimiser-scope-audit-nfr">TC-W3-012 — No-optimiser
+scope audit [NFR]</h3>
+<p><strong>Objective:</strong> Confirm deliberate absence of an
+optimiser and presence of decision record D4. <strong>URS:</strong>
+URS-W3-009. 1. Audit delivered W3 components against the scope baseline.
+→ No optimiser component present. 2. Check the programme decision
+register. → D4 entry exists with a status. <strong>Pass/fail:</strong>
+both true.</p>
+<h3 id="tc-w3-013-orders-in-happy-path-duplicate-rejection-integration">TC-W3-013
+— Orders-in: happy path, duplicate, rejection [Integration]</h3>
+<p><strong>Objective:</strong> Verify inbound demand processing
+incl. idempotency and rejection. <strong>URS:</strong> URS-W3-010.
+<strong>Preconditions:</strong> Contract v1.0 fixtures ERP-IN-001
+(GRP-SO-77001, 500 kg RW-CHM-0003), ERP-IN-001 duplicate, ERP-IN-002
+(unknown item). 1. Play ERP-IN-001. → Sales-input record referencing
+GRP-SO-77001 created, available to plan creation. 2. Replay ERP-IN-001.
+→ No duplicate demand; duplicate logged with GRP-SO-77001. 3. Play
+ERP-IN-002. → Rejected to error queue with machine-readable reason; no
+partial writes. <strong>Pass/fail:</strong> all three exact; any partial
+write on rejection fails.</p>
+<h3 id="tc-w3-014-confirmations-out-on-completed-with-durable-queue-integration">TC-W3-014
+— Confirmations out on Completed, with durable queue [Integration]</h3>
+<p><strong>Objective:</strong> Verify confirmation emission and
+store-and-forward. <strong>URS:</strong> URS-W3-011.
+<strong>Preconditions:</strong> PO-2026-0001 In Progress, linked to
+GRP-SO-77001; simulated ERP endpoint controllable. 1. Complete
+PO-2026-0001 (500 kg into BATCH-C-1001). → Exactly one confirmation with
+GRP-SO-77001, RW-CHM-0003, 500 kg, BATCH-C-1001; schema-valid. 2. Take
+endpoint offline; complete PO-2026-0002; bring endpoint back. → Message
+queued during outage, delivered once on recovery; backlog visible on
+health surface during outage. <strong>Pass/fail:</strong> exactly-once
+delivery per completion; loss or duplication fails.</p>
+<h3 id="tc-w3-015-gl-postings-out-with-account-map-and-unmapped-hold-integration">TC-W3-015
+— GL postings out with account map and unmapped hold [Integration]</h3>
+<p><strong>Objective:</strong> Verify boundary GL emission and
+unmapped-account handling. <strong>URS:</strong> URS-W3-012.
+<strong>Preconditions:</strong> FG Lager Süd mapped to group-ERP
+accounts; a second warehouse deliberately unmapped; BATCH-C-1001
+manufacture at 4.20 €/kg. 1. Post the 500 kg manufacture receipt. → GL
+message with 2,100.00 € debit/credit pair on mapped accounts;
+schema-valid. 2. Trigger a posting on the unmapped warehouse. → Posting
+held in unmapped-accounts queue; alert names warehouse and missing map
+entry; nothing emitted. <strong>Pass/fail:</strong> amount exact;
+emission of an unmapped posting fails.</p>
+<h3 id="tc-w3-016-contract-fixture-suite-and-versioning-in-ci-integration">TC-W3-016
+— Contract fixture suite and versioning in CI [Integration]</h3>
+<p><strong>Objective:</strong> Verify the frozen contract’s fixture
+suite and version discipline. <strong>URS:</strong> URS-W3-013. 1. Run
+the CI contract job. → ≥ 9 fixtures (happy/duplicate/rejection × 3
+message types) all pass; run linked from evidence pack. 2. Introduce a
+non-backward-compatible schema change in a branch. → Contract version
+increments; v1.0 and v1.1 fixture sets both pass in the transition
+window. <strong>Pass/fail:</strong> suite green and versioning
+enforced.</p>
+<h3 id="tc-w3-017-interface-health-kpi-drill-down-and-audited-replay-journey">TC-W3-017
+— Interface health KPI drill-down and audited replay [Journey]</h3>
+<p><strong>Objective:</strong> Verify Command Dashboard tile → error
+queue → replay with audit. <strong>URS:</strong> URS-W3-014.
+<strong>Preconditions:</strong> One rejected message from TC-W3-013 step
+3. 1. B. Vogel opens the Command Dashboard. → Plain-language tile “ERP
+messages needing attention: 1” drills into the professional error-queue
+view showing the rejection reason. 2. P. Krüger corrects and replays the
+message. → Processing succeeds; audit records who, when, message
+reference. <strong>Pass/fail:</strong> drill-down lands on the same-data
+queue view (not a separate report) and audit entry complete.</p>
+<h3 id="tc-w3-018-opc-ua-event-ingestion-and-unmatched-queue-integration">TC-W3-018
+— OPC-UA event ingestion and unmatched queue [Integration]</h3>
+<p><strong>Objective:</strong> Verify tag events land on the right
+order/operation and orphans are held. <strong>URS:</strong> URS-W3-015.
+<strong>Preconditions:</strong> OPC-UA simulator on LINE-1/MIX-01 tags;
+PO-2026-0001 In Progress on LINE-1. 1. Publish a produced-count event of
+25 kg. → Tracking event of 25 kg on PO-2026-0001/MIX within 5 s, source
+“OPC-UA”. 2. Publish an event for FILL-01 with no order In Progress
+there. → Event in unmatched-events queue; not dropped.
+<strong>Pass/fail:</strong> correct attribution and ≤ 5 s latency;
+silent drop fails.</p>
+<h3 id="tc-w3-019-tag-mapping-administration-and-validation-integration">TC-W3-019
+— Tag-mapping administration and validation [Integration]</h3>
+<p><strong>Objective:</strong> Verify mapping CRUD and
+invalid-work-centre refusal. <strong>URS:</strong> URS-W3-016. 1. T.
+Schmid maps <code>ns=2;s=Line1.Mix01.ProducedKg</code> → LINE-1/MIX-01 /
+produced-count. → Saved; events on the tag resolve to LINE-1/MIX-01. 2.
+Attempt a mapping to non-existent work centre “LINE-9/XX-99”. → Save
+refused naming the invalid code. <strong>Pass/fail:</strong> both exact;
+mono rendering of tag ids verified in the admin table.</p>
+<h3 id="tc-w3-020-store-and-forward-across-a-10-minute-outage-integration">TC-W3-020
+— Store-and-forward across a 10-minute outage [Integration]</h3>
+<p><strong>Objective:</strong> Verify buffering, ordering, and late
+flags. <strong>URS:</strong> URS-W3-017. 1. Disconnect adapter from MES
+10 min; publish 3 produced-count events on MIX-01. → Nothing lost at
+adapter. 2. Reconnect. → All 3 events recorded on PO-2026-0001 in
+original order with original equipment timestamps and late-delivery
+flags. <strong>Pass/fail:</strong> 3/3 in order with flags; any
+loss/reorder fails.</p>
+<h3 id="tc-w3-021-hazmat-dispatch-label-content-journey">TC-W3-021 —
+Hazmat dispatch label content [Journey]</h3>
+<p><strong>Objective:</strong> Verify ADR label data for a hazmat FG
+batch. <strong>URS:</strong> URS-W3-018. <strong>Preconditions:</strong>
+RW-CHM-0003 hazmat profile UN 1263, “FARBE”, class 3, PG III;
+BATCH-C-1001 in FG Lager Süd. 1. W. Braun (Terminal mode, dispatch
+station) scans HU/batch and produces label data for BATCH-C-1001. →
+Label contains UN 1263, “FARBE”, class 3, PG III, BATCH-C-1001, net kg.
+<strong>Pass/fail:</strong> all label fields exact.</p>
+<h3 id="tc-w3-022-incomplete-adr-profile-blocks-dispatch-design-conformance">TC-W3-022
+— Incomplete ADR profile blocks dispatch [Design-conformance]</h3>
+<p><strong>Objective:</strong> Verify dispatch refusal presentation for
+missing UN number. <strong>URS:</strong> URS-W3-018 (AC-2).
+<strong>Preconditions:</strong> A hazmat item whose profile lacks a UN
+number, with a batch in stock. 1. Attempt dispatch of the batch. →
+Modal, logged refusal naming rule (ADR data incomplete), record (item +
+missing field), resolution (complete profile). 2. Verify in Terminal
+mode: 48 px targets, scanner field focused. → Conforms.
+<strong>Pass/fail:</strong> refusal completeness + Terminal-mode
+conformance.</p>
+<h3 id="tc-w3-023-external-sync-register-completeness-and-contract-coverage-integration">TC-W3-023
+— External-sync register completeness and contract coverage
+[Integration]</h3>
+<p><strong>Objective:</strong> Verify the survey register and its
+coupling to the contract. <strong>URS:</strong> URS-W3-019. 1. Review
+the published register. → Every entry has system, direction, data
+objects, evidence-of-use, disposition; §8.2 #6 marked answered. 2. For
+each “carry” entry, check contract v1.0 fixtures. → A fixture exists per
+carried sync. <strong>Pass/fail:</strong> no entry incomplete; no
+carried sync without a fixture.</p>
+<h3 id="tc-w3-024-performance-budgets-nfr">TC-W3-024 — Performance
+budgets [NFR]</h3>
+<p><strong>Objective:</strong> Measure the four URS-W3-020 budgets.
+<strong>URS:</strong> URS-W3-020. 1. Load a 200-order LINE-1 schedule
+board. → First meaningful render ≤ 2 s; table virtualized. 2. Time
+planner actions (approve, resequence). → UI feedback &lt; 100 ms; longer
+ops show progress on the control. 3. W. Braun scans HU-000123 at
+dispatch. → Server-confirmed ≤ 300 ms with full-row visual + audible
+confirmation. 4. Play an orders-in fixture. → End-to-end ≤ 10 s.
+<strong>Pass/fail:</strong> all four budgets met in 3 consecutive
+runs.</p>
+<h3 id="tc-w3-025-audit-coverage-of-gated-and-boundary-actions-nfr">TC-W3-025
+— Audit coverage of gated and boundary actions [NFR]</h3>
+<p><strong>Objective:</strong> Sample the audit trail across the four W3
+audit classes. <strong>URS:</strong> URS-W3-021. 1. Trigger: schedule
+approval (TC-W3-006), capacity refusal (TC-W3-011), message
+reject+replay (TC-W3-013/017), OPC-UA event (TC-W3-018). → Each produces
+an audit record with actor/source, timestamp, action, record reference,
+outcome. 2. Attempt to modify an audit record. → No update path exists.
+<strong>Pass/fail:</strong> 4/4 classes covered and immutability
+holds.</p>
+<h3 id="tc-w3-026-german-first-i18n-and-formats-nfr">TC-W3-026 —
+German-first i18n and formats [NFR]</h3>
+<p><strong>Objective:</strong> Verify locale rendering and string
+externalization. <strong>URS:</strong> URS-W3-022. 1. Set locale de;
+open the schedule board with PO-2026-0001 planned start 31.12.2026. →
+Date “31.12.2026”; quantity “500 kg” German-formatted; pill labels from
+the externalized glossary. 2. Run the string-extraction lint over W3
+screens. → Zero hard-coded translatable strings, zero concatenations.
+<strong>Pass/fail:</strong> both checks clean.</p>
+<h3 id="tc-w3-027-permission-matrix-for-planningboundary-actions-nfr">TC-W3-027
+— Permission matrix for planning/boundary actions [NFR]</h3>
+<p><strong>Objective:</strong> Verify workflow-level access control.
+<strong>URS:</strong> URS-W3-023. 1. O. Weber attempts schedule
+approval. → Refused + audited. 2. P. Krüger approves. → Succeeds. 3. P.
+Krüger (no interface-admin) attempts message replay. → Refused naming
+required permission. 4. Interface admin replays; technologist edits tag
+mapping; non-technologist attempt refused. → As specified.
+<strong>Pass/fail:</strong> every allow/deny outcome exact per the
+matrix.</p>
+<h2 id="parity-test-section-absorb-scope">4. Parity test section (Absorb
+scope)</h2>
+<p>Absorb items in W3 are the finite-capacity layer semantics (W3-2).
+The legacy characterization baseline (W0-6 harness) is the contract:</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Parity case</th>
+<th>Legacy contract (code path)</th>
+<th>Target assertion</th>
+<th>Deviation?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TC-W3-007 schedule transitions</td>
+<td><code>Chem_mes</code>
+<code>orders/states/constants/ScheduleState.java:8-24</code>
+(DRAFT/APPROVED/REJECTED, transitions from
+<code>canChangeTo</code>)</td>
+<td>Transition set identical</td>
+<td>None — exact match required</td>
+</tr>
+<tr>
+<td>TC-W3-009 realization times</td>
+<td><code>Chem_mes</code>
+<code>productionScheduling/OrderRealizationTimeServiceImpl.java</code>
+(TJ/TPZ norm arithmetic)</td>
+<td>Outputs identical to the minute over the fixture matrix</td>
+<td>None — exact match required</td>
+</tr>
+<tr>
+<td>Changeover norms (TC-W3-010)</td>
+<td><code>Chem_mes</code> plugin
+<code>mes-plugins-line-changeover-norms</code> (norm lookup between
+product pairs on a line)</td>
+<td>Norm applied when defined; annotated absence otherwise</td>
+<td><strong>Deliberate deviation:</strong> target annotates “no
+changeover norm” transitions for planner visibility (legacy is silent).
+Presentation-only; no timing difference. <strong>Business sign-off
+required</strong> — reference W1-10 behaviour-choice register entry for
+W3-2.</td>
+</tr>
+</tbody>
+</table>
+<p>Boundary (W3-3/W3-4), SCADA (W3-5) and hazmat (W3-6) are
+Rebuild/white-space — no legacy baseline exists, so no parity cases;
+their contracts are the frozen interface fixtures (TC-W3-016) and the
+URS acceptance criteria.</p>
+<h2 id="wave-acceptance-checklist">5. Wave acceptance checklist</h2>
+<p>Executable form of the URS-W3 §6 exit criteria; this checklist closes
+the W3 Epic.</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Exit check</th>
+<th>Verified by</th>
+<th>Status gate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>EXIT-W3-1 planning journey end-to-end</td>
+<td>TC-W3-001…011 all pass in one chained staging run (GRP-SO-77001 →
+approved LINE-1 schedule)</td>
+<td>All green</td>
+</tr>
+<tr>
+<td>EXIT-W3-2 contract v1.0 frozen + fixtures in CI</td>
+<td>TC-W3-013, TC-W3-014, TC-W3-015, TC-W3-016</td>
+<td>All green, CI link in evidence pack</td>
+</tr>
+<tr>
+<td>EXIT-W3-3 external-sync register dispositioned</td>
+<td>TC-W3-023</td>
+<td>Green + §8.2 #6 answered</td>
+</tr>
+<tr>
+<td>EXIT-W3-4 SCADA path incl. outage replay</td>
+<td>TC-W3-018, TC-W3-019, TC-W3-020</td>
+<td>All green</td>
+</tr>
+<tr>
+<td>EXIT-W3-5 hazmat dispatch demonstrated</td>
+<td>TC-W3-021, TC-W3-022</td>
+<td>Both green</td>
+</tr>
+<tr>
+<td>EXIT-W3-6 NFR evidence</td>
+<td>TC-W3-024, TC-W3-025, TC-W3-026, TC-W3-027</td>
+<td>All green, measurements attached</td>
+</tr>
+<tr>
+<td>EXIT-W3-7 Won’t-scope confirmed (no optimiser; D4 recorded)</td>
+<td>TC-W3-012</td>
+<td>Green</td>
+</tr>
+</tbody>
+</table>
+  <footer class="doc">Rheinwerk Chemie GmbH — MES consolidation programme. Generated from the Markdown source of record in SachetCognition/rheinwerk-mes-core.</footer>
+</main>
+<button id="top-btn" title="Back to top">⇧</button>
+<script>
+const links=[...document.querySelectorAll('#sidebar nav a')];
+const targets=links.map(a=>document.getElementById(decodeURIComponent(a.hash.slice(1)))).filter(Boolean);
+function onScroll(){
+  const y=window.scrollY+90;let cur=targets[0];
+  for(const t of targets){if(t.offsetTop<=y)cur=t;else break}
+  links.forEach(a=>a.classList.toggle('active',cur&&decodeURIComponent(a.hash.slice(1))===cur.id));
+  document.getElementById('top-btn').classList.toggle('show',window.scrollY>500);
+}
+document.addEventListener('scroll',onScroll,{passive:true});onScroll();
+document.getElementById('top-btn').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
+</script>
+</body>
+</html>

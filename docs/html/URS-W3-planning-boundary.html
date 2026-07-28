@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>URS W3 — Planning &amp; Boundary</title>
+<style>
+:root{--accent:#1f4e79;--accent2:#2e74b5;--bg:#f7f9fb;--card:#ffffff;--text:#24292f;--muted:#6a737d;--border:#e1e6eb;--sidebar-w:300px}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",Calibri,Arial,sans-serif;color:var(--text);background:var(--bg);line-height:1.55;font-size:15px}
+#sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:var(--accent);color:#fff;overflow-y:auto;padding:22px 18px}
+#sidebar .brand{font-size:15px;font-weight:600;letter-spacing:.4px;border-bottom:1px solid rgba(255,255,255,.25);padding-bottom:12px;margin-bottom:12px}
+#sidebar .brand small{display:block;font-weight:400;opacity:.75;margin-top:4px}
+#sidebar nav ul{list-style:none;margin:0;padding-left:0}
+#sidebar nav ul ul{padding-left:14px}
+#sidebar nav a{display:block;color:rgba(255,255,255,.85);text-decoration:none;font-size:12.6px;padding:4px 8px;border-radius:5px;border-left:3px solid transparent}
+#sidebar nav a:hover{background:rgba(255,255,255,.12);color:#fff}
+#sidebar nav a.active{background:rgba(255,255,255,.18);color:#fff;border-left-color:#9cc3e5;font-weight:600}
+#content{margin-left:var(--sidebar-w);padding:42px 56px;max-width:1080px}
+header.doc{border-bottom:3px solid var(--accent);padding-bottom:18px;margin-bottom:30px}
+header.doc h1{color:var(--accent);font-size:30px;margin:0 0 6px}
+header.doc .sub{color:var(--accent2);font-size:15.5px;font-weight:600}
+h1,h2{color:var(--accent);margin-top:2.1em;border-bottom:1px solid var(--border);padding-bottom:.25em}
+h3,h4{color:var(--accent2);margin-top:1.7em}
+a{color:var(--accent2)}
+table{border-collapse:collapse;width:100%;margin:1.1em 0;background:var(--card);font-size:13.2px;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+th{background:var(--accent);color:#fff;text-align:left;padding:8px 10px;font-weight:600}
+td{border:1px solid var(--border);padding:7px 10px;vertical-align:top}
+tr:nth-child(even) td{background:#f2f6fa}
+code{background:#eef2f6;border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:12px;font-family:Consolas,Menlo,monospace;color:#0b3d66}
+pre{background:#0f2a43;color:#dce8f5;padding:14px 16px;border-radius:8px;overflow-x:auto;font-size:12.5px}
+pre code{background:none;border:none;color:inherit;padding:0}
+blockquote{margin:1em 0;padding:10px 16px;background:#eaf1f8;border-left:5px solid var(--accent2);border-radius:0 6px 6px 0;color:#243b53}
+img.diagram,p img{max-width:100%;background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px;box-shadow:0 1px 3px rgba(0,0,0,.08);display:block;margin:1.2em auto}
+#top-btn{position:fixed;right:26px;bottom:26px;background:var(--accent);color:#fff;border:none;border-radius:50%;width:46px;height:46px;font-size:19px;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .25s;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+#top-btn.show{opacity:.92;pointer-events:auto}
+footer.doc{margin-top:60px;border-top:1px solid var(--border);padding-top:14px;color:var(--muted);font-size:12px}
+@media(max-width:900px){#sidebar{display:none}#content{margin-left:0;padding:24px}}
+</style>
+</head>
+<body>
+<aside id="sidebar">
+  <div class="brand">URS W3 — Planning &amp; Boundary<small>Rheinwerk
+MES Consolidation — User Requirements Specification</small></div>
+  <nav><ul>
+<li><a href="#purpose-scope" id="toc-purpose-scope">1. Purpose &amp;
+scope</a></li>
+<li><a href="#personas-in-scope" id="toc-personas-in-scope">2. Personas
+in scope</a></li>
+<li><a href="#requirements" id="toc-requirements">3. Requirements</a>
+<ul>
+<li><a href="#capability-area-planning-mrp-backlog-w3-1" id="toc-capability-area-planning-mrp-backlog-w3-1">3.1 Capability area:
+Planning / MRP (backlog W3-1)</a></li>
+<li><a href="#capability-area-finite-capacity-backlog-w3-2" id="toc-capability-area-finite-capacity-backlog-w3-2">3.2 Capability
+area: Finite capacity (backlog W3-2)</a></li>
+<li><a href="#capability-area-group-erp-interface-backlog-w3-3-w3-4-adr-002" id="toc-capability-area-group-erp-interface-backlog-w3-3-w3-4-adr-002">3.3
+Capability area: Group-ERP interface (backlog W3-3, W3-4;
+ADR-002)</a></li>
+<li><a href="#capability-area-scadaopc-ua-adapter-backlog-w3-5-white-space-net-new" id="toc-capability-area-scadaopc-ua-adapter-backlog-w3-5-white-space-net-new">3.4
+Capability area: SCADA/OPC-UA adapter (backlog W3-5 — white space,
+net-new)</a></li>
+<li><a href="#capability-area-hazmatregulatory-completion-backlog-w3-6-white-space-net-new" id="toc-capability-area-hazmatregulatory-completion-backlog-w3-6-white-space-net-new">3.5
+Capability area: Hazmat/regulatory completion (backlog W3-6 — white
+space, net-new)</a></li>
+<li><a href="#capability-area-external-sync-survey-contract-freeze-backlog-w3-7" id="toc-capability-area-external-sync-survey-contract-freeze-backlog-w3-7">3.6
+Capability area: External-sync survey &amp; contract freeze (backlog
+W3-7)</a></li>
+<li><a href="#untraceable-deferred" id="toc-untraceable-deferred">3.7
+Untraceable / deferred</a></li>
+</ul></li>
+<li><a href="#non-functional-requirements" id="toc-non-functional-requirements">4. Non-functional
+requirements</a></li>
+<li><a href="#data-migration-requirements" id="toc-data-migration-requirements">5. Data migration
+requirements</a></li>
+<li><a href="#wave-exit-criteria" id="toc-wave-exit-criteria">6. Wave
+exit criteria</a></li>
+</ul></nav>
+</aside>
+<main id="content">
+  <header class="doc"><h1>URS W3 — Planning &amp;
+Boundary</h1><div class="sub">Rheinwerk MES Consolidation — User
+Requirements Specification</div></header>
+<p><strong>Programme:</strong> Rheinwerk Chemie GmbH MES consolidation —
+User Requirements Specification, Wave W3 <strong>Sources:</strong>
+<code>docs/waves/W3-planning-boundary.md</code> (W3-1…W3-7) ·
+<code>CONSOLIDATION.md</code> · <code>docs/adr/ADR-002</code> ·
+<code>docs/canonical-model/README.md</code> (CDM-02, CDM-03, CDM-08) ·
+<code>docs/dossier/production-systems-dossier.md</code> §3.1/§3.2, §5.3,
+§6.2, §6.3, §7, §8.2 · <code>rheinwerk-mes-design-SKILL.md</code>
+<strong>Requirement count:</strong> 23 (within the 15–25 sizing
+guide).</p>
+<hr />
+<h2 id="purpose-scope">1. Purpose &amp; scope</h2>
+<p>Wave W3 delivers the planning journey and the system boundary of the
+consolidated MES: the Production Plan/MRP journey on the anchor (sales
+input → explosion → material requests → production orders), a
+finite-capacity scheduling layer absorbing Qcadoo line-schedule and
+TJ/TPZ realization-time semantics over the anchor slot search, the
+group-ERP interface (orders in, confirmations out, GL postings out) with
+contract fixtures per ADR-002, boundary costing/GL account mapping, the
+net-new SCADA/OPC-UA adapter, hazmat/regulatory completion at the
+shipping boundary, and the survey + contract-freeze of existing external
+syncs.</p>
+<p><strong>Out of scope for W3</strong> (visible scope fences, pulled
+from other waves):</p>
+<ul>
+<li>Order state machine, execution gating, recipe governance, warehouse
+fidelity base — delivered in W1
+(<code>docs/waves/W1-production-core.md</code>); W3 consumes them as
+dependencies.</li>
+<li>Genealogy, batch blocking, QI, CoA, ISA-88, hazmat master data (UN
+numbers, SDS references, storage classes on Item/Batch) — delivered in
+W2 (<code>docs/waves/W2-traceability-quality.md</code>); W3 only
+<em>completes</em> hazmat at the shipping/label boundary (W3-6).</li>
+<li>Per-plant cutover, data backfill, legacy read-only/archival,
+decommission evidence — W4
+(<code>docs/waves/W4-cutover-decommission.md</code>).</li>
+<li>Finance, buying, selling capabilities themselves — permanently
+across the ERP boundary per ADR-002 (never in the MES).</li>
+<li>A constraint-based finite-capacity <strong>optimiser</strong> —
+white space in all three legacy systems (dossier §6.3); explicitly
+excluded from W3 (see URS-W3-009).</li>
+</ul>
+<h2 id="personas-in-scope">2. Personas in scope</h2>
+<p>Subset of the six programme personas relevant to W3 (role model
+evidenced in dossier ch. 3.1 §B.2 — Qcadoo planner/kanban role family;
+ch. 3.2 personas — ERPNext
+<code>Manufacturing Manager</code>/<code>Manufacturing User</code>,
+<code>Accounts Manager</code> at the boundary):</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Persona</th>
+<th>Fixture name</th>
+<th>W3 relevance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>planner</td>
+<td>P. Krüger</td>
+<td>Owns the Production Plan/MRP journey, line schedules, capacity
+decisions (dossier ch. 3.1 §B.2 “Production planner / supervisor”:
+<code>ROLE_DASHBOARD_KANBAN*</code>)</td>
+</tr>
+<tr>
+<td>shop-floor operator</td>
+<td>O. Weber</td>
+<td>Consumes SCADA-originated tracking events; confirms operations
+feeding boundary confirmations (dossier ch. 3.1 §B.2)</td>
+</tr>
+<tr>
+<td>technologist</td>
+<td>T. Schmid</td>
+<td>Owns hazmat shipping/label data completion (white space, dossier
+§6.3)</td>
+</tr>
+<tr>
+<td>warehouse clerk</td>
+<td>W. Braun</td>
+<td>Prints/validates hazmat shipping labels at dispatch (dossier ch. 3.1
+§B.2 “Warehouse operator”)</td>
+</tr>
+<tr>
+<td>business viewer</td>
+<td>B. Vogel</td>
+<td>Reads planning KPIs and boundary-interface health on the Command
+Dashboard (design skill, “The three audiences”)</td>
+</tr>
+</tbody>
+</table>
+<p>Quality inspector (Q. Fischer) is out of W3 scope — QI capability
+landed in W2.</p>
+<h2 id="requirements">3. Requirements</h2>
+<p>Requirement IDs are <code>URS-W3-NNN</code>. Each carries: statement,
+MoSCoW priority, lineage (disposition · golden source · evidence),
+acceptance criteria (Given/When/Then on the shared fixtures), design
+conformance where UI-bearing, and dependencies.</p>
+<p>State vocabulary (fixed, per CONSOLIDATION.md and the dossier):
+production-order <code>exec_state</code> ∈ {Pending, Accepted, In
+Progress, Completed, Interrupted, Abandoned, Declined}; recipe
+<code>gov_state</code> ∈ {Draft, Checked, Accepted, Outdated, Declined};
+batch <code>qa_state</code> ∈ {Quarantined, Released, Blocked}. The
+unqualified word “status” is never used for these (ADR-004).</p>
+<h3 id="capability-area-planning-mrp-backlog-w3-1">3.1 Capability area:
+Planning / MRP (backlog W3-1)</h3>
+<h4 id="urs-w3-001-production-plan-creation-from-sales-input">URS-W3-001
+— Production Plan creation from sales input</h4>
+<p><strong>Statement:</strong> The system shall allow the planner to
+create a Production Plan from sales input (sales orders and/or material
+requests/forecast), listing finished goods with plan quantities and
+warehouses. <strong>Priority:</strong> Must <strong>Lineage:</strong>
+Adopt · ERPNext · dossier ch. 3.2 (<code>production_plan.py</code>;
+Production Plan status enum <code>production_plan.json:302</code>;
+MPS/forecast doctypes
+<code>manufacturing/doctype/master_production_schedule/</code>)
+<strong>Acceptance criteria:</strong> - AC-1: Given a sales input
+demanding 500 kg of RW-CHM-0003 “Rheinol 40 Compound” for FG Lager Süd,
+When planner P. Krüger creates a Production Plan from that input, Then
+the plan contains one row: item RW-CHM-0003, planned qty 500 kg, target
+warehouse FG Lager Süd. - AC-2: Given the Production Plan from AC-1,
+When P. Krüger submits it, Then the plan is in a submitted, non-editable
+form and appears in the planning work queue. <strong>Design
+conformance:</strong> Planning screens use the Work Queue → Detail
+pattern in Desk mode (design skill §“Layout patterns” 1, §“Density
+modes”); full keyboard path (Enter confirms, Esc cancels, arrow keys
+move rows — §“Interaction rules”); quantities right-aligned tabular
+numerals with unit “kg” suffixed (§“Component rules — Forms/Tables”);
+German-first strings, DD.MM.YYYY dates (§“Content and language”).
+<strong>Dependencies:</strong> W0-4 (anchor BOM/order entities), W1
+exit.</p>
+<h4 id="urs-w3-002-bom-explosion-including-sub-assemblies">URS-W3-002 —
+BOM explosion including sub-assemblies</h4>
+<p><strong>Statement:</strong> The system shall explode the Production
+Plan through the Accepted recipe (BOM) of each planned item, including
+sub-assembly levels, to compute component requirements.
+<strong>Priority:</strong> Must <strong>Lineage:</strong> Adopt ·
+ERPNext · dossier ch. 3.2 (<code>production_plan.py</code> sub-assembly
+explosion; capability inventory “Planning / MRP” — High); recipe
+reference restricted to <code>gov_state</code> = Accepted per
+ADR-006/CDM-04 <strong>Acceptance criteria:</strong> - AC-1: Given
+BOM-RW-CHM-0003-001 (Accepted <code>gov_state</code>) consuming 20 kg
+RW-CHM-0001 “Rheinol 40 Basisharz” and 1 kg RW-CHM-0002 “Additiv K7” per
+25 kg of RW-CHM-0003, When the plan for 500 kg RW-CHM-0003 is exploded,
+Then computed requirements are exactly 400 kg RW-CHM-0001 and 20 kg
+RW-CHM-0002. - AC-2: Given a BOM for RW-CHM-0003 whose
+<code>gov_state</code> is Draft, When P. Krüger attempts to plan with
+it, Then the plan refuses the reference and names the rule (only
+Accepted recipes plannable), the record (the Draft BOM id), and the
+resolution (accept the recipe or select an Accepted version).
+<strong>Design conformance:</strong> The AC-2 refusal is a gate refusal:
+modal, logged, naming rule/record/resolution — never a dismissable toast
+(design skill §“Interaction rules — Hard gates look hard”).
+<strong>Dependencies:</strong> URS-W3-001; W1-4 (recipe governance).</p>
+<h4 id="urs-w3-003-mrp-netting-and-material-request-generation">URS-W3-003 —
+MRP netting and material request generation</h4>
+<p><strong>Statement:</strong> The system shall net component
+requirements against ledger on-hand stock (Bin) and open reservations,
+and generate Material Requests only for net shortages.
+<strong>Priority:</strong> Must <strong>Lineage:</strong> Adopt ·
+ERPNext · dossier ch. 3.2
+<code>production_plan/services/material_request.py:141</code>
+(<code>get_items_for_material_requests</code> MRP netting); quantity
+truth is the anchor ledger per ADR-005/CDM-03 <strong>Acceptance
+criteria:</strong> - AC-1: Given requirement 400 kg RW-CHM-0001 and
+BATCH-A-0001 providing 500 kg Released on-hand in RM Lager Nord with no
+reservations, When netting runs, Then no Material Request row is
+generated for RW-CHM-0001. - AC-2: Given requirement 20 kg RW-CHM-0002
+and only BATCH-A-0002 on hand with <code>qa_state</code> Blocked, When
+netting runs, Then Blocked stock is not counted as available and a
+Material Request for 20 kg RW-CHM-0002 is generated (blocking excludes
+stock from availability per CDM-01 lifecycle, W2-3 scope).
+<strong>Dependencies:</strong> URS-W3-002; W2-3 (blocking exclusion —
+cross-wave dependency, parent to reconcile exact ID).</p>
+<h4 id="urs-w3-004-production-order-generation-from-the-plan">URS-W3-004
+— Production order generation from the plan</h4>
+<p><strong>Statement:</strong> The system shall generate production
+orders (anchor Work Order + <code>exec_state</code>) from the Production
+Plan, created in <code>exec_state</code> Pending.
+<strong>Priority:</strong> Must <strong>Lineage:</strong> Adopt (anchor)
++ Absorb (state layer) · ERPNext + Qcadoo semantics · CDM-02/ADR-004;
+dossier ch. 3.2 Production Plan → Work Order spawning
+(<code>work_order.json</code> link <code>production_plan</code>)
+<strong>Acceptance criteria:</strong> - AC-1: Given the submitted plan
+for 500 kg RW-CHM-0003, When P. Krüger generates orders, Then production
+order PO-2026-0001 exists for 500 kg RW-CHM-0003 on line LINE-1 with
+<code>exec_state</code> = Pending and its <code>state_history</code>
+records creator and timestamp. - AC-2: Given PO-2026-0001 in
+<code>exec_state</code> Pending, When it is displayed anywhere in the
+planning UI, Then the state is shown as a status pill (icon + label +
+colour) using the exact label “Pending” — no synonyms. <strong>Design
+conformance:</strong> Status pill component per design skill §“Component
+rules — Status pill”; order identifiers (PO-2026-0001) rendered in mono
+(§“Typography — Identifiers”). <strong>Dependencies:</strong>
+URS-W3-001; W1-1 (exec_state machine).</p>
+<h3 id="capability-area-finite-capacity-backlog-w3-2">3.2 Capability
+area: Finite capacity (backlog W3-2)</h3>
+<h4 id="urs-w3-005-line-schedules-with-governed-schedule-states">URS-W3-005
+— Line schedules with governed schedule states</h4>
+<p><strong>Statement:</strong> The system shall let the planner build
+per-production-line schedules of accepted orders, with schedule
+lifecycle Draft → Approved / Rejected matching Qcadoo
+<code>ScheduleState</code> semantics. <strong>Priority:</strong> Must
+<strong>Lineage:</strong> Absorb (partial) · Qcadoo · dossier ch. 3.1
+<code>orders/states/constants/ScheduleState.java:8-24</code>
+(DRAFT/APPROVED/REJECTED + transitions); re-implementation, never a code
+port (implication 1) <strong>Acceptance criteria:</strong> - AC-1: Given
+PO-2026-0001 and PO-2026-0002 in <code>exec_state</code> Accepted on
+line LINE-1, When P. Krüger creates a schedule for LINE-1, Then the
+schedule is created in state Draft containing both orders with computed
+start/end times. - AC-2: Given the Draft schedule, When P. Krüger
+approves it, Then the schedule state is Approved and the schedule
+becomes the operative sequence for LINE-1; When P. Krüger rejects a
+Draft schedule instead, Then it is Rejected and has no operative effect.
+- AC-3 (parity): Given the characterization baseline of
+<code>ScheduleState.java:8-24</code>, When the target’s allowed schedule
+transitions are enumerated, Then they equal the baseline set
+{Draft→Approved, Draft→Rejected} with no additional transitions. Target
+must match legacy exactly. <strong>Design conformance:</strong> Schedule
+board is a Desk-mode professional view — dense, keyboard-navigable,
+nothing hidden behind hover/progressive disclosure (design skill
+§“Interaction rules — Nothing hides on desktop”); schedule state as
+status pill. <strong>Dependencies:</strong> URS-W3-004; W1-1.</p>
+<h4 id="urs-w3-006-realization-time-calculation-from-tjtpz-norms">URS-W3-006
+— Realization-time calculation from TJ/TPZ norms</h4>
+<p><strong>Statement:</strong> The system shall compute order/operation
+realization times from unit production time (TJ) and setup/preparatory
+time (TPZ) norms per operation and work centre, following Qcadoo
+realization-time semantics. <strong>Priority:</strong> Must
+<strong>Lineage:</strong> Absorb (partial) · Qcadoo · dossier ch. 3.1
+<code>productionScheduling/OrderRealizationTimeServiceImpl.java</code>
+(TJ/TPZ time norms); CDM-08 work-centre <code>production_line</code>
+extension (ADR-010) <strong>Acceptance criteria:</strong> - AC-1: Given
+routing RT-COMPOUND-01 where operation MIX at work centre LINE-1/MIX-01
+has TPZ 30 min and TJ 0.6 min/kg, and operation FILL at LINE-1/FILL-01
+has TPZ 15 min and TJ 0.3 min/kg, When realization time is computed for
+PO-2026-0001 (500 kg), Then MIX duration = 30 + 500×0.6 = 330 min and
+FILL duration = 15 + 500×0.3 = 165 min, and the order realization time
+equals the routed sequence total (495 min for sequential routing). -
+AC-2 (parity): Given the characterization fixtures for
+<code>OrderRealizationTimeServiceImpl</code> (same TJ/TPZ inputs run
+against the legacy baseline), When the target computes realization
+times, Then results match the legacy values exactly (to the minute).
+Target must match legacy exactly. <strong>Dependencies:</strong>
+URS-W3-005; W0-6 (characterisation harness), W0-3/CDM-08.</p>
+<h4 id="urs-w3-007-line-changeover-norms-in-schedule-computation">URS-W3-007
+— Line changeover norms in schedule computation</h4>
+<p><strong>Statement:</strong> The system shall apply line changeover
+norms (time between orders of different products on the same line) when
+sequencing orders in a line schedule. <strong>Priority:</strong> Should
+<strong>Lineage:</strong> Absorb (partial) · Qcadoo · dossier ch. 3.1
+capability inventory “Planning &amp; scheduling” (plugin
+<code>mes-plugins-line-changeover-norms</code>) <strong>Acceptance
+criteria:</strong> - AC-1: Given a changeover norm of 45 min on LINE-1
+between RW-CHM-0003 and any other product, When PO-2026-0002 is
+scheduled immediately after PO-2026-0001 on LINE-1, Then PO-2026-0002’s
+computed start is ≥ PO-2026-0001’s end + 45 min. - AC-2: Given no
+changeover norm defined for a product pair, When two such orders are
+sequenced, Then no changeover time is inserted and the schedule notes
+“no changeover norm” for the transition. <strong>Dependencies:</strong>
+URS-W3-005, URS-W3-006.</p>
+<h4 id="urs-w3-008-anchor-capacity-slot-search-retained-under-the-schedule-layer">URS-W3-008
+— Anchor capacity slot search retained under the schedule layer</h4>
+<p><strong>Statement:</strong> The system shall retain the anchor’s
+capacity slot search: with capacity planning enabled, an operation that
+cannot be placed within the plan window at its work centre’s
+<code>production_capacity</code> shall be refused with a capacity error.
+<strong>Priority:</strong> Should <strong>Lineage:</strong> Adopt ·
+ERPNext · dossier ch. 3.2
+<code>work_order/services/operations.py:105-130</code>
+(<code>CapacityError</code>), <code>workstation.json</code>
+(<code>production_capacity</code>) <strong>Acceptance criteria:</strong>
+- AC-1: Given LINE-1/MIX-01 with <code>production_capacity</code> = 1
+fully booked by PO-2026-0001 for the plan window, When P. Krüger tries
+to schedule PO-2026-0002’s MIX operation in the same window, Then the
+system refuses with a capacity error naming the work centre
+(LINE-1/MIX-01), the blocking booking, and the earliest feasible slot as
+resolution. <strong>Design conformance:</strong> Capacity refusal
+presented as a gate refusal — modal, logged, rule/record/resolution
+(design skill §“Hard gates look hard”). <strong>Dependencies:</strong>
+URS-W3-005.</p>
+<h4 id="urs-w3-009-constraint-based-optimisation-wont-recorded-exclusion">URS-W3-009
+— Constraint-based optimisation (Won’t — recorded exclusion)</h4>
+<p><strong>Statement:</strong> The system shall NOT include a
+constraint-based finite-capacity optimiser in W3; scheduling remains
+norm/slot-based with manual planner sequencing.
+<strong>Priority:</strong> Won’t (this wave) <strong>Lineage:</strong>
+White space · none (absent in all three sources) · dossier §6.2 “Finite
+capacity scheduling … still no optimiser anywhere”, §6.3; build-vs-buy
+is business decision D4
+(<code>docs/plan/consolidation-project-plan.md</code> Dependencies D4)
+<strong>Acceptance criteria:</strong> - AC-1: Given the W3 scope
+baseline, When the delivered scheduling features are audited at wave
+exit, Then no optimiser component exists and decision record D4 (build
+vs buy) is documented with a status, so absence is deliberate and
+traceable rather than an omission. <strong>Dependencies:</strong> —
+(records the boundary of URS-W3-005…008).</p>
+<h3 id="capability-area-group-erp-interface-backlog-w3-3-w3-4-adr-002">3.3
+Capability area: Group-ERP interface (backlog W3-3, W3-4; ADR-002)</h3>
+<h4 id="urs-w3-010-orders-in-inbound-demand">URS-W3-010 — Orders in
+(inbound demand)</h4>
+<p><strong>Statement:</strong> The system shall accept inbound order
+demand from the group ERP over the boundary interface and
+create/maintain corresponding MES demand (sales input to planning),
+keyed by an external order reference. <strong>Priority:</strong> Must
+<strong>Lineage:</strong> Rebuild (boundary) · none (contract per
+ADR-002) · ADR-002 “Interface contract: orders in, confirmations out, GL
+postings out”; external-reference precedent dossier ch. 3.1
+<code>OrderFields.java:48,88</code>
+(<code>externalNumber</code>/<code>externalSynchronized</code>)
+<strong>Acceptance criteria:</strong> - AC-1: Given contract fixture
+ERP-IN-001 carrying an order for 500 kg RW-CHM-0003 with external
+reference GRP-SO-77001, When the interface processes it, Then a
+sales-input record exists in the MES referencing GRP-SO-77001 and is
+available to Production Plan creation (URS-W3-001). - AC-2: Given the
+same fixture ERP-IN-001 delivered a second time (duplicate), When the
+interface processes it, Then no duplicate demand is created and the
+duplicate is logged with reference GRP-SO-77001 (idempotency). - AC-3:
+Given a fixture with an unknown item code, When processed, Then the
+message is rejected to an error queue with a machine-readable reason and
+no partial data is written. <strong>Dependencies:</strong> URS-W3-019
+(contract freeze), external dependency D1 (group-ERP interface
+availability).</p>
+<h4 id="urs-w3-011-confirmations-out-production-confirmations">URS-W3-011 —
+Confirmations out (production confirmations)</h4>
+<p><strong>Statement:</strong> The system shall emit a production
+confirmation message to the group ERP when a production order reaches
+<code>exec_state</code> Completed, carrying order reference, produced
+item, produced quantity, and FG batch identifiers.
+<strong>Priority:</strong> Must <strong>Lineage:</strong> Rebuild
+(boundary) · none · ADR-002; completion semantics from CDM-02
+(<code>exec_state</code> Completed requires produced ≥ ordered or
+explicit shortfall reason) <strong>Acceptance criteria:</strong> - AC-1:
+Given PO-2026-0001 completed with 500 kg RW-CHM-0003 into batch
+BATCH-C-1001, When <code>exec_state</code> transitions to Completed,
+Then exactly one confirmation message is emitted containing GRP-SO-77001
+(if linked), RW-CHM-0003, 500 kg, and BATCH-C-1001, and it validates
+against the frozen contract schema. - AC-2: Given the ERP endpoint is
+unreachable, When the confirmation is emitted, Then it is queued durably
+and delivered on recovery without loss or duplication, and the interface
+health surface shows the backlog. <strong>Dependencies:</strong> W1-1
+(exec_state), URS-W3-013.</p>
+<h4 id="urs-w3-012-gl-postings-out-boundary-costingvaluation">URS-W3-012
+— GL postings out (boundary costing/valuation)</h4>
+<p><strong>Statement:</strong> The system shall map perpetual-inventory
+GL postings arising from stock ledger entries to group-ERP account codes
+via a maintained account map, and emit them over the boundary interface;
+the MES holds no financial ledger of record. <strong>Priority:</strong>
+Must <strong>Lineage:</strong> Adopt (boundary) · ERPNext · dossier
+ch. 3.2 <code>stock_controller.py</code> (perpetual-inventory GL from
+SLE), <code>item.json:387-390</code> (valuation methods),
+<code>stock_ledger.py:1726-1729</code> (FIFO/LIFO queue); fenced per
+ADR-002 <strong>Acceptance criteria:</strong> - AC-1: Given BATCH-C-1001
+(500 kg RW-CHM-0003) received into FG Lager Süd at valuation rate 4.20
+€/kg, When the manufacture posting is made, Then a GL-posting message of
+2,100.00 € debit/credit pair is emitted with FG Lager Süd’s mapped
+group-ERP account codes, validating against the contract schema. - AC-2:
+Given a warehouse with no account mapping, When a posting for it arises,
+Then the posting is held in an unmapped-accounts queue, an alert names
+the warehouse and the missing map entry, and nothing is emitted until
+the map is completed. <strong>Dependencies:</strong> W1-3 (anchor hard
+stops/valuation), URS-W3-013.</p>
+<h4 id="urs-w3-013-contract-fixtures-and-versioned-interface-schema">URS-W3-013
+— Contract fixtures and versioned interface schema</h4>
+<p><strong>Statement:</strong> The system shall maintain a versioned,
+machine-validated interface contract (schemas for orders-in,
+confirmations-out, GL-postings-out) with a fixture set covering happy
+path, duplicate, and rejection cases; contract tests shall run in CI.
+<strong>Priority:</strong> Must <strong>Lineage:</strong> Rebuild
+(boundary) · none · ADR-002 “interface fixtures tested in Wave W3”; wave
+exit criterion (<code>docs/waves/W3-planning-boundary.md</code>)
+<strong>Acceptance criteria:</strong> - AC-1: Given the frozen contract
+version 1.0, When the fixture suite (≥ 1 happy, ≥ 1 duplicate, ≥ 1
+rejection per message type — 9 fixtures minimum) runs in CI, Then all
+pass and the run is linked from the wave evidence pack. - AC-2: Given a
+proposed schema change, When it is not backward-compatible with version
+1.0, Then the contract version increments and both versions’ fixtures
+pass during the agreed transition window. <strong>Dependencies:</strong>
+URS-W3-010…012; external D1.</p>
+<h4 id="urs-w3-014-interface-monitoring-error-handling-and-replay">URS-W3-014
+— Interface monitoring, error handling and replay</h4>
+<p><strong>Statement:</strong> The system shall provide the business
+viewer and planner an interface-health surface (message counts, error
+queue depth, oldest unprocessed message) and allow authorised replay of
+failed messages with full audit. <strong>Priority:</strong> Should
+<strong>Lineage:</strong> Rebuild (boundary) · none · ADR-002; audit
+precedent dossier ch. 3.1 §E (state-change audit rows)
+<strong>Acceptance criteria:</strong> - AC-1: Given 1 rejected orders-in
+message (URS-W3-010 AC-3), When B. Vogel opens the Command Dashboard,
+Then a plain-language KPI tile (“ERP messages needing attention: 1”)
+drills down to the professional error-queue view showing the message
+with its rejection reason. - AC-2: Given the corrected message, When P.
+Krüger replays it, Then processing succeeds, and the audit log records
+who replayed, when, and the message reference. <strong>Design
+conformance:</strong> Command Dashboard pattern — plain-language KPI
+tiles drilling into professional queue views (design skill §“Layout
+patterns” 3); error queue is a dense table with mono message references.
+<strong>Dependencies:</strong> URS-W3-010…013.</p>
+<h3 id="capability-area-scadaopc-ua-adapter-backlog-w3-5-white-space-net-new">3.4
+Capability area: SCADA/OPC-UA adapter (backlog W3-5 — white space,
+net-new)</h3>
+<h4 id="urs-w3-015-opc-ua-tracking-event-ingestion">URS-W3-015 — OPC-UA
+tracking-event ingestion</h4>
+<p><strong>Statement:</strong> The system shall ingest process-control
+events (operation start/stop, produced quantity counts) from plant
+equipment via an OPC-UA adapter and attach them to the correct
+production order and operation as tracking events.
+<strong>Priority:</strong> Must <strong>Lineage:</strong> Rebuild · none
+(white space) · dossier §6.3 “SCADA/OPC-UA / device connectivity —
+absent in all three” (searches documented per chapter §G); backlog W3-5
+<strong>Acceptance criteria:</strong> - AC-1: Given the OPC-UA adapter
+subscribed to LINE-1/MIX-01 tags and PO-2026-0001 In Progress on LINE-1,
+When the equipment publishes a produced-count event of 25 kg, Then a
+tracking event of 25 kg is recorded against PO-2026-0001’s MIX operation
+within 5 s, attributed to source “OPC-UA” (not to an operator). - AC-2:
+Given an event for a work centre with no order In Progress, When it
+arrives, Then it is held in an unmatched-events queue for planner
+disposition and is not silently dropped. <strong>Dependencies:</strong>
+W1-7 (operator journey / tracking records), W2-1 (genealogy recording —
+cross-wave, parent to reconcile).</p>
+<h4 id="urs-w3-016-tag-to-work-centre-mapping-administration">URS-W3-016
+— Tag-to-work-centre mapping administration</h4>
+<p><strong>Statement:</strong> The system shall let the technologist
+maintain the mapping of OPC-UA node/tag addresses to work centres
+(CDM-08) and event types, with validation that each mapped work centre
+exists. <strong>Priority:</strong> Must <strong>Lineage:</strong>
+Rebuild · none (white space) · dossier §6.3; CDM-08/ADR-010 (Workstation
++ production_line) <strong>Acceptance criteria:</strong> - AC-1: Given
+T. Schmid maps tag <code>ns=2;s=Line1.Mix01.ProducedKg</code> to work
+centre LINE-1/MIX-01 event type “produced-count”, When the mapping is
+saved, Then events on that tag resolve to LINE-1/MIX-01 (URS-W3-015 AC-1
+path). - AC-2: Given a mapping referencing a non-existent work centre
+code, When save is attempted, Then save is refused naming the invalid
+code. <strong>Design conformance:</strong> Mapping admin is a Desk-mode
+table with mono tag identifiers (design skill §“Typography —
+Identifiers”, §“Component rules — Tables”).
+<strong>Dependencies:</strong> URS-W3-015, W0-3.</p>
+<h4 id="urs-w3-017-store-and-forward-on-link-loss">URS-W3-017 —
+Store-and-forward on link loss</h4>
+<p><strong>Statement:</strong> The system shall buffer OPC-UA events
+during connectivity loss between adapter and MES and deliver them in
+order on reconnection, flagging late-arriving events with their original
+equipment timestamp. <strong>Priority:</strong> Should
+<strong>Lineage:</strong> Rebuild · none (white space) · dossier §6.3;
+backlog W3-5 (“tracking events from process control into production
+records”) <strong>Acceptance criteria:</strong> - AC-1: Given a
+10-minute adapter-to-MES outage during which LINE-1/MIX-01 publishes 3
+produced-count events, When connectivity is restored, Then all 3 events
+are recorded against PO-2026-0001 in original order with original
+timestamps and a late-delivery flag. <strong>Dependencies:</strong>
+URS-W3-015.</p>
+<h3 id="capability-area-hazmatregulatory-completion-backlog-w3-6-white-space-net-new">3.5
+Capability area: Hazmat/regulatory completion (backlog W3-6 — white
+space, net-new)</h3>
+<h4 id="urs-w3-018-shippingadr-boundary-data-and-label-data">URS-W3-018
+— Shipping/ADR boundary data and label data</h4>
+<p><strong>Statement:</strong> The system shall complete hazmat data at
+the shipping boundary: for items with a hazmat profile (W2-7 scope), the
+technologist shall maintain ADR transport data (UN number, proper
+shipping name, ADR class, packing group) and the system shall render
+dispatch label data for FG batches; dispatch of a hazmat batch without
+complete ADR data shall be refused. <strong>Priority:</strong> Must
+<strong>Lineage:</strong> Rebuild · none (white space) · dossier §6.3
+“Hazmat / regulatory master data … absent in all three”; backlog W3-6;
+depends on W2-7 (hazmat master data) — CDM-01
+<code>hazmat_profile</code> <strong>Acceptance criteria:</strong> -
+AC-1: Given RW-CHM-0003’s hazmat profile with UN 1263, proper shipping
+name “FARBE”, ADR class 3, packing group III, When W. Braun produces the
+dispatch label data for BATCH-C-1001 from FG Lager Süd, Then the label
+output contains UN 1263, “FARBE”, class 3, PG III, batch BATCH-C-1001,
+and net quantity in kg. - AC-2: Given a hazmat item whose profile lacks
+a UN number, When dispatch of its batch is attempted, Then the system
+refuses, naming the rule (ADR data incomplete), the record (the item and
+missing field), and the resolution (complete the hazmat profile).
+<strong>Design conformance:</strong> Refusal per gate-refusal rule
+(modal, logged, rule/record/resolution); label preview usable in
+Terminal mode at dispatch stations — 48 px targets, scanner path to
+select the batch/HU (HU-000123 scan resolves the handling unit) per
+design skill §“Density modes”, §“Scanner is a first-class input”.
+<strong>Dependencies:</strong> W2-7 (cross-wave), W2-2 (unified
+batch).</p>
+<h3 id="capability-area-external-sync-survey-contract-freeze-backlog-w3-7">3.6
+Capability area: External-sync survey &amp; contract freeze (backlog
+W3-7)</h3>
+<h4 id="urs-w3-019-survey-and-contract-freeze-register-of-existing-external-syncs">URS-W3-019
+— Survey and contract-freeze register of existing external syncs</h4>
+<p><strong>Statement:</strong> The programme shall produce a register of
+all existing external synchronisations (all consumers of Qcadoo
+<code>externalNumber</code>/<code>externalSynchronized</code> fields;
+all active ERPNext integrations at Plant C), and each shall be
+dispositioned (carry across boundary / retire / replace) with its
+contract frozen before the ERP interface contract (URS-W3-013) is
+finalised. <strong>Priority:</strong> Must <strong>Lineage:</strong> —
+(survey; no code disposition) · — · dossier ch. 3.1
+<code>OrderFields.java:48,88</code>; open question §8.2 #6 (“Is there an
+external WMS/ERP currently connected to any plant … must those
+interfaces survive consolidation?”) <strong>Acceptance
+criteria:</strong> - AC-1: Given the survey is executed at Plants A and
+C, When the register is published, Then every entry has: system name,
+direction, data objects, evidence of use (or confirmed unused), and a
+disposition; and open question §8.2 #6 is marked answered in the
+programme register. - AC-2: Given any register entry dispositioned
+“carry”, When the ERP interface contract v1.0 is frozen, Then that
+entry’s requirements are reflected in the contract fixtures (URS-W3-013)
+— no carried sync without a fixture. <strong>Dependencies:</strong>
+blocks URS-W3-010…013 finalisation; W0-5.</p>
+<h3 id="untraceable-deferred">3.7 Untraceable / deferred</h3>
+<ul>
+<li><strong>Partner-master ownership at the boundary</strong> (are
+supplier/customer masters owned by group ERP with MES holding references
+only?) — business decision D5
+(<code>docs/plan/consolidation-project-plan.md</code>); no legacy
+evidence determines the answer. Deferred to the D5 sign-off;
+URS-W3-010’s demand model assumes references-only and must be revisited
+if D5 decides otherwise.</li>
+<li><strong>Finite-capacity optimiser build-vs-buy</strong> — decision
+D4; recorded as Won’t in URS-W3-009 rather than an invented
+requirement.</li>
+</ul>
+<h2 id="non-functional-requirements">4. Non-functional requirements</h2>
+<h4 id="urs-w3-020-planning-boundary-performance">URS-W3-020 — Planning
+&amp; boundary performance</h4>
+<p><strong>Statement:</strong> The system shall meet: schedule-board
+initial render for a 200-order line schedule ≤ 2 s; UI feedback for
+every planner action &lt; 100 ms with progress shown on the control for
+longer operations; scan-to-confirmation at dispatch stations ≤ 300 ms
+server-confirmed; orders-in fixture message processed end-to-end ≤ 10 s.
+<strong>Priority:</strong> Must <strong>Lineage:</strong> Design skill
+§“Interaction rules — No dead air” (&lt;100 ms, server-confirmed gated
+actions), §“Component rules — Tables” (virtualized beyond 200 rows);
+interface budget derived from URS-W3-010. <strong>Acceptance
+criteria:</strong> - AC-1: Given a LINE-1 schedule of 200 orders, When
+the board loads, Then first meaningful render ≤ 2 s and the table is
+virtualized. - AC-2: Given W. Braun scans HU-000123 at dispatch, When
+the scan is accepted, Then server-confirmed feedback appears ≤ 300 ms
+with full-row visual + audible confirmation.</p>
+<h4 id="urs-w3-021-audit-and-logging-of-gated-and-boundary-actions">URS-W3-021
+— Audit and logging of gated and boundary actions</h4>
+<p><strong>Statement:</strong> The system shall write an immutable audit
+record (actor or source system, timestamp, action, record reference,
+outcome) for: every schedule approval/rejection, every gate refusal
+(capacity, recipe-governance, hazmat dispatch), every boundary message
+processed/rejected/replayed, and every OPC-UA-sourced tracking event.
+<strong>Priority:</strong> Must <strong>Lineage:</strong> Absorb ·
+Qcadoo audit precedent (dossier ch. 3.1 §E
+<code>orderStateChange.xml:36-47</code> per-entity state-change audit) +
+design skill §“Hard gates look hard” (“modal and logged”).
+<strong>Acceptance criteria:</strong> - AC-1: Given URS-W3-008 AC-1’s
+capacity refusal, When the audit log is queried for PO-2026-0002, Then a
+refusal entry exists naming the rule and work centre LINE-1/MIX-01. -
+AC-2: Given URS-W3-014 AC-2’s replay, When the audit log is queried,
+Then the replay entry names P. Krüger, the timestamp, and message
+reference.</p>
+<h4 id="urs-w3-022-german-first-i18n-and-locale-formats">URS-W3-022 —
+German-first i18n and locale formats</h4>
+<p><strong>Statement:</strong> All W3 UI strings shall be externalized
+with German as the primary locale; dates shall render DD.MM.YYYY and
+quantities in kg with locale-correct decimal separators; no string
+concatenation for translatable text. <strong>Priority:</strong> Must
+<strong>Lineage:</strong> Design skill §“Content and language”
+(“German-first i18n discipline … DD.MM.YYYY and kg”); precedent dossier
+ch. 3.1 (locales en/pl/fr/de/cn), ch. 3.2
+(<code>erpnext/locale/de.po</code>). <strong>Acceptance
+criteria:</strong> - AC-1: Given the locale is de, When the schedule
+board renders PO-2026-0001’s planned start 31.12.2026, Then the date
+shows as “31.12.2026” and quantity as “500 kg” with German number
+formatting; state pill labels come from the externalized glossary (no
+hard-coded English fallbacks in W3 screens — verified by
+string-extraction lint).</p>
+<h4 id="urs-w3-023-access-control-for-planning-and-boundary-actions">URS-W3-023
+— Access control for planning and boundary actions</h4>
+<p><strong>Statement:</strong> The system shall gate: schedule approval
+to the planner role; interface replay and account-map maintenance to
+explicitly authorised roles; tag-mapping administration to the
+technologist role — with workflow-state-level permissions
+(per-transition), not only DocType-level rights.
+<strong>Priority:</strong> Must <strong>Lineage:</strong> Absorb ·
+Qcadoo per-transition role semantics (dossier ch. 3.1 §B.2, 151 granular
+roles incl. per-state-transition; implication 7 role-model levelling) on
+W1-8’s role model. <strong>Acceptance criteria:</strong> - AC-1: Given
+operator O. Weber’s role set, When O. Weber attempts to approve the
+LINE-1 schedule, Then the action is refused and audited; When planner P.
+Krüger performs it, Then it succeeds. - AC-2: Given a user with planner
+but not interface-admin rights, When they attempt message replay, Then
+it is refused naming the required permission.
+<strong>Dependencies:</strong> W1-8.</p>
+<h2 id="data-migration-requirements">5. Data migration requirements</h2>
+<p>W3 lands no migrated data. Master data migrated in W0 (W0-5), open
+batches/genealogy history in W2, backfills in W4 (see URS-W4). The only
+W3 data obligations are: the frozen interface contract fixtures
+(URS-W3-013) and the GL account map (URS-W3-012), both created new —
+reconciliation of the account map is covered by URS-W3-012 AC-2
+(unmapped-accounts hold queue).</p>
+<h2 id="wave-exit-criteria">6. Wave exit criteria</h2>
+<p>Restated from <code>docs/waves/W3-planning-boundary.md</code>
+(“<strong>Exit:</strong> planning journey complete; ERP interface
+contract tested with fixtures”) and decomposed:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>ID</th>
+<th>Check</th>
+<th>Verifies</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>EXIT-W3-1</td>
+<td>Planning journey demonstrably complete end-to-end: sales input
+GRP-SO-77001 → Production Plan → explosion (400 kg RW-CHM-0001 / 20 kg
+RW-CHM-0002) → Material Request for shortage → PO-2026-0001 Pending →
+Approved LINE-1 schedule with TJ/TPZ times and changeover applied</td>
+<td>URS-W3-001…008</td>
+</tr>
+<tr>
+<td>EXIT-W3-2</td>
+<td>ERP interface contract v1.0 frozen and fixture suite (≥ 9 fixtures
+across 3 message types) passing in CI, linked from the evidence
+pack</td>
+<td>URS-W3-010…013</td>
+</tr>
+<tr>
+<td>EXIT-W3-3</td>
+<td>External-sync register published, all entries dispositioned, open
+question §8.2 #6 answered; carried syncs have contract fixtures</td>
+<td>URS-W3-019</td>
+</tr>
+<tr>
+<td>EXIT-W3-4</td>
+<td>SCADA path demonstrated: OPC-UA fixture event recorded against
+PO-2026-0001 incl. outage replay; unmatched-event queue functioning</td>
+<td>URS-W3-015…017</td>
+</tr>
+<tr>
+<td>EXIT-W3-5</td>
+<td>Hazmat dispatch demonstrated: BATCH-C-1001 label data correct;
+incomplete-profile dispatch refused with rule/record/resolution</td>
+<td>URS-W3-018</td>
+</tr>
+<tr>
+<td>EXIT-W3-6</td>
+<td>NFR evidence: performance measurements (URS-W3-020), audit samples
+(URS-W3-021), i18n lint pass (URS-W3-022), permission matrix test pass
+(URS-W3-023)</td>
+<td>URS-W3-020…023</td>
+</tr>
+<tr>
+<td>EXIT-W3-7</td>
+<td>Won’t-scope confirmed: no optimiser shipped; D4 decision record
+present with status</td>
+<td>URS-W3-009</td>
+</tr>
+</tbody>
+</table>
+  <footer class="doc">Rheinwerk Chemie GmbH — MES consolidation programme. Generated from the Markdown source of record in SachetCognition/rheinwerk-mes-core.</footer>
+</main>
+<button id="top-btn" title="Back to top">⇧</button>
+<script>
+const links=[...document.querySelectorAll('#sidebar nav a')];
+const targets=links.map(a=>document.getElementById(decodeURIComponent(a.hash.slice(1)))).filter(Boolean);
+function onScroll(){
+  const y=window.scrollY+90;let cur=targets[0];
+  for(const t of targets){if(t.offsetTop<=y)cur=t;else break}
+  links.forEach(a=>a.classList.toggle('active',cur&&decodeURIComponent(a.hash.slice(1))===cur.id));
+  document.getElementById('top-btn').classList.toggle('show',window.scrollY>500);
+}
+document.addEventListener('scroll',onScroll,{passive:true});onScroll();
+document.getElementById('top-btn').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
+</script>
+</body>
+</html>
