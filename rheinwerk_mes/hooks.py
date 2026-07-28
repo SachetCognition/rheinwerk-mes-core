@@ -78,6 +78,8 @@ after_install = [
 	"rheinwerk_mes.setup.w2_rbac.setup_w2_rbac",
 	# W3: the read-only permission surface of the e-signature evidence (DEC-W2-029).
 	"rheinwerk_mes.setup.w3_esignature.setup_w3_esignature",
+	# W3-2: line-schedule governance workflow and work-centre capacity (URS-W3-005/008).
+	"rheinwerk_mes.setup.w3_scheduling.setup_w3_scheduling",
 ]
 
 # Client-side additions to anchor forms; W1-4 renders the recipe's `gov_state` pill on the
@@ -98,6 +100,8 @@ app_include_css = [
 	"/assets/rheinwerk_mes/css/inspection_queue.css",
 	# W2-7: the hazmat chip's signal tone and icons (URS-W2-024).
 	"/assets/rheinwerk_mes/css/hazmat.css",
+	# W3-2: the planner's virtualized schedule board (URS-W3-005, URS-W3-020).
+	"/assets/rheinwerk_mes/css/schedule_board.css",
 ]
 
 # W2-7: one hazmat chip component shared by the Item/Batch forms, stock views and the

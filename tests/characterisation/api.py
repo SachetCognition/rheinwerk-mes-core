@@ -27,6 +27,11 @@ ENTRYPOINTS: dict[str, str] = {
 	"expired_issue": "rheinwerk_mes.execution_gating.contracts.evaluate_expired_issue",
 	"batch_state_transition": "rheinwerk_mes.genealogy.contracts.evaluate_batch_state_transition",
 	"pickable_candidates": "rheinwerk_mes.genealogy.contracts.pickable_candidates",
+	# W3-2: line-schedule state machine and TJ/TPZ realization times (URS-W3-005/006).
+	"schedule_state_transition": (
+		"rheinwerk_mes.manufacturing_core.scheduling.contracts.evaluate_schedule_state_transition"
+	),
+	"realization_time": "rheinwerk_mes.manufacturing_core.scheduling.contracts.realization_time",
 }
 
 

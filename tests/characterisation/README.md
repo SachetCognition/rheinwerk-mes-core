@@ -37,12 +37,15 @@ pytest tests/characterisation          # offline, no site required
 | `CHAR-BATCH-STATE-01` | batch disposition machine: Released ⇄ Blocked reversible, reason mandatory, illegal edges refused; the Quarantined entry state asserted as **new behaviour** | `BatchState.java:31-44` | URS-W2-006 / TC-W2-038 |
 | `CHAR-BLOCKED-PICK-01` | resources of a quality-blocked batch never reach a candidate list; the Quarantined exclusion asserted as **new behaviour** | `ResourceCriteriaModifiers.java:59,70` | URS-W2-010 / TC-W2-039 |
 | `CHAR-EXPIRY-ISSUE-01` | expired resource issuable under Plant A's FEFO-advisory behaviour — **declared divergence** (W1 refuses it; see below) | `ResourceManagementServiceImpl.java:1015-1027` | URS-W1-030 / TC-W1-033 |
+| `CHAR-SCHEDULE-STATE-01` | line-schedule machine: Draft → Approved / Rejected, every other edge refused; the legacy Approved → Rejected edge asserted as **new behaviour** (narrowed on purpose) | `ScheduleState.java:8-24` | URS-W3-005 / TC-W3-007 |
+| `CHAR-REALIZATION-TIME-01` | realization time = TPZ + truncated(quantity × TJ × staff factor), 15 combinations incl. qty = 1 and TPZ = 0 | `OrderRealizationTimeServiceImpl.java:156-186` | URS-W3-006 / TC-W3-009 |
 
 ### New behaviour without a legacy counterpart
 
 Where the estate adds a behaviour Plant A simply does not have — the `Quarantined` entry
-state and its exclusion from picking (URS-W2-006/010) — the fixture case is flagged
-`new_behaviour` and carries **two** expectations: `expected` is the legacy verdict, pinned
+state and its exclusion from picking (URS-W2-006/010) — or deliberately narrows one it does
+have — the legacy `Approved → Rejected` schedule edge dropped by URS-W3-005 AC-3 — the
+fixture case is flagged `new_behaviour` and carries **two** expectations: `expected` is the legacy verdict, pinned
 while the contract runs against the fallback, and `expected_target` is the addition, asserted
 as soon as the target entrypoint resolves. Unlike a `Divergence` this is not a conflict
 between two readings of the same rule, so it needs no strict xfail and no business sign-off —
@@ -75,6 +78,8 @@ and any behavioural difference fails CI immediately.
 | `rheinwerk_mes.execution_gating.contracts.evaluate_expired_issue` | `(issue: Mapping[str, Any]) -> Verdict` | `legacy_rules.evaluate_expired_issue` |
 | `rheinwerk_mes.genealogy.contracts.evaluate_batch_state_transition` | `(transition: Mapping[str, Any]) -> Verdict` | `legacy_rules.evaluate_batch_state_transition` |
 | `rheinwerk_mes.genealogy.contracts.pickable_candidates` | `(resources: Sequence[Mapping[str, Any]]) -> Sequence[str]` | `legacy_rules.pickable_candidates` |
+| `rheinwerk_mes.manufacturing_core.scheduling.contracts.evaluate_schedule_state_transition` | `(transition: Mapping[str, Any]) -> Verdict` | `legacy_rules.evaluate_schedule_state_transition` |
+| `rheinwerk_mes.manufacturing_core.scheduling.contracts.realization_time` | `(inputs: Mapping[str, Any]) -> int` | `legacy_rules.realization_time` |
 
 Contract details for the implementer:
 
