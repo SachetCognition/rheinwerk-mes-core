@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TST W4 — Cutover &amp; Decommission</title>
+<style>
+:root{--accent:#1f4e79;--accent2:#2e74b5;--bg:#f7f9fb;--card:#ffffff;--text:#24292f;--muted:#6a737d;--border:#e1e6eb;--sidebar-w:300px}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",Calibri,Arial,sans-serif;color:var(--text);background:var(--bg);line-height:1.55;font-size:15px}
+#sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:var(--accent);color:#fff;overflow-y:auto;padding:22px 18px}
+#sidebar .brand{font-size:15px;font-weight:600;letter-spacing:.4px;border-bottom:1px solid rgba(255,255,255,.25);padding-bottom:12px;margin-bottom:12px}
+#sidebar .brand small{display:block;font-weight:400;opacity:.75;margin-top:4px}
+#sidebar nav ul{list-style:none;margin:0;padding-left:0}
+#sidebar nav ul ul{padding-left:14px}
+#sidebar nav a{display:block;color:rgba(255,255,255,.85);text-decoration:none;font-size:12.6px;padding:4px 8px;border-radius:5px;border-left:3px solid transparent}
+#sidebar nav a:hover{background:rgba(255,255,255,.12);color:#fff}
+#sidebar nav a.active{background:rgba(255,255,255,.18);color:#fff;border-left-color:#9cc3e5;font-weight:600}
+#content{margin-left:var(--sidebar-w);padding:42px 56px;max-width:1080px}
+header.doc{border-bottom:3px solid var(--accent);padding-bottom:18px;margin-bottom:30px}
+header.doc h1{color:var(--accent);font-size:30px;margin:0 0 6px}
+header.doc .sub{color:var(--accent2);font-size:15.5px;font-weight:600}
+h1,h2{color:var(--accent);margin-top:2.1em;border-bottom:1px solid var(--border);padding-bottom:.25em}
+h3,h4{color:var(--accent2);margin-top:1.7em}
+a{color:var(--accent2)}
+table{border-collapse:collapse;width:100%;margin:1.1em 0;background:var(--card);font-size:13.2px;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+th{background:var(--accent);color:#fff;text-align:left;padding:8px 10px;font-weight:600}
+td{border:1px solid var(--border);padding:7px 10px;vertical-align:top}
+tr:nth-child(even) td{background:#f2f6fa}
+code{background:#eef2f6;border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:12px;font-family:Consolas,Menlo,monospace;color:#0b3d66}
+pre{background:#0f2a43;color:#dce8f5;padding:14px 16px;border-radius:8px;overflow-x:auto;font-size:12.5px}
+pre code{background:none;border:none;color:inherit;padding:0}
+blockquote{margin:1em 0;padding:10px 16px;background:#eaf1f8;border-left:5px solid var(--accent2);border-radius:0 6px 6px 0;color:#243b53}
+img.diagram,p img{max-width:100%;background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px;box-shadow:0 1px 3px rgba(0,0,0,.08);display:block;margin:1.2em auto}
+#top-btn{position:fixed;right:26px;bottom:26px;background:var(--accent);color:#fff;border:none;border-radius:50%;width:46px;height:46px;font-size:19px;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .25s;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+#top-btn.show{opacity:.92;pointer-events:auto}
+footer.doc{margin-top:60px;border-top:1px solid var(--border);padding-top:14px;color:var(--muted);font-size:12px}
+@media(max-width:900px){#sidebar{display:none}#content{margin-left:0;padding:24px}}
+</style>
+</head>
+<body>
+<aside id="sidebar">
+  <div class="brand">TST W4 — Cutover &amp; Decommission<small>Rheinwerk
+MES Consolidation — Test &amp; Verification</small></div>
+  <nav><ul>
+<li><a href="#test-strategy" id="toc-test-strategy">1. Test
+strategy</a></li>
+<li><a href="#traceability-matrix" id="toc-traceability-matrix">2.
+Traceability matrix</a></li>
+<li><a href="#test-cases" id="toc-test-cases">3. Test cases</a>
+<ul>
+<li><a href="#tc-w4-001-runbook-structural-completeness-journey" id="toc-tc-w4-001-runbook-structural-completeness-journey">TC-W4-001 —
+Runbook structural completeness [Journey]</a></li>
+<li><a href="#tc-w4-002-plant-a-runbook-dry-run-on-staging-journey" id="toc-tc-w4-002-plant-a-runbook-dry-run-on-staging-journey">TC-W4-002
+— Plant A runbook dry-run on staging [Journey]</a></li>
+<li><a href="#tc-w4-003-legacy-write-freeze-with-query-access-retained-integration" id="toc-tc-w4-003-legacy-write-freeze-with-query-access-retained-integration">TC-W4-003
+— Legacy write freeze with query access retained [Integration]</a></li>
+<li><a href="#tc-w4-004-archive-package-restore-test-integration" id="toc-tc-w4-004-archive-package-restore-test-integration">TC-W4-004 —
+Archive package restore test [Integration]</a></li>
+<li><a href="#tc-w4-005-qcadoo-build-chain-archive-network-isolated-integration" id="toc-tc-w4-005-qcadoo-build-chain-archive-network-isolated-integration">TC-W4-005
+— Qcadoo build-chain archive, network-isolated [Integration]</a></li>
+<li><a href="#tc-w4-006-plant-a-resource-decomposition-of-sentinel-rows-migration" id="toc-tc-w4-006-plant-a-resource-decomposition-of-sentinel-rows-migration">TC-W4-006
+— Plant A Resource decomposition of sentinel rows [Migration]</a></li>
+<li><a href="#tc-w4-007-plant-a-stock-reconciliation-report-migration" id="toc-tc-w4-007-plant-a-stock-reconciliation-report-migration">TC-W4-007
+— Plant A stock reconciliation report [Migration]</a></li>
+<li><a href="#tc-w4-008-genealogy-backfill-incl.-arch_-sentinels-migration" id="toc-tc-w4-008-genealogy-backfill-incl.-arch_-sentinels-migration">TC-W4-008
+— Genealogy backfill incl. <code>arch_*</code> sentinels
+[Migration]</a></li>
+<li><a href="#tc-w4-009-genealogy-reconciliation-counts-and-tree-spot-checks-migration" id="toc-tc-w4-009-genealogy-reconciliation-counts-and-tree-spot-checks-migration">TC-W4-009
+— Genealogy reconciliation: counts and tree spot checks
+[Migration]</a></li>
+<li><a href="#tc-w4-010-plant-b-backfill-sentinel-items-and-status-mapping-migration" id="toc-tc-w4-010-plant-b-backfill-sentinel-items-and-status-mapping-migration">TC-W4-010
+— Plant B backfill: sentinel items and status mapping
+[Migration]</a></li>
+<li><a href="#tc-w4-011-plant-b-reconciliation-sums-counts-100-open-runs-migration" id="toc-tc-w4-011-plant-b-reconciliation-sums-counts-100-open-runs-migration">TC-W4-011
+— Plant B reconciliation: sums, counts, 100% open runs
+[Migration]</a></li>
+<li><a href="#tc-w4-012-trace-boundary-register-and-trace-ribbon-marker-design-conformance" id="toc-tc-w4-012-trace-boundary-register-and-trace-ribbon-marker-design-conformance">TC-W4-012
+— Trace-boundary register and Trace Ribbon marker
+[Design-conformance]</a></li>
+<li><a href="#tc-w4-013-persona-sign-off-matrix-journey" id="toc-tc-w4-013-persona-sign-off-matrix-journey">TC-W4-013 — Persona
+sign-off matrix [Journey]</a></li>
+<li><a href="#tc-w4-014-decommission-evidence-pack-audit-integration" id="toc-tc-w4-014-decommission-evidence-pack-audit-integration">TC-W4-014
+— Decommission evidence pack audit [Integration]</a></li>
+<li><a href="#tc-w4-015-legacy-bridge-flag-retirement-per-plant-design-conformance" id="toc-tc-w4-015-legacy-bridge-flag-retirement-per-plant-design-conformance">TC-W4-015
+— Legacy-bridge flag retirement per plant [Design-conformance]</a></li>
+<li><a href="#tc-w4-016-migration-window-timing-and-checkpoint-resume-nfr" id="toc-tc-w4-016-migration-window-timing-and-checkpoint-resume-nfr">TC-W4-016
+— Migration window timing and checkpoint resume [NFR]</a></li>
+<li><a href="#tc-w4-017-migrationdecommission-audit-immutability-nfr" id="toc-tc-w4-017-migrationdecommission-audit-immutability-nfr">TC-W4-017
+— Migration/decommission audit immutability [NFR]</a></li>
+<li><a href="#tc-w4-018-migration-operator-permission-matrix-nfr" id="toc-tc-w4-018-migration-operator-permission-matrix-nfr">TC-W4-018 —
+Migration-operator permission matrix [NFR]</a></li>
+</ul></li>
+<li><a href="#parity-test-section-absorb-scope" id="toc-parity-test-section-absorb-scope">4. Parity test section (Absorb
+scope)</a></li>
+<li><a href="#wave-acceptance-checklist" id="toc-wave-acceptance-checklist">5. Wave acceptance checklist</a></li>
+</ul></nav>
+</aside>
+<main id="content">
+  <header class="doc"><h1>TST W4 — Cutover &amp;
+Decommission</h1><div class="sub">Rheinwerk MES Consolidation — Test
+&amp; Verification</div></header>
+<p><strong>Programme:</strong> Rheinwerk Chemie GmbH MES consolidation —
+Test &amp; Verification specification, Wave W4
+<strong>Verifies:</strong>
+<code>docs/urs/URS-W4-cutover-decommission.md</code> (URS-W4-001…014)
+<strong>Test case count:</strong> 18 (TC-W4-001…TC-W4-018).</p>
+<hr />
+<h2 id="test-strategy">1. Test strategy</h2>
+<p><strong>Test levels</strong> (unit tests assumed for migration
+tooling components):</p>
+<ul>
+<li><strong>Migration reconciliation</strong> — the dominant W4 level:
+record counts, per-warehouse/facility sum equivalence (quantity and
+value), and field-level spot checks for the Plant A stock decomposition,
+Plant A genealogy backfill (incl. <code>arch_*</code>), and Plant B
+backfill; each reconciliation report is a pass/fail artefact for the
+evidence pack.</li>
+<li><strong>Characterization-parity</strong> — migrated data must
+reproduce legacy behaviourally relevant facts: FEFO ordering after
+migration, <code>qa_state</code> mapping per CDM-01,
+<code>PRUN_*</code>→<code>exec_state</code> mapping per CDM-02 (see
+§4).</li>
+<li><strong>Journey / acceptance</strong> — per-plant runbook dry-runs
+and persona sign-off journeys on staging loaded with real-volume
+extracts.</li>
+<li><strong>Integration</strong> — freeze/unfreeze role revocation,
+archival restore, migration checkpoint/resume, run-ID rollback.</li>
+<li><strong>NFR / Design-conformance</strong> — migration window timing,
+audit immutability, permission matrix, trace-boundary marker
+presentation on the Trace Ribbon.</li>
+</ul>
+<p><strong>Environments:</strong> (1) staging target loaded via the W0-5
+tooling from production-volume legacy extracts of Plants A and B; (2)
+legacy staging clones of Qcadoo (with populated <code>arch_*</code>
+tables) and OFBiz for freeze/restore rehearsal; (3) a network-isolated
+build environment for the Qcadoo build-chain archive proof; (4)
+Terminal/Desk stations for sign-off journeys.</p>
+<p><strong>Test data strategy:</strong> shared programme fixtures
+embedded into the legacy extracts as sentinel records so migration
+outcomes are deterministic and human-checkable — Plant A: Resource row
+(RW-CHM-0001, batch “BATCH-A-0001”, 500 kg, expiry 31.12.2026, pallet
+HU-000123, location NORD-A-01-01, 2.10 €/kg, RM Lager Nord, FEFO) and a
+<code>blockedForQualityControl</code> Resource for BATCH-A-0002 (50 kg,
+expiry 30.06.2026); a TrackingRecord BATCH-C-1001 ← {BATCH-A-0001 400
+kg, BATCH-A-0002 20 kg} plus an equivalent record archived into
+<code>arch_*</code>; Plant B: <code>InventoryItem</code> (RW-CHM-0002,
+lotId “B-K7-0009”, 50 kg, expiry 30.06.2026), an
+<code>InventoryItem</code> with NULL lotId, and one production run per
+<code>PRUN_*</code> state for RW-CHM-0003. Personas as fixed: P. Krüger,
+O. Weber, Q. Fischer, W. Braun, T. Schmid, B. Vogel.</p>
+<h2 id="traceability-matrix">2. Traceability matrix</h2>
+<table>
+<thead>
+<tr>
+<th>URS ID</th>
+<th>Test cases</th>
+<th></th>
+<th>TC ID</th>
+<th>URS ID(s)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>URS-W4-001</td>
+<td>TC-W4-001, TC-W4-002</td>
+<td></td>
+<td>TC-W4-001</td>
+<td>URS-W4-001</td>
+</tr>
+<tr>
+<td>URS-W4-002</td>
+<td>TC-W4-003</td>
+<td></td>
+<td>TC-W4-002</td>
+<td>URS-W4-001</td>
+</tr>
+<tr>
+<td>URS-W4-003</td>
+<td>TC-W4-004</td>
+<td></td>
+<td>TC-W4-003</td>
+<td>URS-W4-002</td>
+</tr>
+<tr>
+<td>URS-W4-004</td>
+<td>TC-W4-005</td>
+<td></td>
+<td>TC-W4-004</td>
+<td>URS-W4-003</td>
+</tr>
+<tr>
+<td>URS-W4-005</td>
+<td>TC-W4-006, TC-W4-007</td>
+<td></td>
+<td>TC-W4-005</td>
+<td>URS-W4-004</td>
+</tr>
+<tr>
+<td>URS-W4-006</td>
+<td>TC-W4-008, TC-W4-009</td>
+<td></td>
+<td>TC-W4-006</td>
+<td>URS-W4-005</td>
+</tr>
+<tr>
+<td>URS-W4-007</td>
+<td>TC-W4-010, TC-W4-011</td>
+<td></td>
+<td>TC-W4-007</td>
+<td>URS-W4-005</td>
+</tr>
+<tr>
+<td>URS-W4-008</td>
+<td>TC-W4-012</td>
+<td></td>
+<td>TC-W4-008</td>
+<td>URS-W4-006</td>
+</tr>
+<tr>
+<td>URS-W4-009</td>
+<td>TC-W4-013</td>
+<td></td>
+<td>TC-W4-009</td>
+<td>URS-W4-006</td>
+</tr>
+<tr>
+<td>URS-W4-010</td>
+<td>TC-W4-014</td>
+<td></td>
+<td>TC-W4-010</td>
+<td>URS-W4-007</td>
+</tr>
+<tr>
+<td>URS-W4-011</td>
+<td>TC-W4-015</td>
+<td></td>
+<td>TC-W4-011</td>
+<td>URS-W4-007</td>
+</tr>
+<tr>
+<td>URS-W4-012</td>
+<td>TC-W4-016</td>
+<td></td>
+<td>TC-W4-012</td>
+<td>URS-W4-008</td>
+</tr>
+<tr>
+<td>URS-W4-013</td>
+<td>TC-W4-017</td>
+<td></td>
+<td>TC-W4-013</td>
+<td>URS-W4-009</td>
+</tr>
+<tr>
+<td>URS-W4-014</td>
+<td>TC-W4-018</td>
+<td></td>
+<td>TC-W4-014</td>
+<td>URS-W4-010</td>
+</tr>
+<tr>
+<td>—</td>
+<td>—</td>
+<td></td>
+<td>TC-W4-015</td>
+<td>URS-W4-011</td>
+</tr>
+<tr>
+<td>—</td>
+<td>—</td>
+<td></td>
+<td>TC-W4-016</td>
+<td>URS-W4-012</td>
+</tr>
+<tr>
+<td>—</td>
+<td>—</td>
+<td></td>
+<td>TC-W4-017</td>
+<td>URS-W4-013</td>
+</tr>
+<tr>
+<td>—</td>
+<td>—</td>
+<td></td>
+<td>TC-W4-018</td>
+<td>URS-W4-014</td>
+</tr>
+</tbody>
+</table>
+<p>No orphans in either direction.</p>
+<h2 id="test-cases">3. Test cases</h2>
+<h3 id="tc-w4-001-runbook-structural-completeness-journey">TC-W4-001 —
+Runbook structural completeness [Journey]</h3>
+<p><strong>Objective:</strong> Verify the three runbooks cover all six
+journeys with complete step anatomy. <strong>URS:</strong> URS-W4-001.
+<strong>Preconditions:</strong> Runbooks for Plants A, B, C drafted;
+§8.2 #7 answered for Plant B. 1. Audit each runbook against the §5.3
+journey list. → All six journeys present per plant. 2. Audit every step.
+→ Every step has owner, precondition, verification, abort path — zero
+incomplete steps. 3. Check the Plant B precondition section. → Contains
+the answered §8.2 #7 entry with counted open-run/WIP values.
+<strong>Pass/fail:</strong> all three checks 100%; one incomplete step
+fails.</p>
+<h3 id="tc-w4-002-plant-a-runbook-dry-run-on-staging-journey">TC-W4-002
+— Plant A runbook dry-run on staging [Journey]</h3>
+<p><strong>Objective:</strong> Prove the Plant A runbook executes
+end-to-end before it is declared final. <strong>URS:</strong> URS-W4-001
+(AC-3). <strong>Preconditions:</strong> Staging loaded with
+TC-W4-006/008 migration outputs. 1. Execute the Plant A runbook
+end-to-end on staging. → Every verification step passes, or the runbook
+is amended and the dry-run repeated until it does. 2. Record the dry-run
+report. → Attached to the evidence pack draft.
+<strong>Pass/fail:</strong> a complete passing dry-run exists; a runbook
+declared final without one fails.</p>
+<h3 id="tc-w4-003-legacy-write-freeze-with-query-access-retained-integration">TC-W4-003
+— Legacy write freeze with query access retained [Integration]</h3>
+<p><strong>Objective:</strong> Verify the freeze mechanics per plant.
+<strong>URS:</strong> URS-W4-002. <strong>Preconditions:</strong> Legacy
+staging clones; cutover point declared for Plant A rehearsal. 1. Apply
+the Plant A freeze (revoke write roles). → O. Weber’s attempt to accept
+an order in Qcadoo is refused; read of the same order succeeds. 2. Check
+the decommission register. → Freeze date recorded. 3. At end of the
+rehearsed read-only period, execute archival. → Query access removed;
+archival date recorded. <strong>Pass/fail:</strong> write refused + read
+allowed + both dates registered.</p>
+<h3 id="tc-w4-004-archive-package-restore-test-integration">TC-W4-004 —
+Archive package restore test [Integration]</h3>
+<p><strong>Objective:</strong> Verify each archive is restorable and
+complete. <strong>URS:</strong> URS-W4-003. 1. Execute the documented
+restore of the Plant A package into an isolated environment. → Qcadoo
+starts; the sentinel legacy order (source of PO-2026-0001 fixtures) is
+queryable read-only. 2. Review all three packages’ register entries. →
+Each lists content checksum, pinned commit SHA (81d6bb5 / ecf2990 /
+31e7970), archive date, retention owner. <strong>Pass/fail:</strong>
+restore succeeds once per the procedure and register fields
+complete.</p>
+<h3 id="tc-w4-005-qcadoo-build-chain-archive-network-isolated-integration">TC-W4-005
+— Qcadoo build-chain archive, network-isolated [Integration]</h3>
+<p><strong>Objective:</strong> Prove independence from
+<code>nexus.qcadoo.org</code>. <strong>URS:</strong> URS-W4-004. 1. In a
+network-isolated environment with only the archived Maven mirror and
+sources, build Plant A’s WAR (or deploy the archived WAR). →
+Build/deploy succeeds with zero external repository access (verified by
+network capture). 2. Check W4 planning. → The archive task started
+independent of W4-1…W4-5 sequencing. <strong>Pass/fail:</strong>
+isolated build/deploy success; any external fetch fails.</p>
+<h3 id="tc-w4-006-plant-a-resource-decomposition-of-sentinel-rows-migration">TC-W4-006
+— Plant A Resource decomposition of sentinel rows [Migration]</h3>
+<p><strong>Objective:</strong> Verify field-level decomposition per
+CDM-03/CDM-01. <strong>URS:</strong> URS-W4-005.
+<strong>Preconditions:</strong> Sentinel Resources for BATCH-A-0001 and
+BATCH-A-0002 in the Plant A extract. 1. Run the stock backfill. →
+Completes with run ID. 2. Inspect BATCH-A-0001 targets. → Batch
+BATCH-A-0001 <code>qa_state</code> Released, expiry 31.12.2026; Bin/SLE
+500 kg in RM Lager Nord at 2.10; HU-000123 contains 500 kg of
+BATCH-A-0001; Storage Location NORD-A-01-01 assigned. 3. Inspect
+BATCH-A-0002. → <code>qa_state</code> per CDM-01 map (resource flag →
+Quarantined; genealogy BLOCKED → Blocked); stock excluded from picking
+availability. 4. Run a picking availability query for RW-CHM-0001 in RM
+Lager Nord (FEFO). → Batches offered in expiry order (30.06.2026 before
+31.12.2026 where Released). <strong>Pass/fail:</strong> every field
+exact; wrong <code>qa_state</code> mapping or FEFO order fails.</p>
+<h3 id="tc-w4-007-plant-a-stock-reconciliation-report-migration">TC-W4-007 —
+Plant A stock reconciliation report [Migration]</h3>
+<p><strong>Objective:</strong> Verify counts, per-warehouse sum
+equivalence, and spot checks. <strong>URS:</strong> URS-W4-005
+(reconciliation &amp; rollback). 1. Generate the reconciliation report
+at production volume. → Batch count = distinct legacy (batch, product)
+pairs; HU count = distinct pallet numbers. 2. Compare per-warehouse
+sums. → Σ qty and Σ (qty × rate) per warehouse equal legacy Resource
+sums, exact to 3 decimals. 3. Verify ≥ 50 random Resource rows
+field-by-field. → Zero mismatches. 4. Inject one deliberate value error
+into a copy run. → Sum equivalence fails, cutover abort path triggers,
+rollback by run ID restores the pre-migration state.
+<strong>Pass/fail:</strong> steps 1–3 clean; step 4 proves the rollback
+condition actually fires.</p>
+<h3 id="tc-w4-008-genealogy-backfill-incl.-arch_-sentinels-migration">TC-W4-008
+— Genealogy backfill incl. <code>arch_*</code> sentinels
+[Migration]</h3>
+<p><strong>Objective:</strong> Verify genealogy links from live and
+archived TrackingRecords. <strong>URS:</strong> URS-W4-006. 1. Run the
+genealogy backfill. → Completes with run ID. 2. Open BATCH-C-1001’s
+genealogy. → <code>genealogy_links</code> contain consumed BATCH-A-0001
+(400 kg) and BATCH-A-0002 (20 kg); Trace Ribbon shows both upstream. 3.
+Inspect the sentinel that exists only in <code>arch_*</code>. → Its
+links backfilled identically to live records. 4. Inspect an unmatched
+resource-batch string. → Identity-only Batch created, flagged
+<code>genealogy_incomplete</code>, counted in the report.
+<strong>Pass/fail:</strong> all four exact; dropped <code>arch_*</code>
+history fails.</p>
+<h3 id="tc-w4-009-genealogy-reconciliation-counts-and-tree-spot-checks-migration">TC-W4-009
+— Genealogy reconciliation: counts and tree spot checks [Migration]</h3>
+<p><strong>Objective:</strong> Verify genealogy reconciliation criteria.
+<strong>URS:</strong> URS-W4-006. 1. Compare link counts. → Target
+genealogy link count = legacy used-batch link count, reported separately
+for live and <code>arch_*</code>. 2. Spot-check ≥ 25 trees (≥ 5 from
+<code>arch_*</code>) node-by-node against legacy
+<code>producedFrom</code>/<code>usedToProduce</code>. → Zero structural
+mismatches. 3. Present the <code>genealogy_incomplete</code> count to Q.
+Fischer for acceptance. → Recorded acceptance (or rejection triggering
+investigation). <strong>Pass/fail:</strong> counts equal, trees match,
+acceptance recorded.</p>
+<h3 id="tc-w4-010-plant-b-backfill-sentinel-items-and-status-mapping-migration">TC-W4-010
+— Plant B backfill: sentinel items and status mapping [Migration]</h3>
+<p><strong>Objective:</strong> Verify OFBiz backfill field mapping and
+the fixed <code>PRUN_*</code> map. <strong>URS:</strong> URS-W4-007. 1.
+Run the Plant B backfill. → Completes with run ID. 2. Inspect lot
+B-K7-0009. → Opening SLE 50 kg of RW-CHM-0002 in the mapped warehouse;
+Batch B-K7-0009 <code>qa_state</code> Released, expiry 30.06.2026;
+<code>legacy_refs</code> = (OFBiz, B-K7-0009). 3. Inspect the seven
+sentinel production runs (one per <code>PRUN_*</code> state). → Mapping
+exactly: CREATED/SCHEDULED→Pending, DOC_PRINTED→Accepted, RUNNING→In
+Progress, COMPLETED/CLOSED→Completed, CANCELLED→Abandoned; each with
+<code>legacy_refs</code> to the WorkEffort id. 4. Inspect the NULL-lotId
+item. → Opening SLE without batch allocation; counted in the no-lot
+bucket. <strong>Pass/fail:</strong> every mapping exact; any other
+<code>PRUN_*</code>→In Progress mapping fails.</p>
+<h3 id="tc-w4-011-plant-b-reconciliation-sums-counts-100-open-runs-migration">TC-W4-011
+— Plant B reconciliation: sums, counts, 100% open runs [Migration]</h3>
+<p><strong>Objective:</strong> Verify Plant B reconciliation criteria
+and rollback. <strong>URS:</strong> URS-W4-007. 1. Compare opening SLE
+count to migrated non-zero <code>InventoryItem</code> rows; open-order
+counts per <code>exec_state</code> to legacy per mapped
+<code>PRUN_*</code> state. → Equal. 2. Compare Σ qty per (product,
+warehouse) with legacy QOH per (product, facility). → Exact equality per
+facility. 3. Verify ≥ 30 sampled items and 100% of open runs
+field-by-field. → Zero mismatches. 4. Inject a state mis-map in a copy
+run. → Reconciliation fails; rollback by run ID; Plant B freeze lift
+path exercised. <strong>Pass/fail:</strong> steps 1–3 clean; step 4
+proves rollback.</p>
+<h3 id="tc-w4-012-trace-boundary-register-and-trace-ribbon-marker-design-conformance">TC-W4-012
+— Trace-boundary register and Trace Ribbon marker
+[Design-conformance]</h3>
+<p><strong>Objective:</strong> Verify the Plant B trace boundary is
+recorded and disclosed. <strong>URS:</strong> URS-W4-008.
+<strong>Preconditions:</strong> §8.2 #3 lot-coverage measurement
+answered. 1. Review the trace-boundary register. → Contains boundary
+date, measured lot-coverage %, no-lot quantity bucket (from TC-W4-010
+step 4). 2. Q. Fischer opens the Trace Ribbon of a migrated Plant B
+batch with pre-boundary history. → Upstream shows an explicit boundary
+marker: hard visual break, labelled with the register entry — not an
+empty tree presented as complete. 3. Print the ribbon and open the
+batch’s CoA/recall view. → Marker identical in all three.
+<strong>Pass/fail:</strong> register complete + marker present,
+labelled, and consistent across views/print.</p>
+<h3 id="tc-w4-013-persona-sign-off-matrix-journey">TC-W4-013 — Persona
+sign-off matrix [Journey]</h3>
+<p><strong>Objective:</strong> Verify per-plant sign-off completeness.
+<strong>URS:</strong> URS-W4-009. 1. Compile the Plant A matrix after
+the operating period. → Dated, named entries: P. Krüger (plan an order),
+O. Weber (release + execute &amp; record), Q. Fischer (trace a defect
+batch + quality disposition), W. Braun (stock journeys), T. Schmid
+(define &amp; approve a recipe), B. Vogel (business views) — 6/6. 2.
+Simulate a withheld sign-off. → A named defect with owner is logged; no
+silent “with exceptions” record possible. 3. Repeat for Plants B and C.
+→ 18 entries total across plants. <strong>Pass/fail:</strong> 18/18
+entries or logged blocking defects; a silent exception fails.</p>
+<h3 id="tc-w4-014-decommission-evidence-pack-audit-integration">TC-W4-014 —
+Decommission evidence pack audit [Integration]</h3>
+<p><strong>Objective:</strong> Verify pack completeness closes the Epic.
+<strong>URS:</strong> URS-W4-010. 1. Audit the Plant B pack. → All six
+artefact classes present (executed runbook + verifications;
+reconciliation reports; trace-boundary register; sign-offs;
+freeze/archival dates + checksums; build-chain archive proof), each
+cross-linked. 2. Remove one artefact in a copy. → Pack cannot be marked
+complete. 3. With all three packs complete, evaluate M4. → “All personas
+on target; legacy read-only then archived; evidence pack signed off”
+evaluates true from pack contents alone. <strong>Pass/fail:</strong> all
+three outcomes exact.</p>
+<h3 id="tc-w4-015-legacy-bridge-flag-retirement-per-plant-design-conformance">TC-W4-015
+— Legacy-bridge flag retirement per plant [Design-conformance]</h3>
+<p><strong>Objective:</strong> Verify per-plant flag-off behaviour and
+layout stability. <strong>URS:</strong> URS-W4-011.
+<strong>Preconditions:</strong> Plant A signed off; Plant B not yet. 1.
+Switch off the Plant A bridge flag. → Hovering the Recipe reference on
+PO-2026-0001 as a Plant A user shows no “was: Technology → now: Recipe”;
+Plant B users still see bridge labels. 2. Compare screenshots
+before/after flag change. → No layout shift. <strong>Pass/fail:</strong>
+both exact.</p>
+<h3 id="tc-w4-016-migration-window-timing-and-checkpoint-resume-nfr">TC-W4-016
+— Migration window timing and checkpoint resume [NFR]</h3>
+<p><strong>Objective:</strong> Verify window fit and resumability.
+<strong>URS:</strong> URS-W4-012. 1. Time the Plant A staging dry-run at
+production volume. → Duration ≤ runbook window with ≥ 20% headroom. 2.
+Interrupt a run mid-warehouse; resume. → Continues from last checkpoint;
+reconciliation report byte-identical to an uninterrupted run. 3. Verify
+all writes carry the migration run ID. → Confirmed by sampling.
+<strong>Pass/fail:</strong> all three; a resume producing different
+reconciliation output fails.</p>
+<h3 id="tc-w4-017-migrationdecommission-audit-immutability-nfr">TC-W4-017 —
+Migration/decommission audit immutability [NFR]</h3>
+<p><strong>Objective:</strong> Verify audit records for runs and freeze
+actions. <strong>URS:</strong> URS-W4-013. 1. Query the Plant B run by
+run ID. → Operator, source extract checksums, start/end, record counts,
+reconciliation outcome present. 2. Attempt to update the entry. → No
+update path exists. 3. Query the TC-W4-003 freeze. → Actor, plant A,
+timestamp, revoked scope present. <strong>Pass/fail:</strong> all fields
+present and immutability holds.</p>
+<h3 id="tc-w4-018-migration-operator-permission-matrix-nfr">TC-W4-018 —
+Migration-operator permission matrix [NFR]</h3>
+<p><strong>Objective:</strong> Verify dedicated migration permissions.
+<strong>URS:</strong> URS-W4-014. 1. P. Krüger attempts a migration
+rollback. → Refused + audited. 2. The designated migration operator
+triggers it. → Succeeds with TC-W4-017-conformant audit. 3. Repeat for
+freeze/unfreeze and archival with each of the six business personas. →
+All refused; only the migration operator succeeds.
+<strong>Pass/fail:</strong> every allow/deny exact.</p>
+<h2 id="parity-test-section-absorb-scope">4. Parity test section (Absorb
+scope)</h2>
+<p>W4’s Absorb scope is <em>migration</em> parity: the migrated data
+must reproduce legacy behavioural facts on the target. The legacy
+characterization baseline (W0-6) is the contract:</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Parity case</th>
+<th>Legacy contract (code path)</th>
+<th>Target assertion</th>
+<th>Deviation?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TC-W4-006 step 4 FEFO order after migration</td>
+<td><code>Chem_mes</code>
+<code>materialFlowResources/constants/WarehouseAlgorithm.java:26-27</code>
++ <code>ResourceManagementServiceImpl.java:1015-1027</code> (FEFO =
+expiry ascending)</td>
+<td>Post-migration picking offers batches in identical expiry order for
+RM Lager Nord</td>
+<td>None — exact match. (Any estate-wide expiry <em>hard-stop</em>
+deviation was decided in W1-9 with its own sign-off; W4 only preserves
+ordering.)</td>
+</tr>
+<tr>
+<td>TC-W4-006 steps 2–3 <code>qa_state</code> mapping</td>
+<td><code>Chem_mes</code>
+<code>advancedGenealogy/states/constants/BatchState.java:31-44</code>
+(TRACKED⇄BLOCKED) + <code>ResourceFields.java:84-86</code>
+(<code>blockedForQualityControl</code>)</td>
+<td>TRACKED→Released, BLOCKED→Blocked, resource flag→Quarantined,
+exactly per CDM-01</td>
+<td><strong>Deliberate deviation:</strong> legacy has two parallel truth
+stores; target collapses to one <code>qa_state</code>. Mapping table is
+the contract (ADR-003). <strong>Business sign-off required</strong> —
+assumption A6 (dual model refers to same physical lots) must be
+confirmed at sign-off.</td>
+</tr>
+<tr>
+<td>TC-W4-008 genealogy trees</td>
+<td><code>Chem_mes</code> <code>TrackingRecordFields.java:31-49</code>;
+tree browse <code>AdvancedGenealogyTreeViewListeners.java:71-73</code>;
+archive machinery <code>mes_db_en.sql:292-648</code></td>
+<td>Node-identical trees for live and <code>arch_*</code> records</td>
+<td>None — exact match required</td>
+</tr>
+<tr>
+<td>TC-W4-010 step 3 status map</td>
+<td><code>VM_ofbiz-framework</code>
+<code>WorkEffortSeedData.xml:160-177</code> (<code>PRUN_*</code> states
++ <code>StatusValidChange</code>)</td>
+<td>Fixed CDM-02 map, no other value → In Progress</td>
+<td><strong>Deliberate deviation:</strong> <code>PRUN_CLOSED</code> and
+<code>PRUN_COMPLETED</code> both → Completed (target has no separate
+Closed for migrated history). Recorded in ADR-004 consequences.
+<strong>Business sign-off required</strong> at Plant B cutover
+readiness.</td>
+</tr>
+<tr>
+<td>TC-W4-010 step 2 <code>qa_state</code> default</td>
+<td><code>VM_ofbiz-framework</code>
+<code>product-entitymodel.xml:2419-2427</code> (<code>Lot</code> has no
+status field)</td>
+<td>All OFBiz lots → Released with trace boundary noted</td>
+<td><strong>Deliberate deviation</strong> (no legacy state exists to
+carry): per CDM-01 “∅ (default Released; trace-boundary noted)”.
+Sign-off is the trace-boundary register acceptance (TC-W4-012).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="wave-acceptance-checklist">5. Wave acceptance checklist</h2>
+<p>Executable form of the URS-W4 §6 exit criteria; this checklist closes
+the W4 Epic.</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Exit check</th>
+<th>Verified by</th>
+<th>Status gate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>EXIT-W4-1 runbooks executed, §8.2 #2/#3/#7 answered first</td>
+<td>TC-W4-001, TC-W4-002 (and production executions recorded in
+packs)</td>
+<td>All green</td>
+</tr>
+<tr>
+<td>EXIT-W4-2 18/18 persona sign-offs, no silent exceptions</td>
+<td>TC-W4-013</td>
+<td>Green</td>
+</tr>
+<tr>
+<td>EXIT-W4-3 all reconciliations pass</td>
+<td>TC-W4-006, TC-W4-007, TC-W4-008, TC-W4-009, TC-W4-010, TC-W4-011,
+TC-W4-016</td>
+<td>All green, reports in packs</td>
+</tr>
+<tr>
+<td>EXIT-W4-4 trace-boundary register published + surfaced</td>
+<td>TC-W4-012</td>
+<td>Green</td>
+</tr>
+<tr>
+<td>EXIT-W4-5 freeze → archive proven, restore tested, build chain
+isolated</td>
+<td>TC-W4-003, TC-W4-004, TC-W4-005</td>
+<td>All green</td>
+</tr>
+<tr>
+<td>EXIT-W4-6 evidence packs complete, M4 true from contents</td>
+<td>TC-W4-014, TC-W4-017 (+ TC-W4-015, TC-W4-018 supporting)</td>
+<td>All green</td>
+</tr>
+</tbody>
+</table>
+  <footer class="doc">Rheinwerk Chemie GmbH — MES consolidation programme. Generated from the Markdown source of record in SachetCognition/rheinwerk-mes-core.</footer>
+</main>
+<button id="top-btn" title="Back to top">⇧</button>
+<script>
+const links=[...document.querySelectorAll('#sidebar nav a')];
+const targets=links.map(a=>document.getElementById(decodeURIComponent(a.hash.slice(1)))).filter(Boolean);
+function onScroll(){
+  const y=window.scrollY+90;let cur=targets[0];
+  for(const t of targets){if(t.offsetTop<=y)cur=t;else break}
+  links.forEach(a=>a.classList.toggle('active',cur&&decodeURIComponent(a.hash.slice(1))===cur.id));
+  document.getElementById('top-btn').classList.toggle('show',window.scrollY>500);
+}
+document.addEventListener('scroll',onScroll,{passive:true});onScroll();
+document.getElementById('top-btn').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
+</script>
+</body>
+</html>
