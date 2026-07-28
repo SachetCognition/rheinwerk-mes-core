@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TST W2 — Traceability &amp; Quality</title>
+<style>
+:root{--accent:#1f4e79;--accent2:#2e74b5;--bg:#f7f9fb;--card:#ffffff;--text:#24292f;--muted:#6a737d;--border:#e1e6eb;--sidebar-w:300px}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",Calibri,Arial,sans-serif;color:var(--text);background:var(--bg);line-height:1.55;font-size:15px}
+#sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:var(--accent);color:#fff;overflow-y:auto;padding:22px 18px}
+#sidebar .brand{font-size:15px;font-weight:600;letter-spacing:.4px;border-bottom:1px solid rgba(255,255,255,.25);padding-bottom:12px;margin-bottom:12px}
+#sidebar .brand small{display:block;font-weight:400;opacity:.75;margin-top:4px}
+#sidebar nav ul{list-style:none;margin:0;padding-left:0}
+#sidebar nav ul ul{padding-left:14px}
+#sidebar nav a{display:block;color:rgba(255,255,255,.85);text-decoration:none;font-size:12.6px;padding:4px 8px;border-radius:5px;border-left:3px solid transparent}
+#sidebar nav a:hover{background:rgba(255,255,255,.12);color:#fff}
+#sidebar nav a.active{background:rgba(255,255,255,.18);color:#fff;border-left-color:#9cc3e5;font-weight:600}
+#content{margin-left:var(--sidebar-w);padding:42px 56px;max-width:1080px}
+header.doc{border-bottom:3px solid var(--accent);padding-bottom:18px;margin-bottom:30px}
+header.doc h1{color:var(--accent);font-size:30px;margin:0 0 6px}
+header.doc .sub{color:var(--accent2);font-size:15.5px;font-weight:600}
+h1,h2{color:var(--accent);margin-top:2.1em;border-bottom:1px solid var(--border);padding-bottom:.25em}
+h3,h4{color:var(--accent2);margin-top:1.7em}
+a{color:var(--accent2)}
+table{border-collapse:collapse;width:100%;margin:1.1em 0;background:var(--card);font-size:13.2px;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+th{background:var(--accent);color:#fff;text-align:left;padding:8px 10px;font-weight:600}
+td{border:1px solid var(--border);padding:7px 10px;vertical-align:top}
+tr:nth-child(even) td{background:#f2f6fa}
+code{background:#eef2f6;border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:12px;font-family:Consolas,Menlo,monospace;color:#0b3d66}
+pre{background:#0f2a43;color:#dce8f5;padding:14px 16px;border-radius:8px;overflow-x:auto;font-size:12.5px}
+pre code{background:none;border:none;color:inherit;padding:0}
+blockquote{margin:1em 0;padding:10px 16px;background:#eaf1f8;border-left:5px solid var(--accent2);border-radius:0 6px 6px 0;color:#243b53}
+img.diagram,p img{max-width:100%;background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px;box-shadow:0 1px 3px rgba(0,0,0,.08);display:block;margin:1.2em auto}
+#top-btn{position:fixed;right:26px;bottom:26px;background:var(--accent);color:#fff;border:none;border-radius:50%;width:46px;height:46px;font-size:19px;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .25s;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+#top-btn.show{opacity:.92;pointer-events:auto}
+footer.doc{margin-top:60px;border-top:1px solid var(--border);padding-top:14px;color:var(--muted);font-size:12px}
+@media(max-width:900px){#sidebar{display:none}#content{margin-left:0;padding:24px}}
+</style>
+</head>
+<body>
+<aside id="sidebar">
+  <div class="brand">TST W2 — Traceability &amp; Quality<small>Rheinwerk
+MES Consolidation — Test &amp; Verification</small></div>
+  <nav><ul>
+<li><a href="#test-strategy" id="toc-test-strategy">1. Test
+strategy</a></li>
+<li><a href="#traceability-matrix" id="toc-traceability-matrix">2.
+Traceability matrix</a></li>
+<li><a href="#test-cases" id="toc-test-cases">3. Test cases</a>
+<ul>
+<li><a href="#genealogy-w2-1" id="toc-genealogy-w2-1">3.1 Genealogy
+(W2-1)</a></li>
+<li><a href="#unified-batch-w2-2" id="toc-unified-batch-w2-2">3.2
+Unified batch (W2-2)</a></li>
+<li><a href="#blocking-quarantine-w2-3" id="toc-blocking-quarantine-w2-3">3.3 Blocking &amp; quarantine
+(W2-3)</a></li>
+<li><a href="#quality-inspection-w2-4" id="toc-quality-inspection-w2-4">3.4 Quality Inspection (W2-4)</a></li>
+<li><a href="#coa-w2-5" id="toc-coa-w2-5">3.5 CoA (W2-5)</a></li>
+<li><a href="#isa-88-recipes-w2-6" id="toc-isa-88-recipes-w2-6">3.6
+ISA-88 recipes (W2-6)</a></li>
+<li><a href="#hazmat-w2-7" id="toc-hazmat-w2-7">3.7 Hazmat
+(W2-7)</a></li>
+<li><a href="#warehouse-fidelity-completion-w2-8" id="toc-warehouse-fidelity-completion-w2-8">3.8 Warehouse fidelity
+completion (W2-8)</a></li>
+<li><a href="#wave-demo-decision-w2-910" id="toc-wave-demo-decision-w2-910">3.9 Wave demo &amp; decision
+(W2-9/10)</a></li>
+</ul></li>
+<li><a href="#parity-test-section-absorb-scope" id="toc-parity-test-section-absorb-scope">4. Parity test section (Absorb
+scope)</a></li>
+<li><a href="#migration-reconciliation-cases" id="toc-migration-reconciliation-cases">5. Migration reconciliation
+cases</a></li>
+<li><a href="#nfr-design-conformance-cases" id="toc-nfr-design-conformance-cases">6. NFR &amp; design-conformance
+cases</a></li>
+<li><a href="#wave-acceptance-checklist" id="toc-wave-acceptance-checklist">7. Wave acceptance checklist</a></li>
+</ul></nav>
+</aside>
+<main id="content">
+  <header class="doc"><h1>TST W2 — Traceability &amp;
+Quality</h1><div class="sub">Rheinwerk MES Consolidation — Test &amp;
+Verification</div></header>
+<p><strong>Programme:</strong> Rheinwerk Chemie GmbH — MES consolidation
+<strong>Wave:</strong> W2 (Traceability &amp; Quality) <strong>Document
+type:</strong> Test &amp; Verification specification
+<strong>Verifies:</strong>
+<code>docs/urs/URS-W2-traceability-quality.md</code>
+(URS-W2-001…036)</p>
+<hr />
+<h2 id="test-strategy">1. Test strategy</h2>
+<p><strong>Test levels</strong> (unit testing assumed within the
+implementation Definition of Done, not re-specified here):</p>
+<ul>
+<li><strong>Integration</strong> — hook/workflow behaviour across
+DocTypes (qa_state ↔︎ QI ↔︎ exec_state, genealogy link writes on postings,
+picking exclusion in reservations), executed via the Frappe test harness
+against a seeded site.</li>
+<li><strong>Journey / acceptance</strong> — persona journeys end-to-end
+through the UI (inspection queue, terminal consumption with scanner,
+Trace Ribbon browsing, CoA issue), scripted with fixtures below.</li>
+<li><strong>Migration reconciliation</strong> — pilot extracts from
+Qcadoo (Plant A) and OFBiz (Plant B) loaded through the W0-5 tooling;
+counts/checksums/spot-checks per URS-W2-030…032; one rehearsed
+rollback.</li>
+<li><strong>Characterization-parity</strong> — target behaviour asserted
+against the legacy characterization baseline (W0-6 harness) for every
+Absorb requirement; deliberate deviations asserted in their <em>new</em>
+behaviour and cross-referenced to sign-off (Section 4).</li>
+<li><strong>NFR</strong> — latency measurements (p95 over fixed run
+counts), audit-log completeness queries, i18n catalogue scans, RBAC
+negative tests via API.</li>
+<li><strong>Design-conformance</strong> — screen review against
+<code>rheinwerk-mes-design-SKILL.md</code> Definition of done, plus
+automatable checks (contrast, keyboard path, pill composition, modal
+refusals).</li>
+</ul>
+<p><strong>Environments:</strong> <code>TEST-W2</code>
+(integration/journey; seeded fixture site, Terminal-mode station profile
+available for shop-floor cases), <code>MIG-PILOT</code> (migration;
+staging DB with Plant A/B pilot extracts at the pinned dossier commits),
+<code>PERF</code> (NFR latency, reference hardware profile).</p>
+<p><strong>Test data strategy:</strong> the shared Rheinwerk fixtures
+are authoritative and reset before each suite: products RW-CHM-0001
+“Rheinol 40 Basisharz” (25 kg sack), RW-CHM-0002 “Additiv K7” (5 kg
+pail), RW-CHM-0003 “Rheinol 40 Compound” (FG); raw batches BATCH-A-0001
+(500 kg, expiry 31.12.2026), BATCH-A-0002 (50 kg, expiry 30.06.2026,
+blocked mid-suite); FG batches BATCH-C-1001, BATCH-C-1002; orders
+PO-2026-0001 (500 kg on LINE-1), PO-2026-0002; work centres
+LINE-1/MIX-01, LINE-1/FILL-01; warehouses RM Lager Nord (FEFO), FG Lager
+Süd (FIFO); storage location NORD-A-01-01; handling unit HU-000123;
+recipe BOM-RW-CHM-0003-001 + routing RT-COMPOUND-01; QI template
+QIT-COMPOUND (viscosity 1200–1400 mPa·s, density 1.02–1.06 g/cm³,
+moisture ≤ 0.5 %). Personas: P. Krüger (planner, fixture context only),
+O. Weber (operator), Q. Fischer (quality inspector), W. Braun (warehouse
+clerk), T. Schmid (technologist), B. Vogel (business viewer). A
+three-level trace fixture adds supplier batch SUP-K7-0001 (Additiv K7
+supplier lot feeding BATCH-A-0002).</p>
+<h2 id="traceability-matrix">2. Traceability matrix</h2>
+<p>Every URS-W2 requirement maps to ≥1 test case; every TC maps back. No
+orphans.</p>
+<table>
+<thead>
+<tr>
+<th>URS</th>
+<th>Test cases</th>
+<th></th>
+<th>URS</th>
+<th>Test cases</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>URS-W2-001</td>
+<td>TC-W2-001, TC-W2-002</td>
+<td></td>
+<td>URS-W2-019</td>
+<td>TC-W2-027</td>
+</tr>
+<tr>
+<td>URS-W2-002</td>
+<td>TC-W2-003</td>
+<td></td>
+<td>URS-W2-020</td>
+<td>TC-W2-028</td>
+</tr>
+<tr>
+<td>URS-W2-003</td>
+<td>TC-W2-004, TC-W2-005</td>
+<td></td>
+<td>URS-W2-021</td>
+<td>TC-W2-029</td>
+</tr>
+<tr>
+<td>URS-W2-004</td>
+<td>TC-W2-006</td>
+<td></td>
+<td>URS-W2-022</td>
+<td>TC-W2-030</td>
+</tr>
+<tr>
+<td>URS-W2-005</td>
+<td>TC-W2-007, TC-W2-008</td>
+<td></td>
+<td>URS-W2-023</td>
+<td>TC-W2-031</td>
+</tr>
+<tr>
+<td>URS-W2-006</td>
+<td>TC-W2-009, TC-W2-010</td>
+<td></td>
+<td>URS-W2-024</td>
+<td>TC-W2-032</td>
+</tr>
+<tr>
+<td>URS-W2-007</td>
+<td>TC-W2-011</td>
+<td></td>
+<td>URS-W2-025</td>
+<td>TC-W2-033</td>
+</tr>
+<tr>
+<td>URS-W2-008</td>
+<td>TC-W2-012, TC-W2-040</td>
+<td></td>
+<td>URS-W2-026</td>
+<td>TC-W2-034</td>
+</tr>
+<tr>
+<td>URS-W2-009</td>
+<td>TC-W2-013</td>
+<td></td>
+<td>URS-W2-027</td>
+<td>TC-W2-035</td>
+</tr>
+<tr>
+<td>URS-W2-010</td>
+<td>TC-W2-014, TC-W2-015</td>
+<td></td>
+<td>URS-W2-028</td>
+<td>TC-W2-036</td>
+</tr>
+<tr>
+<td>URS-W2-011</td>
+<td>TC-W2-016, TC-W2-041</td>
+<td></td>
+<td>URS-W2-029</td>
+<td>TC-W2-037</td>
+</tr>
+<tr>
+<td>URS-W2-012</td>
+<td>TC-W2-017</td>
+<td></td>
+<td>URS-W2-030</td>
+<td>TC-W2-042, TC-W2-043</td>
+</tr>
+<tr>
+<td>URS-W2-013</td>
+<td>TC-W2-018, TC-W2-019</td>
+<td></td>
+<td>URS-W2-031</td>
+<td>TC-W2-044</td>
+</tr>
+<tr>
+<td>URS-W2-014</td>
+<td>TC-W2-020, TC-W2-021</td>
+<td></td>
+<td>URS-W2-032</td>
+<td>TC-W2-045</td>
+</tr>
+<tr>
+<td>URS-W2-015</td>
+<td>TC-W2-022</td>
+<td></td>
+<td>URS-W2-033</td>
+<td>TC-W2-046, TC-W2-047</td>
+</tr>
+<tr>
+<td>URS-W2-016</td>
+<td>TC-W2-023</td>
+<td></td>
+<td>URS-W2-034</td>
+<td>TC-W2-048</td>
+</tr>
+<tr>
+<td>URS-W2-017</td>
+<td>TC-W2-024, TC-W2-025</td>
+<td></td>
+<td>URS-W2-035</td>
+<td>TC-W2-049</td>
+</tr>
+<tr>
+<td>URS-W2-018</td>
+<td>TC-W2-026</td>
+<td></td>
+<td>URS-W2-036</td>
+<td>TC-W2-050</td>
+</tr>
+</tbody>
+</table>
+<p>Reverse check: TC-W2-001…050 each cite their URS in Section 3; parity
+cases TC-W2-038…041 additionally serve Section 4. TC-W2-038/039 verify
+parity aspects of URS-W2-006 and URS-W2-010 respectively.</p>
+<h2 id="test-cases">3. Test cases</h2>
+<p>Format: objective · URS link(s) · preconditions &amp; fixtures ·
+steps (expected result per step) · pass/fail rule · type tag.</p>
+<h3 id="genealogy-w2-1">3.1 Genealogy (W2-1)</h3>
+<p><strong>TC-W2-001 — Genealogy links written at output
+recording</strong> — <em>Integration</em> - URS: URS-W2-001 (AC-1) -
+Preconditions: PO-2026-0001 In Progress; BATCH-A-0001 (480 kg staged),
+BATCH-A-0002 (20 kg staged) Released. - Steps: 1) As O. Weber, record
+consumption 480 kg BATCH-A-0001 → posting accepted. 2) Record
+consumption 20 kg BATCH-A-0002 → posting accepted. 3) Record output
+creating BATCH-C-1001 → batch created Quarantined. 4) Query BATCH-C-1001
+genealogy_links → two <code>consumed</code> links (480 kg / 20 kg) + one
+<code>produced</code> link to PO-2026-0001. - Pass: link set exactly as
+step 4, quantities exact. Fail otherwise.</p>
+<p><strong>TC-W2-002 — Genealogy survives cancel/repost; no links for
+non-batch materials</strong> — <em>Integration</em> - URS: URS-W2-001
+(AC-2, AC-3) - Preconditions: TC-W2-001 executed; BOM includes
+non-batch-managed process water. - Steps: 1) Cancel and repost the
+BATCH-A-0002 consumption entry with corrected qty 21 kg → genealogy link
+updated to 21 kg in the same transaction. 2) Run genealogy-vs-SLE
+reconciliation query → zero divergent rows. 3) Inspect BATCH-C-1001
+links → no link for process water;
+<code>genealogy_incomplete = false</code>. - Pass: all three expected
+results hold.</p>
+<p><strong>TC-W2-003 — Forward/backward multi-level browse</strong> —
+<em>Journey</em> - URS: URS-W2-002 (AC-1…3) - Preconditions: chain
+SUP-K7-0001 → BATCH-A-0002 → {BATCH-C-1001 (PO-2026-0001), BATCH-C-1002
+(PO-2026-0002)} loaded. - Steps: 1) As Q. Fischer open backward trace of
+BATCH-C-1001 → BATCH-A-0001 and BATCH-A-0002 at level 1 with quantities.
+2) Expand level 2 → SUP-K7-0001 appears; no node visited twice. 3) Open
+forward trace of BATCH-A-0002 → BATCH-C-1001 and BATCH-C-1002 with their
+production orders. - Pass: node sets and quantities exactly match
+fixtures; no cycles/duplicates.</p>
+<p><strong>TC-W2-004 — Trace Ribbon rendering and interaction</strong> —
+<em>Design-conformance / Journey</em> - URS: URS-W2-003 (AC-1, AC-3) -
+Preconditions: TC-W2-003 fixture; Desk mode. - Steps: 1) As B. Vogel
+open the ribbon for BATCH-C-1001 → suppliers left, focus centred,
+downstream right. 2) Tab/arrow to the BATCH-A-0001 chip and press Enter
+→ ribbon re-centres on BATCH-A-0001, prior expansion state retained. 3)
+Verify chips: mono ID (IBM Plex Mono), status dot, one-click/Enter to
+ribbon. 4) Press <code>?</code> → shortcut sheet opens. - Pass: all four
+steps conform to design skill pattern 4 + component rules.</p>
+<p><strong>TC-W2-005 — Ribbon blocked-branch break and print
+parity</strong> — <em>Design-conformance</em> - URS: URS-W2-003 (AC-2,
+AC-4) - Preconditions: BATCH-A-0002 Blocked (via TC-W2-009). - Steps: 1)
+Render ribbon for BATCH-C-1001 → BATCH-A-0002 branch in
+<code>--rw-signal-red</code> with hard visual break; pill = icon + label
+“Blocked” + colour. 2) Invoke print → printed structure identical;
+blocked state identifiable without colour (icon + label present). -
+Pass: both hold; colour-only signalling anywhere = fail.</p>
+<p><strong>TC-W2-006 — genealogy_incomplete advisory</strong> —
+<em>Integration / Design-conformance</em> - URS: URS-W2-004 (AC-1, AC-2)
+- Preconditions: migrated identity-only batch RB-ORPHAN (from TC-W2-043)
+present in a trace chain. - Steps: 1) Open RB-ORPHAN →
+<code>genealogy_incomplete = true</code>. 2) Render it in a backward
+trace → amber advisory pill “Trace incomplete”; trace does not silently
+terminate. 3) For a Plant B-boundary batch, verify the trace-boundary
+date is displayed. - Pass: flag, pill and boundary date all render.</p>
+<h3 id="unified-batch-w2-2">3.2 Unified batch (W2-2)</h3>
+<p><strong>TC-W2-007 — Canonical batch creation with all four
+facets</strong> — <em>Integration</em> - URS: URS-W2-005 (AC-1, AC-2) -
+Steps: 1) As T. Schmid create BATCH-A-0001 (RW-CHM-0001, 500 kg, expiry
+31.12.2026) → saved with batch_id, item, qty_original 500 kg, expiry
+31.12.2026, qa_state Quarantined. 2) Create a batch for a shelf-life
+item without expiry → save refused naming expiry_date. - Pass: both
+results exact.</p>
+<p><strong>TC-W2-008 — Anchor Batch DocType not forked</strong> —
+<em>Integration</em> - URS: URS-W2-005 (AC-3) - Steps: 1) Diff the
+deployed anchor Batch schema against upstream anchor → zero core-field
+modifications; extensions present only as custom fields / linked
+DocTypes. - Pass: schema diff clean.</p>
+<p><strong>TC-W2-009 — qa_state workflow transitions and
+reasons</strong> — <em>Integration</em> - URS: URS-W2-006 (AC-1…3, AC-5)
+- Steps: 1) Produce BATCH-C-1001 → qa_state Quarantined. 2) Accept its
+QIT-COMPOUND inspection → qa_state Released automatically; audit entry
+with triggering inspection. 3) As Q. Fischer block BATCH-A-0002 without
+reason → refused; with reason “supplier recall K7/2026-06” → Blocked,
+reason audited. 4) Attempt Released → Quarantined via API → rejected
+naming allowed transitions. - Pass: all four steps exact.</p>
+<p><strong>TC-W2-010 — qa_state role gate</strong> — <em>Integration /
+NFR</em> - URS: URS-W2-006 (AC-4); URS-W2-036 overlap - Steps: 1) As O.
+Weber attempt unblock of BATCH-A-0002 via UI and API → both refused with
+permission error, audited. 2) As Q. Fischer unblock with reason →
+Released. - Pass: refusal + success as specified.</p>
+<p><strong>TC-W2-011 — Legacy refs and legacy-bridge hover</strong> —
+<em>Migration / Design-conformance</em> - URS: URS-W2-007 (AC-1, AC-2) -
+Preconditions: migrated batch merged from “GB-4711”/“RB-4711”
+(MIG-PILOT). - Steps: 1) Open the batch → legacy_refs lists both Qcadoo
+refs verbatim. 2) Hover the expiry_date label → “was:
+Resource.expirationDate → now: expiry_date”. 3) Toggle the post-cutover
+feature flag → affordance removed. - Pass: all three hold.</p>
+<p><strong>TC-W2-012 — FEFO ordering by canonical expiry</strong> —
+<em>Integration</em> - URS: URS-W2-008 (AC-1) - Preconditions: RM Lager
+Nord (FEFO) holds BATCH-A-0001 (31.12.2026) + second Basisharz batch
+(30.09.2026). - Steps: 1) As W. Braun pick 100 kg RW-CHM-0001 → proposal
+orders the 30.09.2026 batch first. - Pass: proposal order exact.</p>
+<h3 id="blocking-quarantine-w2-3">3.3 Blocking &amp; quarantine
+(W2-3)</h3>
+<p><strong>TC-W2-013 — Blocking propagation and clearance</strong> —
+<em>Integration</em> - URS: URS-W2-009 (AC-1…3) - Preconditions:
+BATCH-A-0002 consumed into BATCH-C-1001 and BATCH-C-1002. - Steps: 1)
+Block BATCH-A-0002 → both FG batches carry advisory “Blocked ancestor:
+BATCH-A-0002” in the same transaction; own qa_state unchanged. 2) Render
+BATCH-C-1001 chip → amber advisory pill (icon+label). 3) Unblock
+BATCH-A-0002 (no other blocked ancestor) → advisories cleared. - Pass:
+propagation, rendering and clearance all exact.</p>
+<p><strong>TC-W2-014 — Picking exclusion of Blocked/Quarantined
+stock</strong> — <em>Integration</em> - URS: URS-W2-010 (AC-1, AC-2) -
+Steps: 1) With BATCH-A-0002 Blocked, create a pick for 5 kg RW-CHM-0002
+→ BATCH-A-0002 absent; as sole stock, pick fails naming the blocked
+batch. 2) With BATCH-C-1001 Quarantined, attempt reservation for
+RW-CHM-0003 → quantity not reservable; availability excludes it. - Pass:
+both exclusions enforced.</p>
+<p><strong>TC-W2-015 — Terminal gate refusal on blocked HU scan</strong>
+— <em>Journey / Design-conformance</em> - URS: URS-W2-010 (AC-3) -
+Preconditions: Terminal mode station; HU-000123 contains Blocked stock.
+- Steps: 1) As O. Weber scan HU-000123 at the issue screen → modal (not
+toast) naming rule (blocked-batch exclusion), record (BATCH-A-0002,
+HU-000123), resolution (QA unblock required). 2) Check audit log →
+refusal logged. 3) Esc closes modal; scan field regains focus. - Pass:
+modal content, logging and keyboard behaviour all conform.</p>
+<p><strong>TC-W2-016 — Blocked-batch consumption refused (UI +
+API)</strong> — <em>Integration / Journey</em> - URS: URS-W2-011 (AC-1,
+AC-2) - Steps: 1) On PO-2026-0002, scan BATCH-A-0002 (Blocked) for
+consumption → gate-refusal modal (rule/record/resolution); no genealogy
+link written. 2) POST the same consumption via API → server hook refuses
+with the same rule identifier. - Pass: both layers refuse; zero links
+written.</p>
+<p><strong>TC-W2-017 — Quarantine location putaway and movement
+gate</strong> — <em>Integration</em> - URS: URS-W2-012 (AC-1, AC-2) -
+Steps: 1) Receive BATCH-C-1001 (Quarantined) → putaway proposal targets
+NORD-A-01-01 (quarantine-flagged). 2) As O. Weber attempt transfer out →
+refused (role gate). 3) Release the batch; as W. Braun transfer out →
+posts. - Pass: all three exact.</p>
+<h3 id="quality-inspection-w2-4">3.4 Quality Inspection (W2-4)</h3>
+<p><strong>TC-W2-018 — Template instantiation and auto-accept</strong> —
+<em>Integration</em> - URS: URS-W2-013 (AC-1, AC-2) - Steps: 1) As Q.
+Fischer create In Process inspection for BATCH-C-1001 from QIT-COMPOUND
+→ three parameters with limits instantiated. 2) Enter viscosity 1290
+mPa·s, density 1.04 g/cm³, moisture 0.3 % → all readings pass; result
+Accepted automatically. - Pass: instantiation and auto-result exact.</p>
+<p><strong>TC-W2-019 — Out-of-limit reading auto-rejects</strong> —
+<em>Integration</em> - URS: URS-W2-013 (AC-3) - Steps: 1) Enter
+viscosity 1450 mPa·s → inspection Rejected; failing parameter and limit
+identified on the reading row. - Pass: rejection + identification
+exact.</p>
+<p><strong>TC-W2-020 — QI gate blocks completion
+(missing/rejected)</strong> — <em>Integration / Journey</em> - URS:
+URS-W2-014 (AC-1, AC-2) - Steps: 1) With no submitted inspection,
+attempt completion of PO-2026-0001 → modal names rule (QI-required),
+record (PO-2026-0001, BATCH-C-1001, QIT-COMPOUND), resolution;
+exec_state stays In Progress. 2) With a Rejected inspection, attempt
+completion → refusal names the Rejected inspection. - Pass: both
+refusals with full rule/record/resolution; exec_state unchanged.</p>
+<p><strong>TC-W2-021 — Accepted QI releases batch and permits
+completion</strong> — <em>Integration</em> - URS: URS-W2-014 (AC-3) -
+Steps: 1) Accept the inspection → BATCH-C-1001 qa_state Released. 2)
+Complete PO-2026-0001 → exec_state Completed. - Pass: both transitions
+occur, audited.</p>
+<p><strong>TC-W2-022 — Inspection queue journey</strong> — <em>Journey /
+Design-conformance</em> - URS: URS-W2-015 (AC-1…3) - Steps: 1) With
+inspections due for BATCH-C-1001/1002, open the queue → both rows with
+batch chip, item, type; arrows move selection; Enter opens detail. 2)
+Enter readings → units suffixed in inputs; inline validation on blur;
+failed submit preserves entries. 3) Clear the queue → empty state
+directs (“No inspections due — next scheduled …”). - Pass: all conform
+to Work Queue → Detail and form rules.</p>
+<p><strong>TC-W2-023 — Rejected inspection requires disposition</strong>
+— <em>Integration</em> - URS: URS-W2-016 (AC-1, AC-2) - Steps: 1) Reject
+BATCH-C-1002’s inspection; open disposition → choices Block batch /
+Assign rework, reason mandatory. 2) Record no disposition; run the
+integrity check → BATCH-C-1002 listed “Rejected without disposition”. -
+Pass: both exact.</p>
+<h3 id="coa-w2-5">3.5 CoA (W2-5)</h3>
+<p><strong>TC-W2-024 — CoA generation from accepted inspection</strong>
+— <em>Integration / Journey</em> - URS: URS-W2-017 (AC-1, AC-2) - Steps:
+1) With BATCH-C-1001 Released (Accepted inspection), issue CoA →
+certificate snapshots the three readings with limits, batch/item
+identity, signatory Q. Fischer, issue date; PDF attached. 2) Attempt CoA
+for a Quarantined batch → refused naming the missing inspection. - Pass:
+both exact.</p>
+<p><strong>TC-W2-025 — CoA immutability and versioning</strong> —
+<em>Integration</em> - URS: URS-W2-017 (AC-3) - Steps: 1) Amend/cancel
+the underlying inspection after issue → CoA snapshot unchanged. 2) Issue
+a new CoA version → prior version marked superseded, both retrievable. -
+Pass: immutability + versioning hold.</p>
+<p><strong>TC-W2-026 — Ribbon embedded in CoA</strong> —
+<em>Design-conformance</em> - URS: URS-W2-018 (AC-1) - Steps: 1) View
+the CoA for BATCH-C-1001 → embedded ribbon node/state set identical to
+the standalone ribbon at the same instant; print rendering
+icon+label-safe. - Pass: identical structure.</p>
+<p><strong>TC-W2-027 — Business retrieval of CoA</strong> —
+<em>Journey</em> - URS: URS-W2-019 (AC-1) - Steps: 1) As B. Vogel search
+“BATCH-C-1001” from the Command Dashboard → CoA opens read-only, PDF
+downloadable, within the professional view. - Pass: retrieval without
+state-changing affordances.</p>
+<h3 id="isa-88-recipes-w2-6">3.6 ISA-88 recipes (W2-6)</h3>
+<p><strong>TC-W2-028 — ISA-88 structure over BOM/Routing</strong> —
+<em>Integration</em> - URS: URS-W2-020 (AC-1…3) - Steps: 1) As T. Schmid
+define “Mischen” (MIX-01: Dosieren Basisharz 480 kg, Dosieren Additiv 20
+kg, Mischen 30 min) and “Abfüllen” (FILL-01) over
+BOM-RW-CHM-0003-001/RT-COMPOUND-01 → hierarchy persisted with
+material-per-phase. 2) Diff anchor BOM schema → unchanged. 3) Add a
+phase referencing a material not in the BOM; check → validation fails
+naming phase + material. - Pass: all three exact.</p>
+<p><strong>TC-W2-029 — Scaling arithmetic, limits and rounding
+guard</strong> — <em>Integration</em> - URS: URS-W2-021 (AC-1…3) -
+Steps: 1) Scale the 500 kg recipe to 250 kg → 240/10 kg, source
+reference + factor 0.5 recorded. 2) Scale to 750 kg with MIX-01 limit
+600 kg → refused naming phase, work centre, limit. 3) Construct a scale
+yielding 0.004 kg → flagged for confirmation, not silently zeroed. -
+Pass: all three exact.</p>
+<p><strong>TC-W2-030 — Governance gate on recipe use</strong> —
+<em>Integration</em> - URS: URS-W2-022 (AC-1, AC-2) - Steps: 1)
+Reference the scaled recipe (gov_state Draft) from a production-order
+accept → refused naming recipe + gov_state. 2) Accept the recipe
+(validators pass); accept PO-2026-0002 → proceeds; attempt structural
+edit → blocked by in_use_lock. - Pass: both exact.</p>
+<h3 id="hazmat-w2-7">3.7 Hazmat (W2-7)</h3>
+<p><strong>TC-W2-031 — Hazmat profile lifecycle</strong> —
+<em>Integration</em> - URS: URS-W2-023 (AC-1…3) - Steps: 1) Create
+profile UN 1866 / SDS-RW-0001 / storage class 3; link to RW-CHM-0001 →
+visible on BATCH-A-0001 via item. 2) Flag an item hazmat-mandatory
+without profile; create a batch → refused naming missing profile. 3)
+Update the SDS reference → version-audited before/after. - Pass: all
+three exact.</p>
+<p><strong>TC-W2-032 — Hazmat visibility in stock and ribbon</strong> —
+<em>Design-conformance</em> - URS: URS-W2-024 (AC-1) - Steps: 1) Render
+RM Lager Nord stock view and the ribbon with BATCH-A-0001 → storage
+class 3 and UN 1866 as columns/chips, not behind disclosure. - Pass:
+visible in both surfaces.</p>
+<h3 id="warehouse-fidelity-completion-w2-8">3.8 Warehouse fidelity
+completion (W2-8)</h3>
+<p><strong>TC-W2-033 — Pallet balance and single-truth
+reconciliation</strong> — <em>Integration</em> - URS: URS-W2-025 (AC-1,
+AC-2) - Steps: 1) With HU-000123 (20 × 25 kg BATCH-A-0001 at
+NORD-A-01-01), open pallet balance → HU listed with location + content
+500 kg. 2) Force an HU-content divergence in test data; run
+reconciliation → divergent rows listed against the ledger truth. - Pass:
+both exact.</p>
+<p><strong>TC-W2-034 — Stocktaking journey</strong> — <em>Journey /
+Integration</em> - URS: URS-W2-026 (AC-1, AC-2) - Steps: 1) Stocktake RM
+Lager Nord: count BATCH-A-0001 at 495 kg vs book 500 kg; accept →
+correcting 5 kg issue posts; stocktaking immutable. 2) Create a second
+open stocktaking for the same warehouse → refused. - Pass: both
+exact.</p>
+<p><strong>TC-W2-035 — Repacking preserves identity / records
+lineage</strong> — <em>Integration</em> - URS: URS-W2-027 (AC-1, AC-2) -
+Steps: 1) Repack 100 kg of BATCH-A-0001 to a new HU → 400/100 kg split,
+batch identity unchanged. 2) Repack with new lot identity → new batch
+has parent_batch = BATCH-A-0001; ribbon renders it as split lineage,
+distinct from production genealogy. - Pass: both exact.</p>
+<h3 id="wave-demo-decision-w2-910">3.9 Wave demo &amp; decision
+(W2-9/10)</h3>
+<p><strong>TC-W2-036 — Multi-level trace acceptance demo</strong> —
+<em>Journey (wave acceptance)</em> - URS: URS-W2-028 (AC-1, AC-2) -
+Steps: 1) Run the scripted demo: block BATCH-A-0002; forward trace →
+BATCH-C-1001/1002 with advisories; backward trace from BATCH-C-1001 →
+SUP-K7-0001 at level 2; quantities listed. 2) Attach trace listings +
+ribbon screenshots to the wave acceptance record. - Pass: three levels,
+both directions, propagation shown, artefacts attached.</p>
+<p><strong>TC-W2-037 — E-signature decision record verification</strong>
+— <em>NFR (documentation)</em> - URS: URS-W2-029 (AC-1, AC-2) - Steps:
+1) Inspect the committed decision record → per-transition e-signature
+requirement listed (min. Blocked⇄Released, CoA issue, recipe Accept),
+sign-off authority + date named. 2) If any transition requires
+e-signature → enforcement-point design documented and scheduled. - Pass:
+record complete and signed off.</p>
+<h2 id="parity-test-section-absorb-scope">4. Parity test section (Absorb
+scope)</h2>
+<p>Each case asserts target behaviour against the legacy
+characterization baseline (W0-6 harness), citing the legacy code path
+that is the contract. Deliberate deviations carry their sign-off
+reference.</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>TC</th>
+<th>Legacy contract (code path)</th>
+<th>Assertion</th>
+<th>Deviation?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TC-W2-038</td>
+<td>Qcadoo <code>BatchState.java:31-44</code> — TRACKED⇄BLOCKED
+reversible with reason</td>
+<td>Blocked⇄Released reversibility + mandatory reason match legacy
+characterization outputs (same inputs → same accept/refuse
+decisions)</td>
+<td><strong>Deviation:</strong> added Quarantined entry state (no legacy
+counterpart) — asserted as new behaviour; sign-off ref URS-W2-006</td>
+</tr>
+<tr>
+<td>TC-W2-039</td>
+<td>Qcadoo <code>ResourceCriteriaModifiers.java:59,70</code> —
+QC-blocked resources excluded from candidate lists</td>
+<td>For each characterization fixture (blocked lot present/absent),
+target picking candidate set = legacy set</td>
+<td><strong>Deviation:</strong> Quarantined also excluded (legacy
+exclusion is blocked-only) — sign-off ref URS-W2-006/010</td>
+</tr>
+<tr>
+<td>TC-W2-040</td>
+<td>ERPNext <code>stock_ledger_entry.py:287-299</code> — expired-batch
+consumption throw</td>
+<td>Same-date-boundary fixtures (expiry = today, +1, −1) produce
+identical accept/throw decisions as the Plant C characterization
+baseline</td>
+<td>Parity exact (Adopt); Plant A behaviour change governed by W1-9
+sign-off</td>
+</tr>
+<tr>
+<td>TC-W2-041</td>
+<td>Qcadoo <code>BatchBasicStateListenerService.java</code> (blocked
+batch unusable) + <code>TrackingRecordFields.java:31-49</code> link
+semantics</td>
+<td>Consumption refusal for blocked batches and produced↔︎used link shape
+(one produced, n consumed with qty) match characterization outputs</td>
+<td><strong>Deviation:</strong> genealogy propagation advisories
+(URS-W2-009) have no legacy counterpart — asserted as new behaviour;
+sign-off ref URS-W2-009</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>TC-W2-038 — <em>Parity</em> — URS-W2-006. Steps: replay the
+characterization input set for batch state transitions through the
+target workflow; compare decision-by-decision. Pass: zero unexplained
+divergence; the Quarantined additions appear only in the documented
+deviation list.</li>
+<li>TC-W2-039 — <em>Parity</em> — URS-W2-010. Steps: replay
+picking-candidate fixtures; compare candidate sets. Pass:
+legacy-equivalent for Blocked; Quarantined exclusions documented as
+deviation.</li>
+<li>TC-W2-040 — <em>Parity</em> — URS-W2-008. Steps: replay expiry
+boundary fixtures against target posting hook. Pass: identical decisions
+to Plant C baseline.</li>
+<li>TC-W2-041 — <em>Parity</em> — URS-W2-011, URS-W2-001. Steps: replay
+blocked-use and link-shape fixtures. Pass: parity except documented
+propagation deviation.</li>
+</ul>
+<h2 id="migration-reconciliation-cases">5. Migration reconciliation
+cases</h2>
+<p><strong>TC-W2-042 — Dual-model merge (matched pairs)</strong> —
+<em>Migration</em> - URS: URS-W2-030 (AC-1, AC-3 + reconciliation) -
+Steps: 1) Load pilot extract with genealogy batch “GB-100” + resource
+strings “GB-100” (two lots, expiries 30.06.2026/31.07.2026). 2) Verify
+one canonical Batch, both legacy_refs, genealogy_incomplete=false,
+expiry 30.06.2026, conflict on report. 3) Run reconciliation: batch
+counts, qa_state distribution, 100-record spot-check, checksum on
+(batch_id, item, expiry_date). - Pass: zero unexplained divergence on
+every reconciliation criterion.</p>
+<p><strong>TC-W2-043 — Orphan resource strings and rollback
+rehearsal</strong> — <em>Migration</em> - URS: URS-W2-030 (AC-2 +
+rollback) - Steps: 1) Load extract containing “RB-ORPHAN” →
+identity-only Batch with genealogy_incomplete=true. 2) Inject a
+deliberate count divergence; rerun → run rolled back by run-id
+(canonical Batches of the run removed), rollback logged. 3) Correct and
+rerun → clean reconciliation. - Pass: orphan handling + rollback both
+demonstrated.</p>
+<p><strong>TC-W2-044 — Genealogy history load and
+trace-boundary</strong> — <em>Migration</em> - URS: URS-W2-031 (AC-1,
+AC-2 + reconciliation/rollback) - Steps: 1) Load pilot TrackingRecord
+set → consumed links match used-batch rows 1:1 with quantities. 2) Load
+Plant B rows lacking lotId → produced batches flagged
+genealogy_incomplete; trace-boundary date in the migration register. 3)
+Reconcile: link counts per direction/plant; zero orphan links; 50-tree
+spot-check legacy-vs-target. 4) Inject an orphan link → genealogy load
+rolls back by run-id, batches retained. - Pass: all reconciliation
+criteria + rollback behaviour exact.</p>
+<p><strong>TC-W2-045 — Quality flags migrate as state history
+only</strong> — <em>Migration</em> - URS: URS-W2-032 (AC-1, AC-2 +
+reconciliation) - Steps: 1) Load resources with
+blockedForQualityControl=true → batches Quarantined with history citing
+the legacy flag. 2) Query QI list before the cut date → zero backfilled
+inspections. 3) Reconcile Quarantined/Blocked counts vs legacy flagged
+counts. - Pass: zero synthetic QIs; counts reconcile exactly.</p>
+<h2 id="nfr-design-conformance-cases">6. NFR &amp; design-conformance
+cases</h2>
+<p><strong>TC-W2-046 — Trace Ribbon latency</strong> — <em>NFR</em> -
+URS: URS-W2-033 (AC-1). Steps: render a 200-node fixture ribbon 20× on
+PERF → p95 server ≤ 2 s; progress indicator on the control beyond 100
+ms. Pass: both thresholds met.</p>
+<p><strong>TC-W2-047 — Scan-to-confirmation latency</strong> —
+<em>NFR</em> - URS: URS-W2-033 (AC-2). Steps: scan BATCH-A-0001 50× at a
+Terminal-mode issue screen → p95 ≤ 300 ms server-confirmed; each scan
+gives full-row visual + audible confirmation. Pass: thresholds +
+confirmation behaviour met.</p>
+<p><strong>TC-W2-048 — Audit completeness for gated actions</strong> —
+<em>NFR</em> - URS: URS-W2-034 (AC-1, AC-2). Steps: execute one instance
+each of qa_state transition, QI gate refusal, blocked-consumption
+refusal, CoA issue, migration run; query the audit log → each has user,
+timestamp, rule id, record ids, outcome, reason where mandatory. Pass:
+5/5 complete entries.</p>
+<p><strong>TC-W2-049 — German-first i18n and locale formats</strong> —
+<em>NFR / Design-conformance</em> - URS: URS-W2-035 (AC-1, AC-2). Steps:
+1) Scan W2 templates for hardcoded literals → zero. 2) Render ribbon,
+queue, CoA in German → catalogue strings only; expiry “31.12.2026”. 3)
+Verify 480 kg renders tabular, right-aligned, unit-suffixed. Pass: all
+hold.</p>
+<p><strong>TC-W2-050 — Workflow-state-level RBAC</strong> — <em>NFR</em>
+- URS: URS-W2-036 (AC-1, AC-2). Steps: 1) As O. Weber attempt via API:
+qa_state transition, CoA issue, recipe Accept, stocktaking accept → all
+refused + audited. 2) Repeat with the mapped roles (Q. Fischer ×2, T.
+Schmid reviewer, W. Braun) → all succeed. 3) As B. Vogel render each W2
+screen → read-only, no state-changing actions. Pass: every check
+exact.</p>
+<h2 id="wave-acceptance-checklist">7. Wave acceptance checklist</h2>
+<p>Executable closure of the Epic — maps EXIT-W2-N (URS §5) to test
+cases; all listed TCs must pass.</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Exit check</th>
+<th>Test cases</th>
+<th>Status gate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>EXIT-W2-1 — multi-level trace demonstrable incl. blocking
+propagation + incompleteness advisories</td>
+<td>TC-W2-001…006, TC-W2-013, TC-W2-036</td>
+<td>All pass; demo artefacts attached</td>
+</tr>
+<tr>
+<td>EXIT-W2-2 — CoA generated from inspection results</td>
+<td>TC-W2-018, TC-W2-024, TC-W2-025, TC-W2-026</td>
+<td>All pass</td>
+</tr>
+<tr>
+<td>EXIT-W2-3 — recipe scaling functional under governance</td>
+<td>TC-W2-028, TC-W2-029, TC-W2-030</td>
+<td>All pass</td>
+</tr>
+<tr>
+<td>EXIT-W2-4 — pilot migration reconciles; rollback rehearsed</td>
+<td>TC-W2-042…045</td>
+<td>All pass; one rollback rehearsal logged</td>
+</tr>
+<tr>
+<td>EXIT-W2-5 — e-signature decision signed off</td>
+<td>TC-W2-037</td>
+<td>Record committed</td>
+</tr>
+<tr>
+<td>EXIT-W2-6 — design conformance across W2 UI</td>
+<td>TC-W2-004, TC-W2-005, TC-W2-015, TC-W2-022, TC-W2-026, TC-W2-032,
+TC-W2-049</td>
+<td>All pass + screen review vs design skill Definition of done</td>
+</tr>
+<tr>
+<td>Parity contract closed (Absorb scope)</td>
+<td>TC-W2-038…041</td>
+<td>Parity exact or deviation signed off</td>
+</tr>
+<tr>
+<td>NFR floor</td>
+<td>TC-W2-046…048, TC-W2-050</td>
+<td>All pass</td>
+</tr>
+</tbody>
+</table>
+<p>Totals: 50 test cases (TC-W2-001…050) covering 36 requirements
+(URS-W2-001…036); no orphans in either direction.</p>
+  <footer class="doc">Rheinwerk Chemie GmbH — MES consolidation programme. Generated from the Markdown source of record in SachetCognition/rheinwerk-mes-core.</footer>
+</main>
+<button id="top-btn" title="Back to top">⇧</button>
+<script>
+const links=[...document.querySelectorAll('#sidebar nav a')];
+const targets=links.map(a=>document.getElementById(decodeURIComponent(a.hash.slice(1)))).filter(Boolean);
+function onScroll(){
+  const y=window.scrollY+90;let cur=targets[0];
+  for(const t of targets){if(t.offsetTop<=y)cur=t;else break}
+  links.forEach(a=>a.classList.toggle('active',cur&&decodeURIComponent(a.hash.slice(1))===cur.id));
+  document.getElementById('top-btn').classList.toggle('show',window.scrollY>500);
+}
+document.addEventListener('scroll',onScroll,{passive:true});onScroll();
+document.getElementById('top-btn').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
+</script>
+</body>
+</html>
