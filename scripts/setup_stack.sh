@@ -33,12 +33,23 @@ cd "$BENCH_PATH"
 
 # Frappe talks to the bench's own redis instances (ports from
 # sites/common_site_config.json, typically 11000/13000), not to the distro
-# redis-server on 6379 — bench install-app fails hard without them.
+# redis-server on 6379 — bench install-app fails hard without them. They are
+# stopped again on exit, because `bench start` supervises its own copies and
+# aborts when the ports are already bound.
+STARTED_REDIS_PORTS=()
+stop_started_redis() {
+	for started in "${STARTED_REDIS_PORTS[@]:-}"; do
+		[ -n "$started" ] && redis-cli -p "$started" shutdown nosave >/dev/null 2>&1 || true
+	done
+}
+trap stop_started_redis EXIT
+
 for conf in config/redis_queue.conf config/redis_cache.conf; do
 	[ -f "$conf" ] || continue
 	port="$(awk '$1 == "port" { print $2 }' "$conf")"
 	if ! redis-cli -p "$port" ping >/dev/null 2>&1; then
 		redis-server "$conf" --daemonize yes
+		STARTED_REDIS_PORTS+=("$port")
 	fi
 done
 
