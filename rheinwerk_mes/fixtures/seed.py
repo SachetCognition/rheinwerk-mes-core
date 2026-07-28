@@ -113,6 +113,8 @@ PRODUCTION_ORDER = {
 	"wip_warehouse": "RM Lager Nord",
 	"fg_warehouse": "FG Lager Süd",
 	"planned_start_date": "2026-02-02 06:00:00",
+	# The acceptance gate (URS-W1-005) requires a consistent planned range: end after start.
+	"planned_end_date": "2026-02-04 14:00:00",
 }
 
 # Second order used by the W1 state-machine and gating suites (TST-W1 §1).
@@ -124,6 +126,7 @@ SECOND_PRODUCTION_ORDER = {
 	"wip_warehouse": "RM Lager Nord",
 	"fg_warehouse": "FG Lager Süd",
 	"planned_start_date": "2026-03-10 06:00:00",
+	"planned_end_date": "2026-03-12 14:00:00",
 }
 
 # Source-system identifiers preserved out of the primary key (URS-W0-003, URS-W0-014).
@@ -581,6 +584,7 @@ def seed_production_order(bom_no: str) -> str:
 			"wip_warehouse": f"{PRODUCTION_ORDER['wip_warehouse']} - {COMPANY_ABBR}",
 			"fg_warehouse": f"{PRODUCTION_ORDER['fg_warehouse']} - {COMPANY_ABBR}",
 			"planned_start_date": PRODUCTION_ORDER["planned_start_date"],
+			"planned_end_date": PRODUCTION_ORDER["planned_end_date"],
 		}
 	)
 	if _has_field("Work Order", "production_line"):
@@ -605,6 +609,7 @@ def seed_second_production_order(bom_no: str) -> str:
 			"wip_warehouse": f"{SECOND_PRODUCTION_ORDER['wip_warehouse']} - {COMPANY_ABBR}",
 			"fg_warehouse": f"{SECOND_PRODUCTION_ORDER['fg_warehouse']} - {COMPANY_ABBR}",
 			"planned_start_date": SECOND_PRODUCTION_ORDER["planned_start_date"],
+			"planned_end_date": SECOND_PRODUCTION_ORDER["planned_end_date"],
 		}
 	)
 	if _has_field("Work Order", "production_line"):

@@ -61,6 +61,8 @@ after_install = [
 	"rheinwerk_mes.install.after_install",
 	# W1-4: recipe governance (URS-W1-014 … URS-W1-017).
 	"rheinwerk_mes.setup.w1_recipe_gov.setup_w1_recipe_gov",
+	# W1-2/W1-3: execution gating + anchor hard-stop configuration (URS-W1-005 … URS-W1-013).
+	"rheinwerk_mes.setup.w1_gating.setup_w1_gating",
 ]
 
 # Client-side additions to anchor forms; W1-4 renders the recipe's `gov_state` pill on the
@@ -76,7 +78,10 @@ doc_events = {
 		"validate": "rheinwerk_mes.manufacturing_core.uom.validate_uom_conversions",
 	},
 	# W1-6: draft outbound Stock Entries make/release reservations (URS-W1-023/024).
+	# W1-3: consuming a batch past its expiry is refused (URS-W1-013, policy URS-W1-030) —
+	# the substrate skips its own expiry throw for Stock Entry vouchers.
 	"Stock Entry": {
+		"validate": "rheinwerk_mes.execution_gating.expiry.enforce_batch_expiry",
 		"on_update": "rheinwerk_mes.warehouse.reservations.on_stock_entry_update",
 		"on_submit": "rheinwerk_mes.warehouse.reservations.on_stock_entry_submit",
 		"on_cancel": "rheinwerk_mes.warehouse.reservations.on_stock_entry_cancel",
@@ -87,6 +92,10 @@ doc_events = {
 		"before_insert": "rheinwerk_mes.manufacturing_core.exec_state.set_default_exec_state",
 		"validate": "rheinwerk_mes.manufacturing_core.exec_state.validate_exec_state_change",
 		"before_update_after_submit": "rheinwerk_mes.manufacturing_core.exec_state.validate_exec_state_change",
+		# W1-2: post-transition side effects — reservations released on Declined/Abandoned
+		# (URS-W1-009) and the executed transition logged immutably (URS-W1-033).
+		"on_update": "rheinwerk_mes.execution_gating.side_effects.on_work_order_update",
+		"on_update_after_submit": "rheinwerk_mes.execution_gating.side_effects.on_work_order_update",
 	},
 	# W1-4: Accepted recipes are immutable and in-use recipes are locked
 	# (URS-W1-016, URS-W1-017); changes need a new BOM version.
@@ -106,4 +115,9 @@ rheinwerk_exec_state_gates = [
 	"rheinwerk_mes.manufacturing_core.exec_state.reason_gate",
 	"rheinwerk_mes.manufacturing_core.exec_state.anchor_submit_gate",
 	"rheinwerk_mes.manufacturing_core.exec_state.shortfall_gate",
+	# W1-2: execution gating (URS-W1-005 … URS-W1-008).
+	"rheinwerk_mes.execution_gating.gates.acceptance_gate",
+	"rheinwerk_mes.execution_gating.gates.recipe_accepted_gate",
+	"rheinwerk_mes.execution_gating.gates.completion_gate",
+	"rheinwerk_mes.execution_gating.gates.material_availability_gate",
 ]

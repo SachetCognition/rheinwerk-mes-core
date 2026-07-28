@@ -5,3 +5,4 @@ rheinwerk_mes.setup.w0
 rheinwerk_mes.setup.w1_exec_state
 rheinwerk_mes.setup.w1_recipe_gov
 rheinwerk_mes.setup.w1_warehouse
+rheinwerk_mes.setup.w1_gating
