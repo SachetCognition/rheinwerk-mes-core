@@ -7,7 +7,7 @@ Workflow Transition row, which `rheinwerk_mes.manufacturing_core.exec_state` alr
 enforces — this module owns the matrix and levels the two programme workflows onto it:
 
 * `Production Order Execution` (`exec_state`, W1-1)
-* `Recipe Governance` (`gov_state`, W1-4) — applied only once that workflow exists, so
+* `Rheinwerk Rezeptfreigabe` (`gov_state`, W1-4) — applied only once that workflow exists, so
   this installer stays runnable while the parallel wave children land.
 
 Per-DocType rights (W0, `rheinwerk_mes.setup.roles`) remain the floor; the transition
@@ -36,13 +36,14 @@ from rheinwerk_mes.manufacturing_core.exec_state import (
 	WORKFLOW_NAME as EXEC_WORKFLOW,
 )
 from rheinwerk_mes.setup.roles import PLANNER, TECHNOLOGIST
+from rheinwerk_mes.setup.w1_recipe_gov import WORKFLOW_NAME as RECIPE_GOV_WORKFLOW
 
 OPERATOR = "Rheinwerk Shop Floor Operator"
 BUSINESS_VIEWER = "Rheinwerk Business Viewer"
 
 W1_ROLES = (OPERATOR, BUSINESS_VIEWER)
 
-GOV_WORKFLOW = "Recipe Governance"
+GOV_WORKFLOW = RECIPE_GOV_WORKFLOW
 
 #: Append-only audit of refused transitions (`rheinwerk_mes` DocType, never an anchor).
 REFUSAL_LOG = "Transition Refusal Log"
