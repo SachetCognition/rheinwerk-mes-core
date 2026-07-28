@@ -29,6 +29,17 @@ log() { printf '\n=== %s\n' "$1"; }
 log "MariaDB + Redis"
 sudo service mariadb start >/dev/null 2>&1 || true
 sudo service redis-server start >/dev/null 2>&1 || true
+# The bench talks to its own cache/queue instances (ports 13000/11000, see
+# sites/common_site_config.json); the system service on 6379 is not one of them, and
+# bench commands outside `bench start` have no Procfile to bring them up.
+for conf in redis_cache redis_queue; do
+	conf_path="$BENCH_PATH/config/$conf.conf"
+	[ -f "$conf_path" ] || continue
+	port="$(awk '/^port /{print $2; exit}' "$conf_path")"
+	[ -n "$port" ] || continue
+	redis-cli -p "$port" ping >/dev/null 2>&1 && continue
+	( cd "$BENCH_PATH" && redis-server "config/$conf.conf" --daemonize yes ) || true
+done
 
 cd "$BENCH_PATH"
 
@@ -46,7 +57,14 @@ if [ ! -e "apps/rheinwerk_mes" ]; then
 	ln -s "$APP_SRC" apps/rheinwerk_mes
 	./env/bin/python -m pip install --quiet -e apps/rheinwerk_mes
 fi
-grep -qx "rheinwerk_mes" sites/apps.txt || printf 'rheinwerk_mes\n' >> sites/apps.txt
+if ! grep -qx "rheinwerk_mes" sites/apps.txt; then
+	# bench writes apps.txt without a trailing newline, so a bare append would yield
+	# "erpnextrheinwerk_mes" and site creation would die on the phantom module
+	if [ -s sites/apps.txt ] && [ -n "$(tail -c1 sites/apps.txt)" ]; then
+		printf '\n' >> sites/apps.txt
+	fi
+	printf 'rheinwerk_mes\n' >> sites/apps.txt
+fi
 
 log "node dependencies + asset build prerequisites"
 ( cd apps/frappe && yarn install --check-files >/dev/null )
