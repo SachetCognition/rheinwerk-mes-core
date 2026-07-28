@@ -38,6 +38,38 @@ Seeds the shared programme fixtures from `docs/test/TST-W0-foundation.md` §1
 warehouses RM Lager Nord / FG Lager Süd, work centres LINE-1/MIX-01 and
 LINE-1/FILL-01, the six personas). Re-running is safe.
 
+## Master-data migration (W0-5)
+
+Extract → import → re-export → reconcile for the three legacy sources, against the
+committed fixture exports in `tests/fixtures/legacy/**` (never a live plant):
+
+```bash
+cd ~/frappe-bench
+# one source: qcadoo (Plant A) | ofbiz (Plant B) | erpnext (Plant C)
+bench --site dev.localhost execute \
+  rheinwerk_mes.integration.migration.cli.run_round_trip --kwargs "{'source': 'qcadoo'}"
+
+# all three, one reconciliation report each
+bench --site dev.localhost execute rheinwerk_mes.integration.migration.cli.run_all
+
+# reverse a run from its journal (printed with every report)
+bench --site dev.localhost execute \
+  rheinwerk_mes.integration.migration.cli.rollback --kwargs "{'run_id': 'qcadoo-20260728…'}"
+```
+
+Each run prints a German-first reconciliation report: per entity the source /
+imported / re-exported counts, SHA-256 checksums over the CDM `=`-mapped fields, a
+deterministic 5 % (minimum 10 records) field-level spot check and `PASS`/`FAIL`.
+A `FAIL` names the offending record and rolls the run back automatically
+(`keep_on_fail=True` keeps the imports for inspection). Every touched document is
+journaled to `sites/<site>/private/files/rheinwerk_mes_migration/<run_id>.json`, so
+rollback removes exactly that run's imports and restores what it updated.
+
+Unmappable source values (e.g. an OFBiz `quantityUomId` with no canonical UoM) are
+listed in the report's exceptions section and never silently defaulted. Extraction is
+deterministic: re-running over unchanged fixtures produces byte-identical output.
+Add `fixture='<path>'` to point a run at an alternative export.
+
 ## Test suites
 
 ```bash
