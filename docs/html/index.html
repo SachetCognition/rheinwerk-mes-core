@@ -41,7 +41,7 @@ footer.doc{margin-top:60px;border-top:1px solid var(--border);padding-top:14px;c
 <body>
 <aside id="sidebar">
   <div class="brand">Rheinwerk MES Consolidation<small>Programme
-artefact index — Stages 1–4</small></div>
+artefact index — Stages 1–5</small></div>
   <nav><ul>
 <li><a href="#stage-1-reverse-engineering" id="toc-stage-1-reverse-engineering">Stage 1 — Reverse
 engineering</a></li>
@@ -51,12 +51,14 @@ Target capability model &amp; canonical data model</a></li>
 Design</a></li>
 <li><a href="#stage-4-implementation-plan" id="toc-stage-4-implementation-plan">Stage 4 — Implementation
 plan</a></li>
+<li><a href="#stage-5-requirements-verification" id="toc-stage-5-requirements-verification">Stage 5 — Wave requirements &amp;
+verification</a></li>
 </ul></nav>
 </aside>
 <main id="content">
   <header class="doc"><h1>Rheinwerk MES
 Consolidation</h1><div class="sub">Programme artefact index — Stages
-1–4</div></header>
+1–5</div></header>
 <p>All artefacts are self-contained HTML files (open offline in any
 browser). The Markdown sources of record live in this repository.</p>
 <h2 id="stage-1-reverse-engineering">Stage 1 — Reverse engineering</h2>
@@ -174,6 +176,49 @@ Target capability model &amp; canonical data model</h2>
 <td><a href="consolidation-project-plan.html">consolidation-project-plan.html</a></td>
 <td><code>docs/plan/consolidation-project-plan.md</code> (+
 <code>.xlsx</code>)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="stage-5-requirements-verification">Stage 5 — Wave requirements &amp; verification</h2>
+<p>Per-wave User Requirements Specifications (URS) and Test &amp; Verification documents (TST). Delivery structure is mirrored on the Jira board <em>Sach_Sales_MES</em> (project SSM): one wave-level issue per wave, one child issue per URS requirement.</p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 40%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr>
+<th>Wave</th>
+<th>URS (HTML · source of record)</th>
+<th>Test &amp; Verification (HTML · source of record)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>W0 — Foundation</td>
+<td><a href="URS-W0-foundation.html">URS-W0-foundation.html</a> · <code>docs/urs/URS-W0-foundation.md</code></td>
+<td><a href="TST-W0-foundation.html">TST-W0-foundation.html</a> · <code>docs/test/TST-W0-foundation.md</code></td>
+</tr>
+<tr>
+<td>W1 — Production Core</td>
+<td><a href="URS-W1-production-core.html">URS-W1-production-core.html</a> · <code>docs/urs/URS-W1-production-core.md</code></td>
+<td><a href="TST-W1-production-core.html">TST-W1-production-core.html</a> · <code>docs/test/TST-W1-production-core.md</code></td>
+</tr>
+<tr>
+<td>W2 — Traceability &amp; Quality</td>
+<td><a href="URS-W2-traceability-quality.html">URS-W2-traceability-quality.html</a> · <code>docs/urs/URS-W2-traceability-quality.md</code></td>
+<td><a href="TST-W2-traceability-quality.html">TST-W2-traceability-quality.html</a> · <code>docs/test/TST-W2-traceability-quality.md</code></td>
+</tr>
+<tr>
+<td>W3 — Planning &amp; Boundary</td>
+<td><a href="URS-W3-planning-boundary.html">URS-W3-planning-boundary.html</a> · <code>docs/urs/URS-W3-planning-boundary.md</code></td>
+<td><a href="TST-W3-planning-boundary.html">TST-W3-planning-boundary.html</a> · <code>docs/test/TST-W3-planning-boundary.md</code></td>
+</tr>
+<tr>
+<td>W4 — Cutover &amp; Decommission</td>
+<td><a href="URS-W4-cutover-decommission.html">URS-W4-cutover-decommission.html</a> · <code>docs/urs/URS-W4-cutover-decommission.md</code></td>
+<td><a href="TST-W4-cutover-decommission.html">TST-W4-cutover-decommission.html</a> · <code>docs/test/TST-W4-cutover-decommission.md</code></td>
 </tr>
 </tbody>
 </table>
