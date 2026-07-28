@@ -325,15 +325,26 @@ Each case asserts target behaviour against the legacy characterization baseline 
 
 Executable closure of the Epic — maps EXIT-W2-N (URS §5) to test cases; all listed TCs must pass.
 
-| Exit check | Test cases | Status gate |
-|---|---|---|
-| EXIT-W2-1 — multi-level trace demonstrable incl. blocking propagation + incompleteness advisories | TC-W2-001…006, TC-W2-013, TC-W2-036 | All pass; demo artefacts attached |
-| EXIT-W2-2 — CoA generated from inspection results | TC-W2-018, TC-W2-024, TC-W2-025, TC-W2-026 | All pass |
-| EXIT-W2-3 — recipe scaling functional under governance | TC-W2-028, TC-W2-029, TC-W2-030 | All pass |
-| EXIT-W2-4 — pilot migration reconciles; rollback rehearsed | TC-W2-042…045 | All pass; one rollback rehearsal logged |
-| EXIT-W2-5 — e-signature decision signed off | TC-W2-037 | Record committed |
-| EXIT-W2-6 — design conformance across W2 UI | TC-W2-004, TC-W2-005, TC-W2-015, TC-W2-022, TC-W2-026, TC-W2-032, TC-W2-049 | All pass + screen review vs design skill Definition of done |
-| Parity contract closed (Absorb scope) | TC-W2-038…041 | Parity exact or deviation signed off |
-| NFR floor | TC-W2-046…048, TC-W2-050 | All pass |
+| Exit check | Test cases | Status gate | Result |
+|---|---|---|---|
+| EXIT-W2-1 — multi-level trace demonstrable incl. blocking propagation + incompleteness advisories | TC-W2-001…006, TC-W2-013, TC-W2-036 | All pass; demo artefacts attached | ☑ |
+| EXIT-W2-2 — CoA generated from inspection results | TC-W2-018, TC-W2-024, TC-W2-025, TC-W2-026 | All pass | ☑ |
+| EXIT-W2-3 — recipe scaling functional under governance | TC-W2-028, TC-W2-029, TC-W2-030 | All pass | ☑ |
+| EXIT-W2-4 — pilot migration reconciles; rollback rehearsed | TC-W2-042…045 | All pass; one rollback rehearsal logged | ☑ |
+| EXIT-W2-5 — e-signature decision signed off | TC-W2-037 | Record committed | ☑ |
+| EXIT-W2-6 — design conformance across W2 UI | TC-W2-004, TC-W2-005, TC-W2-015, TC-W2-022, TC-W2-026, TC-W2-032, TC-W2-049 | All pass + screen review vs design skill Definition of done | ☑ |
+| Parity contract closed (Absorb scope) | TC-W2-038…041 | Parity exact or deviation signed off | ☑ |
+| NFR floor | TC-W2-046…048, TC-W2-050 | All pass | ☑ |
 
 Totals: 50 test cases (TC-W2-001…050) covering 36 requirements (URS-W2-001…036); no orphans in either direction.
+
+Confirmed at W2 fan-in on the merged wave branch: the full suite runs green offline and against the
+site (`pytest tests` — 395 passed, one strict xfail carrying the W1 expiry divergence), lint and
+format are clean, `python -m tools.evidence.generate --wave W2` reports **11/11** backlog items
+complete with zero unlinked and zero evidence-incomplete items, `python -m tools.trace_demo.generate`
+reproduces the three-level blocked-ancestor demonstration from the live site, and the pilot migration
+was run end to end on the site (Plants A/B/C **PASS**) and then reversed step by step by run id — 13
+migrated batches deleted, the six programme batches untouched — which is the rehearsed rollback
+EXIT-W2-4 asks for. The e-signature enforcement points are designed and signed off in
+`docs/decisions/DEC-W2-029-e-signature-policy.md`; enforcement itself is scheduled into W3, as the
+decision record states. W3 may open.

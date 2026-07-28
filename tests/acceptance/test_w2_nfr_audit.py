@@ -138,7 +138,20 @@ def test_migration_run_is_audited_with_its_run_ids(site):
 	"""URS-W2-034 AC-1 — the pilot run is auditable by run id and verdict."""
 	from rheinwerk_mes.integration.migration.w2 import cli as w2_cli
 
+	# The pilot commits (it is a real migration run, not a fixture), so this test undoes it
+	# by run id afterwards — the rehearsed rollback the URS requires — and leaves only the
+	# append-only audit trail behind, which is what the case is about.
 	summary = w2_cli.run_w2_migration()
+	try:
+		_assert_migration_audit(summary, w2_cli)
+	finally:
+		if not summary["rolled_back"]:
+			for plant_run_ids in summary["run_ids"].values():
+				w2_cli.rollback_plant(plant_run_ids)
+			frappe.db.commit()
+
+
+def _assert_migration_audit(summary: dict[str, Any], w2_cli: Any) -> None:
 	entries = frappe.get_all(
 		audit.LOG_DOCTYPE,
 		filters={"gate": w2_cli.MIGRATION_GATE},
