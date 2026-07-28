@@ -76,6 +76,8 @@ after_install = [
 	# W2 fan-in: the business viewer's cross-module read surface (URS-W2-036 AC-2) — after
 	# W1 roles, which creates the role, and after every W2 child installed its DocTypes.
 	"rheinwerk_mes.setup.w2_rbac.setup_w2_rbac",
+	# W3: the read-only permission surface of the e-signature evidence (DEC-W2-029).
+	"rheinwerk_mes.setup.w3_esignature.setup_w3_esignature",
 ]
 
 # Client-side additions to anchor forms; W1-4 renders the recipe's `gov_state` pill on the
@@ -102,6 +104,8 @@ app_include_css = [
 # Trace Ribbon (URS-W2-024).
 app_include_js = [
 	"/assets/rheinwerk_mes/js/hazmat.js",
+	# W3: the German-first signing dialog for the four dispositive acts (DEC-W2-029).
+	"/assets/rheinwerk_mes/js/esignature.js",
 ]
 
 # W2-7: the Trace Ribbon page fetches its model from `genealogy.ribbon.ribbon`; the hazmat
@@ -182,6 +186,14 @@ doc_events = {
 	},
 	# W1-4: Accepted recipes are immutable and in-use recipes are locked
 	# (URS-W1-016, URS-W1-017); changes need a new BOM version.
+	# W3: the two remaining dispositive acts of DEC-W2-029 — issuing a certificate and
+	# accepting a recipe — intercepted on their own documents.
+	"CoA Certificate": {
+		"before_insert": "rheinwerk_mes.compliance.gates.coa_issue_signature_gate",
+	},
+	"Recipe Governance": {
+		"validate": "rheinwerk_mes.compliance.gates.recipe_accept_signature_gate",
+	},
 	"BOM": {
 		"validate": "rheinwerk_mes.recipe_isa88.governance.enforce_recipe_change_control",
 		"before_update_after_submit": "rheinwerk_mes.recipe_isa88.governance.enforce_recipe_change_control",
@@ -217,4 +229,8 @@ rheinwerk_qa_state_gates = [
 	# W2-4: a Rejected inspection must be dispositioned before its batch can be released
 	# (URS-W2-016).
 	"rheinwerk_mes.quality.gates.rejected_inspection_gate",
+	# W3: release and block are dispositive acts and need an electronic signature once
+	# enforcement is switched on (DEC-W2-029 · URS-W2-029 AC-2). Registered last, so a
+	# transition that fails a cheaper gate is refused before anyone is asked to sign.
+	"rheinwerk_mes.compliance.gates.qa_state_signature_gate",
 ]

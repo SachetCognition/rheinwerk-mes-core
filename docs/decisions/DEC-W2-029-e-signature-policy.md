@@ -7,7 +7,10 @@ missing or `PENDING`, which blocks EXIT-W2-5.
 - **Decision:** E-signature **required** for the three dispositive acts (QA release/block,
   CoA issue, recipe Accept); **audit trail only** for operational execution transitions.
 - **Sign-off:** Sachet Agarwal — Programme Owner — 28.07.2026
-- **Enforcement:** designed here, implemented in W3 (URS-W2-029 AC-2 permits the split).
+- **Enforcement:** designed here, implemented in W3 —
+  `docs/design/W3-esignature-enforcement.md` (URS-W2-029 AC-2 permits the split). Arming the
+  enforcement switch estate-wide is a W4 cutover precondition, because the automated release
+  paths must carry a signer first.
 
 ## Why a decision was needed
 
@@ -70,3 +73,10 @@ the four required transitions, the German-first signing dialog per the design sk
 audit report listing signatures per batch and per CoA. Until it lands, the affected
 transitions remain gated by role and recorded in their existing audit trails — W2 exits with
 the decision, not with the enforcement.
+
+**W3 addendum (delivered).** All four gates, the signing API and dialog, the append-only
+record and the signature report are in `rheinwerk_mes/compliance/**`; the gates are armed by
+`Rheinwerk Compliance Settings.esignature_enforced`, which ships off so the estate's
+server-side release paths (inspection auto-release, QA disposition, migration loaders, fixture
+seeding) can be given a signer during the W4 cutover rather than being broken mid-programme.
+Rationale and evidence: `docs/design/W3-esignature-enforcement.md` §4–§5.
