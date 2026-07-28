@@ -65,4 +65,21 @@ doc_events = {
 	"Item": {
 		"validate": "rheinwerk_mes.manufacturing_core.uom.validate_uom_conversions",
 	},
+	# W1-1: every `exec_state` change funnels through one validator (URS-W1-001…004).
+	"Work Order": {
+		"before_insert": "rheinwerk_mes.manufacturing_core.exec_state.set_default_exec_state",
+		"validate": "rheinwerk_mes.manufacturing_core.exec_state.validate_exec_state_change",
+		"before_update_after_submit": "rheinwerk_mes.manufacturing_core.exec_state.validate_exec_state_change",
+	},
 }
+
+# W1-1: ordered gate callbacks run by
+# `rheinwerk_mes.manufacturing_core.exec_state.transition` before a state change is
+# written. Later waves append their gates here — no edit to the state machine needed.
+# Each callable takes a `TransitionContext` and either appends German-first messages to
+# `context.errors` / returns them, or throws its own modal.
+rheinwerk_exec_state_gates = [
+	"rheinwerk_mes.manufacturing_core.exec_state.reason_gate",
+	"rheinwerk_mes.manufacturing_core.exec_state.anchor_submit_gate",
+	"rheinwerk_mes.manufacturing_core.exec_state.shortfall_gate",
+]
