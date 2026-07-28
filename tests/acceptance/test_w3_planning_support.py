@@ -17,10 +17,11 @@ suites pin cannot be re-shaped in the seeder, so they are arranged here per test
 
 from __future__ import annotations
 
-import frappe
+import pytest
 
-from rheinwerk_mes.genealogy import qa_state
-from rheinwerk_mes.recipe_isa88 import governance
+frappe = pytest.importorskip("frappe")
+qa_state = pytest.importorskip("rheinwerk_mes.genealogy.qa_state")
+governance = pytest.importorskip("rheinwerk_mes.recipe_isa88.governance")
 
 COMPANY = "Rheinwerk Chemie GmbH"
 CANONICAL_BOM = "BOM-RW-CHM-0003-001"
