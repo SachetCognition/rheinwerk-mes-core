@@ -36,10 +36,12 @@ def test_tc_w0_008_extension_fields_are_custom_not_anchor_schema(site):
 		assert not site.db.exists("DocField", {"parent": "Work Order", "fieldname": fieldname})
 
 
-def test_tc_w0_008_state_history_container_without_w1_workflow(site):
-	"""TC-W0-008 (URS-W0-007): `state_history` is a container only — W0 ships no
-	`exec_state` field and no Work Order workflow, so W1 can layer the state machine
-	without schema rework."""
+def test_tc_w0_008_state_history_container_carries_the_w1_state_machine(site):
+	"""TC-W0-008 (URS-W0-007): the W0 `state_history` container needed no schema rework
+	for W1 — the W1-1 `exec_state` machine (TC-W1-001) layers onto it as a Custom Field
+	plus a workflow, with the anchor still unforked."""
 	assert site.get_meta("Order State History").istable
-	assert not site.get_meta("Work Order").get_field("exec_state")
-	assert not site.get_all("Workflow", filters={"document_type": "Work Order"}, pluck="name")
+	assert not site.db.exists("DocField", {"parent": "Work Order", "fieldname": "exec_state"})
+	assert site.db.exists(
+		"Custom Field", {"dt": "Work Order", "fieldname": "exec_state", "module": "Manufacturing Core"}
+	)
