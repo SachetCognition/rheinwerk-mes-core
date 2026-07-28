@@ -23,7 +23,6 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
 	sys.path.insert(0, str(REPO_ROOT))
 
-from rheinwerk_mes.genealogy import qa_state as genealogy_qa_state  # noqa: E402
 from rheinwerk_mes.integration.migration.w2 import extract as w2_extract  # noqa: E402
 from rheinwerk_mes.integration.migration.w2 import model as w2_model  # noqa: E402
 
@@ -230,10 +229,11 @@ def test_tc_w2_045_no_synthetic_quality_inspection_and_distributions_reconcile(s
 	"""TC-W2-045 (URS-W2-032 AC-2): the migration creates no Quality Inspection record (none
 	predates the cut date) and the Quarantined/Blocked counts reconcile against the legacy
 	flags. The local qa_state vocabulary must equal the genealogy module's."""
+	# Resolved via the site (not a top-level import) so this module imports offline.
 	assert (w2_model.QUARANTINED, w2_model.RELEASED, w2_model.BLOCKED) == (
-		genealogy_qa_state.QUARANTINED,
-		genealogy_qa_state.RELEASED,
-		genealogy_qa_state.BLOCKED,
+		site.get_attr(f"{GEN}.qa_state.QUARANTINED"),
+		site.get_attr(f"{GEN}.qa_state.RELEASED"),
+		site.get_attr(f"{GEN}.qa_state.BLOCKED"),
 	)
 
 	qi_before = site.db.count("Quality Inspection")
