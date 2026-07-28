@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Base Repository Decision</title>
+<style>
+:root{--accent:#1f4e79;--accent2:#2e74b5;--bg:#f7f9fb;--card:#ffffff;--text:#24292f;--muted:#6a737d;--border:#e1e6eb;--sidebar-w:300px}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",Calibri,Arial,sans-serif;color:var(--text);background:var(--bg);line-height:1.55;font-size:15px}
+#sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:var(--accent);color:#fff;overflow-y:auto;padding:22px 18px}
+#sidebar .brand{font-size:15px;font-weight:600;letter-spacing:.4px;border-bottom:1px solid rgba(255,255,255,.25);padding-bottom:12px;margin-bottom:12px}
+#sidebar .brand small{display:block;font-weight:400;opacity:.75;margin-top:4px}
+#sidebar nav ul{list-style:none;margin:0;padding-left:0}
+#sidebar nav ul ul{padding-left:14px}
+#sidebar nav a{display:block;color:rgba(255,255,255,.85);text-decoration:none;font-size:12.6px;padding:4px 8px;border-radius:5px;border-left:3px solid transparent}
+#sidebar nav a:hover{background:rgba(255,255,255,.12);color:#fff}
+#sidebar nav a.active{background:rgba(255,255,255,.18);color:#fff;border-left-color:#9cc3e5;font-weight:600}
+#content{margin-left:var(--sidebar-w);padding:42px 56px;max-width:1080px}
+header.doc{border-bottom:3px solid var(--accent);padding-bottom:18px;margin-bottom:30px}
+header.doc h1{color:var(--accent);font-size:30px;margin:0 0 6px}
+header.doc .sub{color:var(--accent2);font-size:15.5px;font-weight:600}
+h1,h2{color:var(--accent);margin-top:2.1em;border-bottom:1px solid var(--border);padding-bottom:.25em}
+h3,h4{color:var(--accent2);margin-top:1.7em}
+a{color:var(--accent2)}
+table{border-collapse:collapse;width:100%;margin:1.1em 0;background:var(--card);font-size:13.2px;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+th{background:var(--accent);color:#fff;text-align:left;padding:8px 10px;font-weight:600}
+td{border:1px solid var(--border);padding:7px 10px;vertical-align:top}
+tr:nth-child(even) td{background:#f2f6fa}
+code{background:#eef2f6;border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:12px;font-family:Consolas,Menlo,monospace;color:#0b3d66}
+pre{background:#0f2a43;color:#dce8f5;padding:14px 16px;border-radius:8px;overflow-x:auto;font-size:12.5px}
+pre code{background:none;border:none;color:inherit;padding:0}
+blockquote{margin:1em 0;padding:10px 16px;background:#eaf1f8;border-left:5px solid var(--accent2);border-radius:0 6px 6px 0;color:#243b53}
+img.diagram,p img{max-width:100%;background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px;box-shadow:0 1px 3px rgba(0,0,0,.08);display:block;margin:1.2em auto}
+#top-btn{position:fixed;right:26px;bottom:26px;background:var(--accent);color:#fff;border:none;border-radius:50%;width:46px;height:46px;font-size:19px;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .25s;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+#top-btn.show{opacity:.92;pointer-events:auto}
+footer.doc{margin-top:60px;border-top:1px solid var(--border);padding-top:14px;color:var(--muted);font-size:12px}
+@media(max-width:900px){#sidebar{display:none}#content{margin-left:0;padding:24px}}
+</style>
+</head>
+<body>
+<aside id="sidebar">
+  <div class="brand">Base Repository Decision<small>Stage 2.2 —
+Consolidated repo base selection &amp; rationale</small></div>
+  <nav><ul>
+<li><a href="#decision-form" id="toc-decision-form">Decision
+form</a></li>
+<li><a href="#weighted-comparison-from-dossier-parts-36" id="toc-weighted-comparison-from-dossier-parts-36">Weighted comparison
+(from dossier Parts 3–6)</a></li>
+<li><a href="#rationale-summary" id="toc-rationale-summary">Rationale
+(summary)</a></li>
+<li><a href="#what-base-does-not-mean" id="toc-what-base-does-not-mean">What “base” does NOT mean</a></li>
+</ul></nav>
+</aside>
+<main id="content">
+  <header class="doc"><h1>Base Repository
+Decision</h1><div class="sub">Stage 2.2 — Consolidated repo base
+selection &amp; rationale</div></header>
+<p><strong>Decision: <code>SachetCognition/Chem_erpnext</code> (ERPNext)
+is the base for the consolidated application built in
+<code>SachetCognition/rheinwerk-mes-core</code>.</strong> Qcadoo MES
+(<code>Chem_mes</code>) is a semantics donor only; OFBiz
+(<code>VM_ofbiz-framework</code>) is retired (data-migration source
+only).</p>
+<h2 id="decision-form">Decision form</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td>Status</td>
+<td>Accepted (confirms ADR-001 with Stage 1 evidence)</td>
+</tr>
+<tr>
+<td>Options considered</td>
+<td>Base on Chem_erpnext · base on Chem_mes · base on VM_ofbiz-framework
+· greenfield</td>
+</tr>
+<tr>
+<td>Scoring</td>
+<td>ADR-001 weights: functional 35 / data model 20 / technical health 20
+/ extensibility 15 / UX 10</td>
+</tr>
+</tbody>
+</table>
+<h2 id="weighted-comparison-from-dossier-parts-36">Weighted comparison
+(from dossier Parts 3–6)</h2>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Criterion (weight)</th>
+<th>ERPNext</th>
+<th>Qcadoo MES</th>
+<th>OFBiz</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Functional depth (35%)</td>
+<td>14 Rich / 7 Adequate of 30 capabilities; only real quality engine,
+planning/MRP, valuation</td>
+<td>11 Rich, deepest in execution/traceability/warehouse</td>
+<td>5 Rich; wins no capability area</td>
+</tr>
+<tr>
+<td>Data-model fitness (20%)</td>
+<td>DocType metadata + immutable SLE/GLE ledgers; extensible without
+schema forks</td>
+<td>Rich but Java-bound; dual batch model; single schema</td>
+<td>Generic entity engine; optional lots break traceability</td>
+</tr>
+<tr>
+<td>Technical health (20%)</td>
+<td>Python 3 / active CI / 515 test files / current framework</td>
+<td>Java 8, Spring-XML, snapshot deps from third-party Nexus
+(unreproducible builds)</td>
+<td>Java 17 but manufacturing module functionally frozen</td>
+</tr>
+<tr>
+<td>Extensibility (15%)</td>
+<td>hooks/doc-events/custom apps designed for absorption without
+forking</td>
+<td>AOP/plugin model, but extension = more Java 8 estate</td>
+<td>Component model, weak for this team’s stack</td>
+</tr>
+<tr>
+<td>UX (10%)</td>
+<td>Modern desk + shop-floor pages</td>
+<td>jqGrid/JSP-era</td>
+<td>Declarative screens, dated</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Weighted outcome: ERPNext wins every criterion except raw
+execution-semantics depth — and that depth is carried over as
+re-implemented rules (Absorb), which is exactly what the anchor’s
+extension model is designed for.</strong></p>
+<h2 id="rationale-summary">Rationale (summary)</h2>
+<ol type="1">
+<li><strong>Breadth + health:</strong> the anchor must be the system
+that is broadest and healthiest, because everything else is grafted onto
+it. That is ERPNext by a wide margin (dossier §6.2 platform-substrate
+row).</li>
+<li><strong>Depth is portable, platforms are not:</strong> Qcadoo’s
+winning behaviours are enum/listener <em>rules</em> — re-implementable
+as Frappe workflows/hooks with characterisation-test parity. Making
+Qcadoo the base would mean building quality, planning, valuation,
+multi-plant and a modern UI <em>into</em> an ageing Java 8 platform with
+unreproducible builds (implication 10).</li>
+<li><strong>OFBiz eliminated:</strong> wins no capability area;
+manufacturing is Adequate-at-best, quality Absent, lots optional
+(dossier §6.2 “Anything from OFBiz: none”).</li>
+<li><strong>Greenfield eliminated:</strong> discards a working quality
+engine, planning stack, ledgers and RBAC that score Rich, for no
+compensating gain.</li>
+<li><strong>Consequence for repo layout:</strong>
+<code>rheinwerk-mes-core</code> hosts a custom Frappe app
+(<code>rheinwerk_mes</code>) installed alongside the ERPNext base;
+anchor DocTypes are never forked (ARCHITECTURE.md layering);
+Qcadoo/OFBiz code is never vendored in.</li>
+</ol>
+<h2 id="what-base-does-not-mean">What “base” does NOT mean</h2>
+<ul>
+<li>Not a fork of <code>Chem_erpnext</code>: the base is consumed as an
+upstream dependency; all Rheinwerk behaviour lives in the
+<code>rheinwerk_mes</code> app in this repo.</li>
+<li>Not carrying ERPNext’s finance/buying/selling as books of record —
+those remain group-ERP territory (ADR-002); modules stay installed only
+as far as stock/GL integrity requires.</li>
+</ul>
+  <footer class="doc">Rheinwerk Chemie GmbH — MES consolidation programme. Generated from the Markdown source of record in SachetCognition/rheinwerk-mes-core.</footer>
+</main>
+<button id="top-btn" title="Back to top">⇧</button>
+<script>
+const links=[...document.querySelectorAll('#sidebar nav a')];
+const targets=links.map(a=>document.getElementById(decodeURIComponent(a.hash.slice(1)))).filter(Boolean);
+function onScroll(){
+  const y=window.scrollY+90;let cur=targets[0];
+  for(const t of targets){if(t.offsetTop<=y)cur=t;else break}
+  links.forEach(a=>a.classList.toggle('active',cur&&decodeURIComponent(a.hash.slice(1))===cur.id));
+  document.getElementById('top-btn').classList.toggle('show',window.scrollY>500);
+}
+document.addEventListener('scroll',onScroll,{passive:true});onScroll();
+document.getElementById('top-btn').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
+</script>
+</body>
+</html>
