@@ -1,0 +1,156 @@
+/* Inspection queue — Work Queue → Detail (W2-4 · URS-W2-015).
+ * Same Rheinwerk Petrol tokens as the shop-floor screens; status is never colour-only
+ * (every pill carries a label), units are rendered suffixed *inside* the input. */
+
+.rw-queue {
+	--rw-petrol-900: #0e3038;
+	--rw-petrol-600: #16606e;
+	--rw-signal-amber: #b4690e;
+	--rw-signal-green: #1a7f47;
+	--rw-signal-red: #a51d2d;
+	--rw-line: #d6dee0;
+
+	color: var(--rw-petrol-900);
+	font-size: 14px;
+}
+
+.rw-queue__bar {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.5rem 0.75rem;
+	border-bottom: 1px solid var(--rw-line);
+}
+
+.rw-queue__hint {
+	margin-left: auto;
+	color: #52666b;
+	font-size: 12px;
+}
+
+.rw-queue__split {
+	display: grid;
+	grid-template-columns: minmax(18rem, 26rem) 1fr;
+	gap: 1rem;
+	align-items: start;
+}
+
+.rw-queue__list {
+	border-right: 1px solid var(--rw-line);
+	max-height: 70vh;
+	overflow-y: auto;
+}
+
+.rw-queue__row {
+	padding: 0.5rem 0.75rem;
+	border-bottom: 1px solid var(--rw-line);
+	cursor: pointer;
+}
+
+.rw-queue__row[aria-current="true"] {
+	background: #eaf3f4;
+	box-shadow: inset 3px 0 0 var(--rw-petrol-600);
+}
+
+.rw-queue__row h3 {
+	font-size: 14px;
+	margin: 0;
+}
+
+.rw-queue__row p {
+	margin: 0.1rem 0;
+	color: #40595f;
+}
+
+.rw-queue__due {
+	font-size: 12px;
+}
+
+.rw-queue__empty {
+	padding: 2rem 1rem;
+	color: #40595f;
+}
+
+.rw-queue__pane {
+	padding: 0.5rem 0.75rem;
+}
+
+.rw-form .rw-field {
+	margin-bottom: 0.75rem;
+	max-width: 22rem;
+}
+
+/* Label above the field (design skill form rules). */
+.rw-form .rw-field label {
+	display: block;
+	font-weight: 600;
+	margin-bottom: 0.15rem;
+}
+
+.rw-input-affix {
+	display: flex;
+	align-items: center;
+	border: 1px solid var(--rw-petrol-600);
+	border-radius: 2px;
+}
+
+.rw-input-affix input {
+	border: 0;
+	flex: 1;
+	min-height: 32px;
+	padding: 0 0.5rem;
+	font-variant-numeric: tabular-nums;
+	text-align: right;
+}
+
+.rw-input-affix__unit {
+	padding: 0 0.5rem;
+	color: #40595f;
+	border-left: 1px solid var(--rw-line);
+	white-space: nowrap;
+}
+
+.rw-field__hint {
+	font-size: 12px;
+	color: #52666b;
+	margin: 0.15rem 0 0 0;
+}
+
+.rw-field__error {
+	font-size: 12px;
+	color: var(--rw-signal-red);
+	margin: 0.15rem 0 0 0;
+}
+
+.rw-queue__findings {
+	border-top: 1px solid var(--rw-line);
+	margin-top: 1rem;
+	padding: 0.5rem 0.75rem;
+}
+
+.rw-queue__findings h2 {
+	font-size: 14px;
+	color: var(--rw-signal-red);
+}
+
+.rw-queue .rw-pill {
+	display: inline-flex;
+	gap: 0.25rem;
+	align-items: center;
+	font-size: 12px;
+	border-radius: 999px;
+	padding: 0 0.5rem;
+	border: 1px solid currentColor;
+}
+
+.rw-queue .rw-pill--green {
+	color: var(--rw-signal-green);
+}
+
+.rw-queue .rw-pill--amber {
+	color: var(--rw-signal-amber);
+}
+
+.rw-queue .rw-pill--red {
+	color: var(--rw-signal-red);
+}
