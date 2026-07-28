@@ -61,6 +61,9 @@ after_install = [
 	"rheinwerk_mes.install.after_install",
 	# W1-4: recipe governance (URS-W1-014 … URS-W1-017).
 	"rheinwerk_mes.setup.w1_recipe_gov.setup_w1_recipe_gov",
+	# W1-8: role gating runs last so it can also stamp the governance workflow's
+	# transitions (URS-W1-029).
+	"rheinwerk_mes.setup.w1_roles.setup_w1_roles",
 ]
 
 # Client-side additions to anchor forms; W1-4 renders the recipe's `gov_state` pill on the
@@ -68,6 +71,9 @@ after_install = [
 doctype_js = {
 	"BOM": "recipe_isa88/bom_gov_state.js",
 }
+
+# W1-7: Desk/Terminal density tokens and status pills for the shop-floor screens.
+app_include_css = "/assets/rheinwerk_mes/css/shopfloor.css"
 
 doc_events = {
 	# W0-2: item-level UoM conversion invariants (URS-W0-004).
@@ -87,6 +93,10 @@ doc_events = {
 		"before_insert": "rheinwerk_mes.manufacturing_core.exec_state.set_default_exec_state",
 		"validate": "rheinwerk_mes.manufacturing_core.exec_state.validate_exec_state_change",
 		"before_update_after_submit": "rheinwerk_mes.manufacturing_core.exec_state.validate_exec_state_change",
+	},
+	# W1-7: the job card's own name is the barcode the terminal scans (URS-W1-028).
+	"Job Card": {
+		"validate": "rheinwerk_mes.setup.w1_shopfloor.set_job_card_scan_code",
 	},
 	# W1-4: Accepted recipes are immutable and in-use recipes are locked
 	# (URS-W1-016, URS-W1-017); changes need a new BOM version.

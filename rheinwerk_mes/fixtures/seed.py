@@ -29,6 +29,7 @@ import frappe
 from frappe.model.naming import NamingSeries
 
 from rheinwerk_mes.setup.naming import WORK_ORDER_SERIES
+from rheinwerk_mes.setup.w1_roles import assign_persona_roles
 
 COMPANY = "Rheinwerk Chemie GmbH"
 COMPANY_ABBR = "RWC"
@@ -783,6 +784,9 @@ def seed_all() -> dict:
 	summary["second_production_order"] = seed_second_production_order(summary["bom"])
 	summary["legacy_refs"] = seed_legacy_refs()
 	summary["personas"] = seed_personas()
+	# W1-8: the personas only exist now, so their transition roles are granted here as well
+	# as from the installer (URS-W1-029).
+	summary["persona_roles"] = assign_persona_roles()
 	frappe.db.commit()
 	print(frappe.as_json(summary))
 	return summary
