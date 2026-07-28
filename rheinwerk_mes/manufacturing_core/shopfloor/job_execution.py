@@ -85,6 +85,7 @@ def job_queue(work_order: str) -> dict[str, Any]:
 		frappe.throw(
 			_("Fertigungsauftrag {0} ist nicht bekannt.").format(work_order), frappe.DoesNotExistError
 		)
+	frappe.has_permission("Work Order", "read", doc=work_order, throw=True)
 	order = frappe.get_doc("Work Order", work_order)
 	names = frappe.get_all(
 		"Job Card",

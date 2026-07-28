@@ -80,8 +80,13 @@ def resolve(code: str) -> dict[str, Any]:
 			"message": _("Leerer Scan — bitte erneut scannen."),
 		}
 	for kind, doctype in SCAN_TARGETS:
-		if frappe.db.exists(doctype, scanned):
-			return _payload(kind, doctype, scanned)
+		if not frappe.db.exists(doctype, scanned):
+			continue
+		# A code the scanning user may not read is reported as unknown rather than refused:
+		# the terminal must not become a way to enumerate orders, batches or materials.
+		if not frappe.has_permission(doctype, "read", doc=scanned):
+			break
+		return _payload(kind, doctype, scanned)
 	return {
 		"recognised": False,
 		"code": scanned,

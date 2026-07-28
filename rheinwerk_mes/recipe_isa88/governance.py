@@ -109,15 +109,17 @@ def active_orders_for_recipe(recipe: str) -> list[str]:
 	"""Production orders that lock `recipe` (URS-W1-017).
 
 	Baseline `TechnologyService.java:159-172`: the technology is looked up on orders in an
-	active state. Here the canonical signal is the `exec_state` extension (CDM-02); the
-	anchor `status` reflection is accepted as well so the lock also holds on sites where
-	`exec_state` is not installed yet.
+	active state. `exec_state` (CDM-02) is the canonical signal and, where installed, the
+	*only* one: a Pending order must not lock (URS-W1-017, `docs/design/W1-recipe-governance.md`
+	§6) even though the anchor already reports it as `Not Started`. The anchor `status`
+	reflection is the fallback for sites without the extension.
 	"""
 	filters: dict[str, Any] = {"bom_no": recipe, "docstatus": ("<", 2)}
-	or_filters: dict[str, Any] = {"status": ("in", ACTIVE_ANCHOR_STATUSES)}
 	if _has_field("Work Order", "exec_state"):
-		or_filters["exec_state"] = ("in", ACTIVE_EXEC_STATES)
-	return frappe.get_all("Work Order", filters=filters, or_filters=or_filters, pluck="name", order_by="name")
+		filters["exec_state"] = ("in", ACTIVE_EXEC_STATES)
+	else:
+		filters["status"] = ("in", ACTIVE_ANCHOR_STATUSES)
+	return frappe.get_all("Work Order", filters=filters, pluck="name", order_by="name")
 
 
 # ------------------------------------------------------------------- snapshot for validators

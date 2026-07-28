@@ -57,6 +57,12 @@ rheinwerk.ShopFloorTerminal = class ShopFloorTerminal {
 		this.$scan.on("blur", () => setTimeout(() => this.focus_scan(), 0));
 	}
 
+	// Server-provided values (record names, operation labels, pill text) are escaped before
+	// they reach innerHTML: a document name is user-controlled data, not markup.
+	esc(value) {
+		return frappe.utils.escape_html(value == null ? "" : String(value));
+	}
+
 	focus_scan() {
 		this.$scan.trigger("focus");
 	}
@@ -104,7 +110,7 @@ rheinwerk.ShopFloorTerminal = class ShopFloorTerminal {
 
 	show_shortcuts() {
 		const rows = (this.tokens?.shortcuts || [])
-			.map((s) => `<tr><td class="rw-mono">${s.keys}</td><td>${s.action}</td></tr>`)
+			.map((s) => `<tr><td class="rw-mono">${this.esc(s.keys)}</td><td>${this.esc(s.action)}</td></tr>`)
 			.join("");
 		const dialog = this.$body.find('[data-ref="shortcuts"]');
 		dialog.html(`<h3>${__("Tastaturkürzel")}</h3><table>${rows}</table>`);
@@ -186,8 +192,8 @@ rheinwerk.ShopFloorTerminal = class ShopFloorTerminal {
 			.find('[data-ref="pill"]')
 			.attr("data-state", order.exec_state)
 			.html(
-				`<span class="rw-pill__icon" data-icon="${order.exec_state_pill.icon}"></span>` +
-					`<span class="rw-pill__label">${order.exec_state_pill.label}</span>`
+				`<span class="rw-pill__icon" data-icon="${this.esc(order.exec_state_pill.icon)}"></span>` +
+					`<span class="rw-pill__label">${this.esc(order.exec_state_pill.label)}</span>`
 			);
 		this.$body.find('[data-ref="card"]').html(job ? this.render_card(job) : "");
 		this.$body.find('[data-ref="queue"]').html(
@@ -195,15 +201,15 @@ rheinwerk.ShopFloorTerminal = class ShopFloorTerminal {
 				.map(
 					(row, index) => `
 					<div class="rw-row ${index === this.state.index ? "rw-row--current" : ""}"
-						data-highlight="job_card:${row.job_card}" role="option">
-						<span class="rw-mono">${row.job_card}</span>
-						<span>${row.operation}</span>
-						<span>${row.workstation}</span>
-						<span class="rw-pill" data-state="${row.job_status}">
-							<span class="rw-pill__icon" data-icon="${row.status_pill.icon}"></span>
-							<span class="rw-pill__label">${row.status_pill.label}</span>
+						data-highlight="job_card:${this.esc(row.job_card)}" role="option">
+						<span class="rw-mono">${this.esc(row.job_card)}</span>
+						<span>${this.esc(row.operation)}</span>
+						<span>${this.esc(row.workstation)}</span>
+						<span class="rw-pill" data-state="${this.esc(row.job_status)}">
+							<span class="rw-pill__icon" data-icon="${this.esc(row.status_pill.icon)}"></span>
+							<span class="rw-pill__label">${this.esc(row.status_pill.label)}</span>
 						</span>
-						<span class="rw-num">${row.total_completed_qty_display}</span>
+						<span class="rw-num">${this.esc(row.total_completed_qty_display)}</span>
 					</div>`
 				)
 				.join("")
@@ -213,12 +219,12 @@ rheinwerk.ShopFloorTerminal = class ShopFloorTerminal {
 	render_card(job) {
 		const paused = job.is_paused;
 		return `
-			<div class="rw-card" data-highlight="job_card:${job.job_card}">
+			<div class="rw-card" data-highlight="job_card:${this.esc(job.job_card)}">
 				<dl class="rw-card__facts">
-					<dt>${__("Arbeitsgang")}</dt><dd>${job.operation}</dd>
-					<dt>${__("Arbeitsplatz")}</dt><dd>${job.workstation}</dd>
-					<dt>${__("Sollmenge")}</dt><dd class="rw-num">${job.for_quantity_display}</dd>
-					<dt>${__("Erfasste Menge")}</dt><dd class="rw-num">${job.total_completed_qty_display}</dd>
+					<dt>${__("Arbeitsgang")}</dt><dd>${this.esc(job.operation)}</dd>
+					<dt>${__("Arbeitsplatz")}</dt><dd>${this.esc(job.workstation)}</dd>
+					<dt>${__("Sollmenge")}</dt><dd class="rw-num">${this.esc(job.for_quantity_display)}</dd>
+					<dt>${__("Erfasste Menge")}</dt><dd class="rw-num">${this.esc(job.total_completed_qty_display)}</dd>
 				</dl>
 				<div class="rw-card__actions">
 					<button class="rw-btn rw-btn--primary" data-job-action="${paused ? "resume_job" : "start_job"}">
