@@ -42,6 +42,8 @@ doc_events = {
 	"Work Order": {
 		"before_insert": "rheinwerk_mes.manufacturing_core.exec_state.set_default_exec_state",
 		"validate": "rheinwerk_mes.manufacturing_core.exec_state.record_exec_state_change",
-		"on_update_after_submit": "rheinwerk_mes.manufacturing_core.exec_state.record_exec_state_change",
+		# `validate` does not run for update_after_submit, and rows appended in
+		# `on_update_after_submit` land after `update_children()` — too late to persist.
+		"before_update_after_submit": "rheinwerk_mes.manufacturing_core.exec_state.record_exec_state_change",
 	},
 }

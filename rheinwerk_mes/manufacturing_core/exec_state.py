@@ -100,7 +100,7 @@ def set_default_exec_state(doc: Any, method: str | None = None) -> None:
 
 
 def record_exec_state_change(doc: Any, method: str | None = None) -> None:
-	"""`Work Order.validate` / `on_update_after_submit` — audit one state change.
+	"""`Work Order.validate` / `before_update_after_submit` — audit one state change.
 
 	Refuses the change when the target state demands a reason and none was given
 	(URS-W1-003 AC-2), otherwise appends the `state_history` row (AC-1).

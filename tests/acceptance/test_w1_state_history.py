@@ -112,6 +112,9 @@ class _StubOrder:
 	def get(self, fieldname: str, default: Any = None) -> Any:
 		return getattr(self, fieldname, default)
 
+	def set(self, fieldname: str, value: Any) -> None:
+		setattr(self, fieldname, value)
+
 	def append(self, fieldname: str, row: dict[str, Any]) -> None:
 		getattr(self, fieldname).append(row)
 
