@@ -1,13 +1,20 @@
-"""Frappe app hooks — placeholder.
+"""Frappe app hooks.
 
-Wave W0 wires: app metadata, doc_events for gating listeners,
-workflow fixtures for order/recipe state machines.
+Anchor ERPNext DocTypes are never forked: absorbed behaviour is registered here as a
+doc_event, workflow or custom field owned by `rheinwerk_mes`.
 """
+
 app_name = "rheinwerk_mes"
 app_title = "Rheinwerk MES Core"
 app_publisher = "Rheinwerk Chemie GmbH"
 app_description = "Consolidated Manufacturing Execution System for centralised chemical operations"
 app_license = "Proprietary"
 
-# doc_events = {}        # W1: execution gating hooks land here
 # fixtures = []          # W0: workflows, roles, custom fields
+
+doc_events = {
+	"Work Order": {
+		# URS-W1-007 — completion gate: recorded output > 0 and execution dates present.
+		"validate": "rheinwerk_mes.execution_gating.gates.completion_gate",
+	},
+}
