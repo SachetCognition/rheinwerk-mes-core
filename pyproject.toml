@@ -8,3 +8,23 @@ readme = "README.md"
 [build-system]
 requires = ["flit_core >=3.4,<4"]
 build-backend = "flit_core.buildapi"
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+extend-exclude = ["docs", "tools/htmlgen"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "W"]
+ignore = [
+	"E501",
+	"W191", # frappe house style: tab indentation
+	"E101",
+]
+
+[tool.ruff.format]
+indent-style = "tab"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
