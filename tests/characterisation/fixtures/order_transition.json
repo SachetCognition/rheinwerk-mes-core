@@ -1,0 +1,123 @@
+{
+	"contract": "CHAR-ORDER-TRANSITION-01",
+	"urs": ["URS-W0-012", "URS-W1-002"],
+	"test_cases": ["TC-W1-002", "TC-W1-030"],
+	"legacy_source": "mes-plugins/mes-plugins-orders/src/main/java/com/qcadoo/mes/orders/states/constants/OrderState.java:31-81",
+	"notes": "One case per source state: `canChangeTo` returns true for `allowed_targets` and false for every other state, including the source state itself. Refusals are reported by the legacy state framework as states.messages.change.failure.transitionNotAllowed (StateChangeContextBuilderImpl.java:64, StateExecutorService.java:175,201). A null source state is the initial workflow assignment and is permitted by the same guard.",
+	"refusal_error": "states.messages.change.failure.transitionNotAllowed",
+	"states": ["Pending", "Accepted", "In Progress", "Completed", "Declined", "Interrupted", "Abandoned"],
+	"cases": [
+		{
+			"id": "TRANSITION-01-pending",
+			"description": "PO-2026-0001 in Pending — acceptance, a direct start and a decline are legal; Completed is a jump",
+			"source_state": "Pending",
+			"legacy_state_value": "01pending",
+			"expected": {
+				"allowed_targets": ["Accepted", "In Progress", "Declined"],
+				"refused_targets": ["Pending", "Completed", "Interrupted", "Abandoned"]
+			}
+		},
+		{
+			"id": "TRANSITION-02-accepted",
+			"description": "Accepted order — start or decline only",
+			"source_state": "Accepted",
+			"legacy_state_value": "02accepted",
+			"expected": {
+				"allowed_targets": ["In Progress", "Declined"],
+				"refused_targets": ["Pending", "Accepted", "Completed", "Interrupted", "Abandoned"]
+			}
+		},
+		{
+			"id": "TRANSITION-03-in-progress",
+			"description": "Running order — completion, interruption or abandonment; no way back to Pending/Accepted",
+			"source_state": "In Progress",
+			"legacy_state_value": "03inProgress",
+			"expected": {
+				"allowed_targets": ["Completed", "Interrupted", "Abandoned"],
+				"refused_targets": ["Pending", "Accepted", "In Progress", "Declined"]
+			}
+		},
+		{
+			"id": "TRANSITION-04-completed-terminal",
+			"description": "PO-2026-0002 in Completed — terminal, every transition is refused (TC-W1-002 step 2)",
+			"source_state": "Completed",
+			"legacy_state_value": "04completed",
+			"expected": {
+				"allowed_targets": [],
+				"refused_targets": [
+					"Pending",
+					"Accepted",
+					"In Progress",
+					"Completed",
+					"Declined",
+					"Interrupted",
+					"Abandoned"
+				]
+			}
+		},
+		{
+			"id": "TRANSITION-05-declined-terminal",
+			"description": "Declined order — terminal",
+			"source_state": "Declined",
+			"legacy_state_value": "05declined",
+			"expected": {
+				"allowed_targets": [],
+				"refused_targets": [
+					"Pending",
+					"Accepted",
+					"In Progress",
+					"Completed",
+					"Declined",
+					"Interrupted",
+					"Abandoned"
+				]
+			}
+		},
+		{
+			"id": "TRANSITION-06-interrupted",
+			"description": "Interrupted order — resume or abandon; direct completion is refused (TC-W1-002 step 3)",
+			"source_state": "Interrupted",
+			"legacy_state_value": "06interrupted",
+			"expected": {
+				"allowed_targets": ["In Progress", "Abandoned"],
+				"refused_targets": ["Pending", "Accepted", "Completed", "Declined", "Interrupted"]
+			}
+		},
+		{
+			"id": "TRANSITION-07-abandoned-terminal",
+			"description": "Abandoned order — terminal",
+			"source_state": "Abandoned",
+			"legacy_state_value": "07abandoned",
+			"expected": {
+				"allowed_targets": [],
+				"refused_targets": [
+					"Pending",
+					"Accepted",
+					"In Progress",
+					"Completed",
+					"Declined",
+					"Interrupted",
+					"Abandoned"
+				]
+			}
+		},
+		{
+			"id": "TRANSITION-08-initial-assignment",
+			"description": "Newly created order — the initial assignment of the workflow has no source state and is permitted",
+			"source_state": null,
+			"legacy_state_value": null,
+			"expected": {
+				"allowed_targets": [
+					"Pending",
+					"Accepted",
+					"In Progress",
+					"Completed",
+					"Declined",
+					"Interrupted",
+					"Abandoned"
+				],
+				"refused_targets": []
+			}
+		}
+	]
+}

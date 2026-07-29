@@ -9,5 +9,11 @@ app_publisher = "Rheinwerk Chemie GmbH"
 app_description = "Consolidated Manufacturing Execution System for centralised chemical operations"
 app_license = "Proprietary"
 
-# doc_events = {}        # W1: execution gating hooks land here
 # fixtures = []          # W0: workflows, roles, custom fields
+
+doc_events = {
+	# W1-1: only legal `exec_state` transitions are permitted (URS-W1-002).
+	"Work Order": {
+		"validate": "rheinwerk_mes.execution_gating.order_state_gating.enforce_legal_transition",
+	},
+}
