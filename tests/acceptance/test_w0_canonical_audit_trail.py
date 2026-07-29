@@ -77,16 +77,25 @@ def technologist(site):
 	return user
 
 
+def _ensure(site, doctype, name, **values):
+	"""Fetch a master record by name, creating it when the site has none."""
+	if site.db.exists(doctype, name):
+		return name
+	return site.get_doc({"doctype": doctype, **values}).insert(ignore_permissions=True).name
+
+
 @pytest.fixture
 def audited_item(site, technologist):
 	"""A throwaway canonical Item; the `site` fixture rolls the transaction back."""
+	item_group = _ensure(site, "Item Group", "Alle Artikelgruppen", item_group_name="Alle Artikelgruppen")
+	uom = _ensure(site, "UOM", "Kg", uom_name="Kg")
 	return site.get_doc(
 		{
 			"doctype": "Item",
 			"item_code": "RW-TEST-AUDIT",
 			"item_name": "Prüfharz Audit",
-			"item_group": site.db.get_value("Item Group", {"is_group": 0}, "name"),
-			"stock_uom": site.db.get_value("UOM", {"name": "Kg"}, "name") or "Nos",
+			"item_group": item_group,
+			"stock_uom": uom,
 		}
 	).insert()
 
