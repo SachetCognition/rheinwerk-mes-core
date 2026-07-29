@@ -100,7 +100,8 @@ def missing_fields(order: Mapping[str, Any]) -> tuple[RequiredField, ...]:
 	"""Required fields the order does not carry, in legacy declaration order.
 
 	Baseline: `OrderStateValidationService.java:64-72` (`checkRequired`) — a field is
-	missing when its value is null.
+	missing when its value is null; an unset Frappe Link or Date field carries `""`
+	rather than `None`, so emptiness rather than nullity is the test.
 	"""
 	return tuple(spec for spec in REQUIRED_FIELDS if not order.get(spec.legacy))
 
