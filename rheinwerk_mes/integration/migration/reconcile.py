@@ -70,6 +70,8 @@ class ReconciliationReport:
 	exceptions: tuple[dict[str, Any], ...] = ()
 	deferred: dict[str, int] = field(default_factory=dict)
 	duration_seconds: float = 0.0
+	#: Documents deleted/restored when a FAIL run was rolled back (AC-3); empty otherwise.
+	rollback: dict[str, int] = field(default_factory=dict)
 
 	@property
 	def status(self) -> str:
@@ -86,6 +88,13 @@ class ReconciliationReport:
 			f"- **Status:** {self.status}",
 			f"- **Lauf:** {self.run_id}",
 			f"- **Dauer:** {self.duration_seconds:.1f} s",
+		]
+		if self.rollback:
+			lines.append(
+				"- **Rücklauf:** Lauf zurückgerollt — "
+				+ ", ".join(f"{action} = {count}" for action, count in sorted(self.rollback.items()))
+			)
+		lines += [
 			"",
 			"| Entität | Quelle | Importiert | Rückexport | Prüfsumme Quelle | Prüfsumme Rückexport | Stichprobe | Status |",
 			"|---|---|---|---|---|---|---|---|",

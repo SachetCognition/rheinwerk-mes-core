@@ -63,7 +63,13 @@ deterministic 5 % (minimum 10 records) field-level spot check and `PASS`/`FAIL`.
 A `FAIL` names the offending record and rolls the run back automatically
 (`keep_on_fail=True` keeps the imports for inspection). Every touched document is
 journaled to `sites/<site>/private/files/rheinwerk_mes_migration/<run_id>.json`, so
-rollback removes exactly that run's imports and restores what it updated.
+rollback removes exactly that run's imports and restores what it updated. A rolled-back
+run says so in its own report ("Rücklauf").
+
+Reports are archived, not just printed: each run writes
+`sites/<site>/private/files/rheinwerk_mes_migration_reports/<run_id>.md`, and `run_all`
+adds `round-trip-summary.md` — one `PASS`/`FAIL` over all three sources, which is the
+W0 exit criterion "master data from all three sources round-trips" (EXIT-W0-2).
 
 Unmappable source values (e.g. an OFBiz `quantityUomId` with no canonical UoM) are
 listed in the report's exceptions section and never silently defaulted. Extraction is

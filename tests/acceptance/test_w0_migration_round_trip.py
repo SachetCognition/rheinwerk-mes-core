@@ -4,7 +4,7 @@ TC-W0-009 step 2 (URS-W0-008 AC-2) — Qcadoo import keeps the conversion and le
 TC-W0-010 step 2 (URS-W0-009 AC-1) — Plant C `=`-mapped fields byte-identical after import.
 TC-W0-011 step 1 (URS-W0-010 AC-1) — OFBiz machine FixedAsset imports as a Workstation only.
 TC-W0-012 (URS-W0-011 AC-1/AC-2) — three PASS reports; a mutated record yields a named FAIL.
-TC-W0-013 (URS-W0-011 AC-3) — rollback removes exactly that run's imports; re-run passes.
+TC-W0-013 (URS-W0-011 AC-3) — a FAIL run is rolled back to nothing; re-run passes.
 TC-W0-021 step 1 (URS-W0-018) — each source's round trip stays far below the 30-minute budget.
 """
 
@@ -28,8 +28,8 @@ def api(site, dotted: str):
 	return site.get_attr(f"{MIGRATION}.{dotted}")
 
 
-def run(site, source: str, *, keep_on_fail: bool = False):
-	return api(site, "cli.round_trip")(source, keep_on_fail=keep_on_fail)
+def run(site, source: str, *, keep_on_fail: bool = False, persist: bool = False):
+	return api(site, "cli.round_trip")(source, keep_on_fail=keep_on_fail, persist=persist)
 
 
 def import_source(site, source: str):
@@ -110,6 +110,50 @@ def test_tc_w0_012_mutated_record_yields_a_named_fail(site):
 	assert named, report.to_markdown()
 	assert any(difference.kind == "field" for difference in named)
 	assert "RW-CHM-0002" in report.to_markdown()
+
+
+def test_tc_w0_012_reports_are_archived_and_summarised(site):
+	"""TC-W0-012 step 1 (URS-W0-011 AC-1): each run archives its report, and the
+	three-source summary carries one deterministic PASS for the W0 exit criterion."""
+	runs = [run(site, source, persist=True) for source in extractors.SOURCES]
+
+	for report in runs:
+		archived = Path(api(site, "reports.report_path")(report.run_id))
+		assert archived.exists(), archived
+		assert f"**Status:** {report.status}" in archived.read_text(encoding="utf-8")
+
+	summary = api(site, "reports.summary_markdown")(runs)
+	assert "**Gesamtstatus:** PASS" in summary
+	for report in runs:
+		assert report.run_id in summary
+	assert Path(api(site, "reports.write_summary")(runs)).read_text(encoding="utf-8") == summary
+
+
+def test_tc_w0_013_failed_run_is_rolled_back_and_the_report_says_so(site):
+	"""TC-W0-013 step 1 (URS-W0-011 AC-3): a FAIL run is reversed record by record — the
+	documents it inserted are gone, the ones it updated hold their pre-run values, and the
+	report names the rollback."""
+	before_name = site.db.get_value("Item", "RW-CHM-0001", "item_name")
+	extract, result = import_source(site, "ofbiz")
+	item = site.get_doc("Item", "RW-CHM-0001")
+	item.item_name = "Basisharz (fehlerhafter Lauf)"
+	item.save(ignore_permissions=True)
+
+	failed = api(site, "reconcile.reconcile")(
+		extract,
+		api(site, "exporter.reexport")(extract),
+		run_id=result.run_id,
+		imported=result.imported,
+	)
+	assert failed.status == "FAIL"
+
+	report = api(site, "cli.rollback_failed_run")(failed, result)
+
+	assert report.rollback["deleted"] >= 1
+	assert "Rücklauf" in report.to_markdown()
+	assert not site.db.exists("Workstation", "EXTRUDER-01")
+	assert site.db.get_value("Item", "RW-CHM-0001", "item_name") == before_name
+	assert run(site, "ofbiz").status == "PASS"
 
 
 def test_tc_w0_013_rollback_removes_exactly_this_runs_imports(site):

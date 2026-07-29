@@ -11,6 +11,10 @@ target and reconciles the two, printing the German-first markdown report. A FAIL
 rolls the run back automatically unless `keep_on_fail=True`, so a failed migration never
 leaves partial master data behind (URS-W0-011 AC-3).
 
+Every run archives its report under `<site>/private/files/rheinwerk_mes_migration_reports/`
+and `run_all` writes the three-source summary the W0 exit criterion is read from
+(`reports.py`).
+
 Fixture location defaults to `tests/fixtures/legacy/**` in the app checkout and can be
 overridden per run with `fixture=<path>`.
 """
@@ -18,15 +22,16 @@ overridden per run with `fixture=<path>`.
 from __future__ import annotations
 
 import time
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
 import frappe
 
-from rheinwerk_mes.integration.migration import extractors
+from rheinwerk_mes.integration.migration import extractors, reports
 from rheinwerk_mes.integration.migration.canonical import CanonicalExtract
 from rheinwerk_mes.integration.migration.exporter import reexport
-from rheinwerk_mes.integration.migration.importer import import_extract, new_run_id
+from rheinwerk_mes.integration.migration.importer import ImportResult, import_extract, new_run_id
 from rheinwerk_mes.integration.migration.reconcile import FAIL, ReconciliationReport, reconcile
 from rheinwerk_mes.integration.migration.rollback import rollback_result, rollback_run
 
@@ -47,11 +52,23 @@ def extract_source(source: str, fixture: str | Path | None = None) -> CanonicalE
 	return extractors.extract(source, fixture_path(source, fixture))
 
 
+def rollback_failed_run(report: ReconciliationReport, result: ImportResult) -> ReconciliationReport:
+	"""Reverse a FAIL run and record the outcome on its report (URS-W0-011 AC-3).
+
+	A PASS report is returned untouched, so the caller can hand every report through this
+	gate without asking whether a rollback is due.
+	"""
+	if report.status != FAIL:
+		return report
+	return replace(report, rollback=rollback_result(result))
+
+
 def round_trip(
 	source: str,
 	*,
 	fixture: str | Path | None = None,
 	keep_on_fail: bool = False,
+	persist: bool = True,
 ) -> ReconciliationReport:
 	"""Extract → import → re-export → reconcile one source; roll back on FAIL."""
 	started = time.monotonic()
@@ -66,8 +83,10 @@ def round_trip(
 		deferred=result.deferred,
 		duration_seconds=time.monotonic() - started,
 	)
-	if report.status == FAIL and not keep_on_fail:
-		rollback_result(result)
+	if not keep_on_fail:
+		report = rollback_failed_run(report, result)
+	if persist:
+		reports.write_report(report)
 	return report
 
 
@@ -76,20 +95,33 @@ def run_round_trip(source: str = "qcadoo", fixture: str | None = None, keep_on_f
 	report = round_trip(source, fixture=fixture, keep_on_fail=bool(keep_on_fail))
 	print(report.to_markdown())
 	frappe.db.commit()
-	return {"source": source, "run_id": report.run_id, "status": report.status}
+	return {
+		"source": source,
+		"run_id": report.run_id,
+		"status": report.status,
+		"report": reports.report_path(report.run_id),
+	}
 
 
 def run_all(fixture_directory: str | None = None) -> dict:
-	"""Bench entry point: run the round trip for all three sources."""
-	summary = {}
+	"""Bench entry point: round-trip all three sources and write the wave-exit summary."""
+	runs = []
 	for source in extractors.SOURCES:
 		fixture = (
 			str(Path(fixture_directory) / Path(extractors.DEFAULT_FIXTURES[source]).name)
 			if fixture_directory
 			else None
 		)
-		summary[source] = run_round_trip(source, fixture=fixture)
-	return summary
+		runs.append(round_trip(source, fixture=fixture))
+		print(runs[-1].to_markdown())
+	summary = reports.write_summary(runs)
+	frappe.db.commit()
+	print(f"summary: {summary}")
+	return {
+		"status": reports.summary_status(runs),
+		"summary": summary,
+		"sources": {report.source: {"run_id": report.run_id, "status": report.status} for report in runs},
+	}
 
 
 def rollback(run_id: str) -> dict:
