@@ -1,0 +1,44 @@
+{
+	"description": "Plant C (ERPNext) master-data export subset — Item, UOM Conversion Detail, Workstation, Warehouse and BOM header. Direct-mapped (`=`) fields must survive the round-trip byte-identical (URS-W0-009).",
+	"docs": [
+		{
+			"doctype": "Item",
+			"item_code": "RW-CHM-0002",
+			"item_name": "Additiv K7",
+			"item_group": "Raw Material",
+			"stock_uom": "Kg",
+			"is_stock_item": 1,
+			"description": "Additiv K7 für Rheinol-Compounds",
+			"uoms": [{"uom": "Pail", "conversion_factor": 5.0}]
+		},
+		{
+			"doctype": "Item",
+			"item_code": "RW-CHM-0003",
+			"item_name": "Rheinol 40 Compound",
+			"item_group": "Products",
+			"stock_uom": "Kg",
+			"is_stock_item": 1,
+			"description": "Fertigcompound Rheinol 40",
+			"uoms": []
+		},
+		{
+			"doctype": "Warehouse",
+			"warehouse_name": "FG Lager Süd",
+			"disposal_method": "FIFO"
+		},
+		{
+			"doctype": "Workstation",
+			"workstation_name": "PACK-01",
+			"production_line": "LINE-1",
+			"division": "Abfüllung"
+		},
+		{
+			"doctype": "BOM",
+			"name": "BOM-RW-CHM-0003-C01",
+			"item": "RW-CHM-0003",
+			"quantity": 100.0,
+			"uom": "Kg",
+			"is_active": 1
+		}
+	]
+}

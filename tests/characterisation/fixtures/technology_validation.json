@@ -1,0 +1,168 @@
+{
+	"contract": "CHAR-TECH-VALIDATE-01",
+	"urs": ["URS-W0-012"],
+	"test_cases": ["TC-W0-014"],
+	"legacy_source": "mes-plugins/mes-plugins-technologies/src/main/java/com/qcadoo/mes/technologies/states/listener/TechnologyValidationService.java:91-707",
+	"notes": "Refusal fixtures for the structural validators of technology RT-COMPOUND-01 (operations MIX at LINE-1/MIX-01, FILL at LINE-1/FILL-01). W1 consumes these when implementing the recipe governance validators.",
+	"cases": [
+		{
+			"id": "TECH-01-empty-operation-tree",
+			"description": "Technology without operations — empty tree refusal (:678-705)",
+			"technology": {
+				"number": "RT-COMPOUND-01",
+				"operation_components": []
+			},
+			"expected": {
+				"allowed": false,
+				"errors": ["technologies.technology.validate.global.error.emptyTechnologyTree"]
+			}
+		},
+		{
+			"id": "TECH-02-input-component-without-quantity",
+			"description": "MIX consumes RW-CHM-0002 without a quantity — refusal (:91-144)",
+			"technology": {
+				"number": "RT-COMPOUND-01",
+				"operation_components": [
+					{
+						"node_number": "1",
+						"operation": "MIX",
+						"production_in_one_cycle_unit": "kg",
+						"main_output_product_unit": "kg",
+						"operation_product_in_components": [
+							{"product": "RW-CHM-0001", "quantity": 400},
+							{"product": "RW-CHM-0002", "quantity": null}
+						]
+					}
+				]
+			},
+			"expected": {
+				"allowed": false,
+				"errors": ["technologies.technology.validate.global.error.inComponentsQuantitiesNotFilled"]
+			}
+		},
+		{
+			"id": "TECH-03-output-unit-mismatch",
+			"description": "MIX produces in l while RW-CHM-0003 is managed in kg — unit refusal (:641-676)",
+			"technology": {
+				"number": "RT-COMPOUND-01",
+				"operation_components": [
+					{
+						"node_number": "1",
+						"operation": "MIX",
+						"production_in_one_cycle_unit": "l",
+						"main_output_product_unit": "kg",
+						"operation_product_in_components": [{"product": "RW-CHM-0001", "quantity": 400}]
+					}
+				]
+			},
+			"expected": {
+				"allowed": false,
+				"errors": [
+					"technologies.operationDetails.validate.error.OutputUnitsNotMatch",
+					"technologies.technology.validate.error.OperationTreeNotValid"
+				]
+			}
+		},
+		{
+			"id": "TECH-04-next-operation-unit-mismatch",
+			"description": "FILL passes a specified quantity in a different unit than it produces (:618-639)",
+			"technology": {
+				"number": "RT-COMPOUND-01",
+				"operation_components": [
+					{
+						"node_number": "2",
+						"operation": "FILL",
+						"production_in_one_cycle_unit": "kg",
+						"main_output_product_unit": "kg",
+						"next_operation_after_produced_type": "02specified",
+						"next_operation_after_produced_quantity_unit": "Stk",
+						"operation_product_in_components": [{"product": "RW-CHM-0003", "quantity": 500}]
+					}
+				]
+			},
+			"expected": {
+				"allowed": false,
+				"errors": [
+					"technologies.operationDetails.validate.error.UnitsNotMatch",
+					"technologies.technology.validate.error.OperationTreeNotValid"
+				]
+			}
+		},
+		{
+			"id": "TECH-05-production-unit-not-set",
+			"description": "Operation without a productionInOneCycle unit — output unit refusal (:641-676)",
+			"technology": {
+				"number": "RT-COMPOUND-01",
+				"operation_components": [
+					{
+						"node_number": "1",
+						"operation": "MIX",
+						"production_in_one_cycle_unit": null,
+						"main_output_product_unit": "kg",
+						"operation_product_in_components": [{"product": "RW-CHM-0001", "quantity": 400}]
+					}
+				]
+			},
+			"expected": {
+				"allowed": false,
+				"errors": [
+					"technologies.operationDetails.validate.error.OutputUnitsNotMatch",
+					"technologies.technology.validate.error.OperationTreeNotValid"
+				]
+			}
+		},
+		{
+			"id": "TECH-06-technology-used-in-active-order",
+			"description": "RT-COMPOUND-01 is used by the running PO-2026-0001 — state change refused (:232-238)",
+			"technology": {
+				"number": "RT-COMPOUND-01",
+				"used_in_active_order": true,
+				"operation_components": [
+					{
+						"node_number": "1",
+						"operation": "MIX",
+						"production_in_one_cycle_unit": "kg",
+						"main_output_product_unit": "kg",
+						"operation_product_in_components": [{"product": "RW-CHM-0001", "quantity": 400}]
+					}
+				]
+			},
+			"expected": {
+				"allowed": false,
+				"errors": ["technologies.technology.state.error.orderInProgress"]
+			}
+		},
+		{
+			"id": "TECH-07-valid-two-operation-technology",
+			"description": "RT-COMPOUND-01 as specified in TST-W0 §1 — MIX then FILL, all units kg",
+			"technology": {
+				"number": "RT-COMPOUND-01",
+				"used_in_active_order": false,
+				"operation_components": [
+					{
+						"node_number": "1",
+						"operation": "MIX",
+						"production_in_one_cycle_unit": "kg",
+						"main_output_product_unit": "kg",
+						"operation_product_in_components": [
+							{"product": "RW-CHM-0001", "quantity": 400},
+							{"product": "RW-CHM-0002", "quantity": 100}
+						]
+					},
+					{
+						"node_number": "2",
+						"operation": "FILL",
+						"production_in_one_cycle_unit": "kg",
+						"main_output_product_unit": "kg",
+						"next_operation_after_produced_type": "01all",
+						"operation_product_in_components": [{"product": "RW-CHM-0003", "quantity": 500}]
+					}
+				]
+			},
+			"expected": {
+				"allowed": true,
+				"errors": []
+			}
+		}
+	]
+}
