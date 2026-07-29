@@ -65,4 +65,12 @@ doc_events = {
 	"Item": {
 		"validate": "rheinwerk_mes.manufacturing_core.uom.validate_uom_conversions",
 	},
+	# W0-2: pack quantities on anchor transactions resolve through the item-level
+	# conversion table in Decimal (URS-W0-004 AC-1).
+	"Stock Entry": {
+		"validate": "rheinwerk_mes.manufacturing_core.uom.resolve_transaction_quantities",
+	},
+	"BOM": {
+		"validate": "rheinwerk_mes.manufacturing_core.uom.resolve_transaction_quantities",
+	},
 }
