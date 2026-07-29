@@ -1,0 +1,158 @@
+{
+ "actions": [],
+ "allow_import": 0,
+ "allow_rename": 0,
+ "autoname": "hash",
+ "creation": "2026-02-20 09:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 0,
+ "engine": "InnoDB",
+ "field_order": [
+  "gate",
+  "outcome",
+  "column_break_rw1",
+  "logged_by",
+  "logged_at",
+  "record_section",
+  "reference_doctype",
+  "reference_name",
+  "column_break_rw2",
+  "from_state",
+  "to_state",
+  "rule_section",
+  "rule",
+  "detail",
+  "state_history_row"
+ ],
+ "fields": [
+  {
+   "fieldname": "gate",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Gate",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "outcome",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Ergebnis",
+   "options": "Abgelehnt\nDurchgef\u00fchrt",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_rw1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "logged_by",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Benutzer",
+   "options": "User",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "logged_at",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Zeitpunkt",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "record_section",
+   "fieldtype": "Section Break",
+   "label": "Datensatz"
+  },
+  {
+   "fieldname": "reference_doctype",
+   "fieldtype": "Link",
+   "label": "Referenz-Dokumenttyp",
+   "options": "DocType",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Datensatz",
+   "options": "reference_doctype",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_rw2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "from_state",
+   "fieldtype": "Data",
+   "label": "Von Zustand",
+   "read_only": 1
+  },
+  {
+   "fieldname": "to_state",
+   "fieldtype": "Data",
+   "label": "Nach Zustand",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rule_section",
+   "fieldtype": "Section Break",
+   "label": "Regel"
+  },
+  {
+   "fieldname": "rule",
+   "fieldtype": "Small Text",
+   "label": "Regel",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "detail",
+   "fieldtype": "Small Text",
+   "label": "Begr\u00fcndung",
+   "read_only": 1
+  },
+  {
+   "description": "Zeile des Ausf\u00fchrungsverlaufs, die diesen Eintrag ausgel\u00f6st hat (Idempotenz).",
+   "fieldname": "state_history_row",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Verlaufszeile",
+   "read_only": 1
+  }
+ ],
+ "in_create": 1,
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-02-20 09:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Execution Gating",
+ "name": "Execution Gate Log",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "read": 1,
+   "report": 1,
+   "role": "System Manager"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing User"
+  }
+ ],
+ "sort_field": "logged_at",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 0
+}

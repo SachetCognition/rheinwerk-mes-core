@@ -1,0 +1,102 @@
+name: Server tests
+
+# Full regression floor: builds the substrate stack (Frappe + ERPNext + rheinwerk_mes)
+# on MariaDB/Redis, seeds the programme fixtures and runs the site-backed
+# integration/acceptance suites plus the characterisation contracts.
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: server-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  server-tests:
+    name: Site-backed suites
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+
+    services:
+      mariadb:
+        image: mariadb:10.6
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: rheinwerk-mes-core
+
+      - uses: actions/setup-python@v5
+        with:
+          # frappe/erpnext `develop` require >=3.14,<3.15 (their pyproject.toml)
+          python-version: "3.14"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: System dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libmysqlclient-dev mariadb-client wkhtmltopdf
+          npm install -g yarn
+          pip install frappe-bench
+
+      - name: MariaDB configuration for Frappe
+        run: |
+          mysql -h 127.0.0.1 -u root -proot -e "SET GLOBAL character_set_server = 'utf8mb4'; SET GLOBAL collation_server = 'utf8mb4_unicode_ci';"
+
+      - name: Initialise bench with the substrate
+        run: |
+          bench init --skip-redis-config-generation --frappe-branch develop --python "$(which python)" frappe-bench
+          cd frappe-bench
+          bench set-config -g db_host 127.0.0.1
+          bench set-config -g redis_cache "redis://127.0.0.1:6379/1"
+          bench set-config -g redis_queue "redis://127.0.0.1:6379/2"
+          bench set-config -g redis_socketio "redis://127.0.0.1:6379/3"
+          bench get-app erpnext https://github.com/SachetCognition/Chem_erpnext --branch develop --skip-assets
+
+      - name: Install rheinwerk_mes on a fresh site
+        run: |
+          cd frappe-bench
+          ln -s "$GITHUB_WORKSPACE/rheinwerk-mes-core" apps/rheinwerk_mes
+          ./env/bin/python -m pip install -e apps/rheinwerk_mes
+          # bench writes apps.txt without a trailing newline; appending blindly yields
+          # "erpnextrheinwerk_mes" and site creation dies on the phantom module
+          if [ -s sites/apps.txt ] && [ -n "$(tail -c1 sites/apps.txt)" ]; then
+            printf '\n' >> sites/apps.txt
+          fi
+          printf 'rheinwerk_mes\n' >> sites/apps.txt
+          bench new-site test_site \
+            --db-root-password root \
+            --admin-password admin \
+            --mariadb-user-host-login-scope='%'
+          bench --site test_site install-app erpnext
+          bench --site test_site install-app rheinwerk_mes
+          bench --site test_site execute rheinwerk_mes.fixtures.seed.seed_all
+
+      - name: Site-backed suites
+        env:
+          BENCH_PATH: ${{ github.workspace }}/frappe-bench
+          FRAPPE_SITE: test_site
+        run: |
+          "$GITHUB_WORKSPACE/frappe-bench/env/bin/python" -m pip install pytest
+          cd "$GITHUB_WORKSPACE/rheinwerk-mes-core"
+          "$GITHUB_WORKSPACE/frappe-bench/env/bin/python" -m pytest tests -rs
+
+      - name: Bench logs on failure
+        if: failure()
+        run: cat frappe-bench/logs/*.log || true
