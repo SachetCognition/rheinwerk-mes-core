@@ -15,3 +15,4 @@
 - Material-availability gate on order release; completion blocked without final recorded output.
 - Batch blocking/quarantine propagates through genealogy trees.
 - Full forward and backward trace as a system-of-record object model, not a derived report.
+- Every create/update/delete of canonical master data (Item, Workstation, BOM, Work Order) is audited with user, timestamp and old→new field values on the platform version log, retrievable per record via `rheinwerk_mes.manufacturing_core.audit.get_audit_trail` (URS-W0-015).
