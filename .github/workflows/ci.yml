@@ -1,0 +1,57 @@
+name: CI
+
+# Regression floor for the consolidated MES (URS-W0-002 / TC-W0-003): every change to
+# the rheinwerk_mes app is linted and the test suites are run before merge.
+# Site-backed suites (Frappe site + ERPNext substrate on MariaDB/Redis) skip here and
+# run once the substrate stack lands with URS-W0-001.
+
+on:
+  push:
+    branches: [main, "migration/**"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint (ruff)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - name: Install lint toolchain
+        run: pip install -r requirements-dev.txt
+      - name: ruff check
+        run: ruff check --output-format=github .
+      - name: ruff format --check
+        run: ruff format --check .
+
+  tests:
+    name: Tests (pytest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - name: Install test toolchain
+        run: pip install -r requirements-dev.txt
+      - name: Run suites
+        # -rs reports skipped site-backed tests; -rf names every failing test in the
+        # short summary so a red pipeline identifies the regression without log digging.
+        run: pytest tests -rs -rf --junit-xml=junit.xml
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-report
+          path: junit.xml

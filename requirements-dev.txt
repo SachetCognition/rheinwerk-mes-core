@@ -1,0 +1,5 @@
+# Development and CI toolchain (kept in step with .github/workflows/ci.yml so a local
+# `ruff check . && pytest tests` reproduces the pipeline result exactly).
+ruff==0.14.4
+pytest==8.4.2
+PyYAML==6.0.2

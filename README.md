@@ -82,4 +82,25 @@ docs/waves/               Forward-engineering wave plans (W0–W4)
 docs/evidence/            Evidence packs and source-lineage index
 tools/htmlgen/            HTML artefact generator (pandoc + mermaid-cli)
 tests/                    Characterisation + acceptance suites
+.github/workflows/        CI pipeline (lint + test runner)
 ```
+
+## Continuous integration
+
+Every pull request runs `.github/workflows/ci.yml` — a **lint** job (`ruff check` plus
+`ruff format --check`) and a **test** job (`pytest tests`). Either job failing makes the
+pipeline red, so the W0 regression floor (URS-W0-002, verified by TC-W0-003) gates merges
+from the first commit.
+
+The toolchain is pinned in `requirements-dev.txt` and its configuration lives in
+`pyproject.toml`, so the pipeline reproduces locally:
+
+```bash
+pip install -r requirements-dev.txt
+ruff check . && ruff format --check .
+pytest tests -rs
+```
+
+Site-backed suites (Frappe site with the ERPNext substrate on MariaDB/Redis) skip when no
+site is reachable; the stack job that provides one lands with the substrate scaffold
+(URS-W0-001).
