@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Plant B (OFBiz) master-data export subset — Product, GoodIdentification, FixedAsset
+  machine group and Facility, as the entity engine writes them for the Derby-backed
+  instance. Entity definitions: applications/datamodel/entitydef/product-entitymodel.xml
+  (Product, GoodIdentification, Facility) and accounting-entitymodel.xml:630 (FixedAsset).
+
+  Deliberate contents for URS-W0-010:
+  * RHEINOL-40-CMPD carries SKU RW-CHM-0003 (AC-1 item).
+  * EXTRUDER-01 is the single machine FixedAsset — GROUP_EQUIPMENT, with purchaseCost and
+    classEnumId that must NOT be carried (CDM-08); BUERO-NORD (PROPERTY) is not a machine
+    and must be skipped entirely.
+  * RHEINOL-40-LB carries quantityUomId="WT_lb", which has no canonical equivalent: it
+    belongs in the exceptions report, not in a defaulted import (AC-2).
+-->
+<entity-engine-xml>
+	<Product productId="RHEINOL-40-BASE" productTypeId="RAW_MATERIAL" productName="Rheinol 40 Basisharz" description="Basisharz für Rheinol 40" quantityUomId="WT_kg"/>
+	<GoodIdentification productId="RHEINOL-40-BASE" goodIdentificationTypeId="SKU" idValue="RW-CHM-0001"/>
+	<Product productId="RHEINOL-40-CMPD" productTypeId="FINISHED_GOOD" productName="Rheinol 40 Compound" description="Fertigcompound Rheinol 40" quantityUomId="WT_kg"/>
+	<GoodIdentification productId="RHEINOL-40-CMPD" goodIdentificationTypeId="SKU" idValue="RW-CHM-0003"/>
+	<Product productId="RHEINOL-40-LB" productTypeId="RAW_MATERIAL" productName="Rheinol 40 Basisharz (US-Gebinde)" description="Exportgebinde" quantityUomId="WT_lb"/>
+	<GoodIdentification productId="RHEINOL-40-LB" goodIdentificationTypeId="SKU" idValue="RW-CHM-0009"/>
+	<ProductPrice productId="RHEINOL-40-BASE" productPriceTypeId="AVERAGE_COST" currencyUomId="EUR" price="2.45"/>
+	<FixedAsset fixedAssetId="EXTRUDER-01" fixedAssetTypeId="GROUP_EQUIPMENT" fixedAssetName="Extruder 01" productionCapacity="450" uomId="WT_kg" purchaseCost="185000" classEnumId="MACHINERY"/>
+	<FixedAsset fixedAssetId="BUERO-NORD" fixedAssetTypeId="PROPERTY" fixedAssetName="Bürogebäude Nord" purchaseCost="920000" classEnumId="BUILDING"/>
+	<Facility facilityId="WH-WEST" facilityTypeId="WAREHOUSE" facilityName="Lager West" ownerPartyId="RHEINWERK"/>
+	<Facility facilityId="PLANT-B" facilityTypeId="PLANT" facilityName="Werk Süd" ownerPartyId="RHEINWERK"/>
+</entity-engine-xml>
