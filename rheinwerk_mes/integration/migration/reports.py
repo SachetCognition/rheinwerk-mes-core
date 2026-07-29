@@ -8,7 +8,9 @@ for "master data from all three sources round-trips".
 
 The summary lists the sources in `extractors.SOURCES` order with the run id each status
 came from, so a reviewer can walk from the summary to the per-source report to the run
-journal without consulting a shell history.
+journal without consulting a shell history. It closes with the wall-clock budget table
+(`nfr.py`), and a run that overruns the budget fails the summary even when its data
+reconciles (URS-W0-018 AC-1).
 """
 
 from __future__ import annotations
@@ -18,7 +20,8 @@ from collections.abc import Sequence
 
 import frappe
 
-from rheinwerk_mes.integration.migration.reconcile import FAIL, PASS, ReconciliationReport
+from rheinwerk_mes.integration.migration.nfr import budget_markdown, budget_status
+from rheinwerk_mes.integration.migration.reconcile import FAIL, ReconciliationReport
 
 REPORT_DIRECTORY = "rheinwerk_mes_migration_reports"
 
@@ -48,10 +51,13 @@ def write_report(report: ReconciliationReport) -> str:
 
 
 def summary_status(reports: Sequence[ReconciliationReport]) -> str:
-	"""PASS only when every source round-tripped — the W0 exit criterion (EXIT-W0-2)."""
+	"""PASS only when every source round-tripped inside budget — the W0 exit criterion
+	(EXIT-W0-2) together with the tooling budget (URS-W0-018 AC-1)."""
 	if not reports:
 		return FAIL
-	return FAIL if any(report.status == FAIL for report in reports) else PASS
+	if any(report.status == FAIL for report in reports):
+		return FAIL
+	return budget_status(reports)
 
 
 def summary_markdown(reports: Sequence[ReconciliationReport]) -> str:
@@ -70,6 +76,7 @@ def summary_markdown(reports: Sequence[ReconciliationReport]) -> str:
 			f"{counts.get('work_centre', 0)} | {counts.get('warehouse', 0)} | {report.status} | "
 			f"`{REPORT_DIRECTORY}/{report.run_id}.md` |"
 		)
+	lines += ["", budget_markdown(reports).rstrip("\n")]
 	return "\n".join(lines) + "\n"
 
 

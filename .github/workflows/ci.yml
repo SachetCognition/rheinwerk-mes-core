@@ -39,6 +39,35 @@ jobs:
       - name: Run offline suites
         run: pytest tests -rs
 
+  migration-determinism:
+    name: Migration tooling determinism (URS-W0-018 AC-2)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Extract every source (run 1)
+        # Different hash seeds per run: any dict/set ordering leaking into the canonical
+        # file shows up as a diff instead of passing by luck.
+        env:
+          PYTHONHASHSEED: "0"
+        run: python -m rheinwerk_mes.integration.migration.extract --all --output-directory build/run-1
+      - name: Extract every source (run 2)
+        env:
+          PYTHONHASHSEED: "12345"
+        run: |
+          python -m rheinwerk_mes.integration.migration.extract \
+            --all --output-directory build/run-2 --verify-determinism
+      - name: Canonical import files are byte-identical
+        run: diff -r build/run-1 build/run-2
+      - name: Upload canonical import files
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: W0-canonical-import-files
+          path: build/run-1
+
   contracts:
     name: Characterisation contracts + evidence pack
     runs-on: ubuntu-latest

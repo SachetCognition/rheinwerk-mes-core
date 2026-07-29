@@ -10,4 +10,8 @@ All three produce the same canonical import format (`canonical.py`), which the
 importer lands on anchor ERPNext DocTypes (never forked) with the source
 identifier preserved in the `legacy_refs` Custom Field created by
 `rheinwerk_mes.setup.custom_fields`.
+
+The tooling's own non-functional contracts live in `nfr.py`: the 30-minute per-source
+round-trip budget and the byte-identical canonical import file written by `extract.py`
+(URS-W0-018).
 """

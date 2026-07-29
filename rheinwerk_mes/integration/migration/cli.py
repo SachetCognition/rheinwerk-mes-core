@@ -28,7 +28,7 @@ from typing import Any
 
 import frappe
 
-from rheinwerk_mes.integration.migration import extractors, reports
+from rheinwerk_mes.integration.migration import extractors, nfr, reports
 from rheinwerk_mes.integration.migration.canonical import CanonicalExtract
 from rheinwerk_mes.integration.migration.exporter import reexport
 from rheinwerk_mes.integration.migration.importer import ImportResult, import_extract, new_run_id
@@ -116,9 +116,11 @@ def run_all(fixture_directory: str | None = None) -> dict:
 		print(runs[-1].to_markdown())
 	summary = reports.write_summary(runs)
 	frappe.db.commit()
+	print(nfr.budget_markdown(runs))
 	print(f"summary: {summary}")
 	return {
 		"status": reports.summary_status(runs),
+		"budget": nfr.budget_status(runs),
 		"summary": summary,
 		"sources": {report.source: {"run_id": report.run_id, "status": report.status} for report in runs},
 	}

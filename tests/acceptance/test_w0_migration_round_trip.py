@@ -19,9 +19,9 @@ if str(REPO_ROOT) not in sys.path:
 	sys.path.insert(0, str(REPO_ROOT))
 
 from rheinwerk_mes.integration.migration import extractors  # noqa: E402
+from rheinwerk_mes.integration.migration.nfr import ROUND_TRIP_BUDGET_SECONDS  # noqa: E402
 
 MIGRATION = "rheinwerk_mes.integration.migration"
-ROUND_TRIP_BUDGET_SECONDS = 30 * 60
 
 
 def api(site, dotted: str):
@@ -185,12 +185,18 @@ def test_tc_w0_013_rollback_from_journal_file(site):
 
 
 def test_tc_w0_021_round_trip_stays_within_the_ci_budget(site):
-	"""TC-W0-021 step 1 (URS-W0-018): each source's full round trip completes well inside
-	the 30-minute CI budget."""
+	"""TC-W0-021 step 1 (URS-W0-018 AC-1): each source's full round trip completes well
+	inside the 30-minute CI budget, and the budget gate agrees with the measurement."""
+	reports = []
 	for source in extractors.SOURCES:
 		started = time.monotonic()
 		report = run(site, source)
 		elapsed = time.monotonic() - started
 		assert report.status == "PASS"
 		assert elapsed < ROUND_TRIP_BUDGET_SECONDS, f"{source}: {elapsed:.1f}s"
-		assert report.duration_seconds < ROUND_TRIP_BUDGET_SECONDS
+		check = api(site, "nfr.check_budget")(report)
+		assert check.status == "PASS", str(check)
+		reports.append(report)
+
+	assert api(site, "reports.summary_status")(reports) == "PASS"
+	assert "Laufzeitbudget" in api(site, "reports.summary_markdown")(reports)

@@ -97,6 +97,23 @@ jobs:
           cd "$GITHUB_WORKSPACE/rheinwerk-mes-core"
           "$GITHUB_WORKSPACE/frappe-bench/env/bin/python" -m pytest tests -rs
 
+      - name: Three-source round trip within the 30-minute budget (URS-W0-018 AC-1)
+        run: |
+          cd frappe-bench
+          # `run_all` fails the summary when any source overruns its budget.
+          bench --site test_site execute rheinwerk_mes.integration.migration.cli.run_all \
+            | tee "$GITHUB_WORKSPACE/round-trip-summary.log"
+          grep -q 'Gesamtstatus:\*\* PASS' sites/test_site/private/files/rheinwerk_mes_migration_reports/round-trip-summary.md
+
+      - name: Upload round-trip reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: W0-round-trip-reports
+          path: |
+            round-trip-summary.log
+            frappe-bench/sites/test_site/private/files/rheinwerk_mes_migration_reports/
+
       - name: Bench logs on failure
         if: failure()
         run: cat frappe-bench/logs/*.log || true
