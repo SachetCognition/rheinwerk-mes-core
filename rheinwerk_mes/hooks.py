@@ -3,6 +3,7 @@
 Wave W0 wires: app metadata, doc_events for gating listeners,
 workflow fixtures for order/recipe state machines.
 """
+
 app_name = "rheinwerk_mes"
 app_title = "Rheinwerk MES Core"
 app_publisher = "Rheinwerk Chemie GmbH"
