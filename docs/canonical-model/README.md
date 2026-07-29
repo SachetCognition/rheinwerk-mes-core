@@ -12,6 +12,7 @@ Canonical target entities for every consolidation-critical concept flagged in th
 | CDM-06 | Reservation | ADR-008 | W1 |
 | CDM-07 | Quality Result | ADR-009 | W2 |
 | CDM-08 | Work Centre | ADR-010 | W0 |
+| CDM-09 | Item / Product master ([item-master.md](item-master.md)) | — (adopted anchor) | W0 |
 
 Conventions: canonical entities are Frappe DocTypes in the `rheinwerk_mes` app or anchor DocTypes used as-is; anchor DocTypes are never forked — canonical extensions land as linked DocTypes or custom fields. Source mapping legend: **=** direct, **≈** transform, **∅** no source equivalent (backfill/default), **✕** deliberately not carried.
 
