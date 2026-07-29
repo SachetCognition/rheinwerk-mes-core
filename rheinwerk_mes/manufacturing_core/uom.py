@@ -10,7 +10,8 @@ the two invariants Qcadoo enforces and ERPNext leaves open:
 2. the stock UoM converts to itself with factor exactly 1.
 
 Resolution runs in `Decimal` so pack→stock quantities are exact (20 sack ×
-25 kg = 500 kg, no binary-float drift).
+25 kg = 500 kg, no binary-float drift), both for direct callers and for the
+anchor transactions that accept a pack UoM on their item rows.
 """
 
 from __future__ import annotations
@@ -75,3 +76,29 @@ def conversion_factor(item_code: str, uom: str) -> Decimal:
 def resolve_to_stock_uom(item_code: str, qty: float | str | Decimal, uom: str) -> Decimal:
 	"""Convert `qty` in `uom` to the item's stock UoM exactly (URS-W0-004 AC-1)."""
 	return Decimal(str(qty)) * conversion_factor(item_code, uom)
+
+
+# Anchor item rows name the resolved stock quantity differently (`Stock Entry Detail`
+# vs. `BOM Item`); whichever the row has is recomputed.
+STOCK_QTY_FIELDS: tuple[str, ...] = ("transfer_qty", "stock_qty")
+
+
+def resolve_transaction_quantities(doc, method: str | None = None) -> None:
+	"""`validate` hook on anchor transactions: recompute every item row's conversion
+	factor and stock quantity from the item-level conversion table.
+
+	ERPNext falls back to the global `UOM Conversion Factor` table and resolves in
+	binary floats; Qcadoo resolves against the product's own `unitConversionItem`
+	rows only. Rewriting the row here keeps pack quantities deterministic and exact,
+	and makes a pack UoM without an item-level conversion a hard error.
+	"""
+	for row in doc.get("items") or []:
+		if not row.get("item_code") or not row.get("uom"):
+			continue
+		factor = conversion_factor(row.item_code, row.uom)
+		if row.meta.has_field("conversion_factor"):
+			row.conversion_factor = float(factor)
+		resolved = Decimal(str(row.get("qty") or 0)) * factor
+		for fieldname in STOCK_QTY_FIELDS:
+			if row.meta.has_field(fieldname):
+				row.set(fieldname, float(resolved))
