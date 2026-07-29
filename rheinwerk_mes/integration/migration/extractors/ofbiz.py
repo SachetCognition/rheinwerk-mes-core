@@ -65,7 +65,8 @@ DIRECT_FIELDS = {
 
 def extract(path: str | Path) -> CanonicalExtract:
 	"""Extract Plant B master data from the OFBiz entity XML export at `path`."""
-	root = ElementTree.parse(Path(path)).getroot()  # noqa: S314 — controlled export, no external input
+	# The export is a controlled artefact of the plant's own entity engine, not user input.
+	root = ElementTree.parse(Path(path)).getroot()
 	records: list[CanonicalRecord] = []
 	exceptions: list[MigrationException] = []
 
@@ -116,14 +117,15 @@ def extract(path: str | Path) -> CanonicalExtract:
 		if asset.get("fixedAssetTypeId") not in MACHINE_ASSET_TYPES:
 			continue
 		asset_id = asset.get("fixedAssetId", "")
+		workstation_name = asset.get("fixedAssetName") or asset_id
 		records.append(
 			CanonicalRecord(
 				entity="work_centre",
-				key=asset.get("fixedAssetName") or asset_id,
+				key=workstation_name,
 				# Asset accounting (purchaseCost, classEnumId, depreciation) stays with the
 				# group ERP (CDM-08/ADR-010); `productionCapacity` is a weight throughput and
 				# has no anchor equivalent — capacity norms are modelled in W3.
-				fields={"workstation_name": asset.get("fixedAssetName") or asset_id},
+				fields={"workstation_name": workstation_name},
 				source_entity="FixedAsset",
 				source_identifier=asset_id,
 			)
@@ -132,13 +134,15 @@ def extract(path: str | Path) -> CanonicalExtract:
 	for facility in root.iter("Facility"):
 		if facility.get("facilityTypeId") != WAREHOUSE_FACILITY_TYPE:
 			continue
+		facility_id = facility.get("facilityId", "")
+		warehouse_name = facility.get("facilityName") or facility_id
 		records.append(
 			CanonicalRecord(
 				entity="warehouse",
-				key=facility.get("facilityName") or facility.get("facilityId", ""),
-				fields={"warehouse_name": facility.get("facilityName") or facility.get("facilityId")},
+				key=warehouse_name,
+				fields={"warehouse_name": warehouse_name},
 				source_entity="Facility",
-				source_identifier=facility.get("facilityId", ""),
+				source_identifier=facility_id,
 			)
 		)
 
