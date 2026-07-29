@@ -36,15 +36,14 @@ def reserved_qty(item: str, warehouse: str, exclude_voucher: tuple[str, str] | N
 	`exclude_voucher` is a `(voucher_type, voucher_no)` pair whose reservations are left out,
 	so a voucher is not made to compete with the stock it reserved for itself.
 	"""
-	filters: dict[str, object] = {
-		"item_code": item,
-		"warehouse": warehouse,
-		"docstatus": ["<", 2],
-		"status": ["!=", "Cancelled"],
-	}
 	rows = frappe.get_all(
 		RESERVATION_DOCTYPE,
-		filters=filters,
+		filters={
+			"item_code": item,
+			"warehouse": warehouse,
+			"docstatus": ["<", 2],
+			"status": ["!=", "Cancelled"],
+		},
 		fields=["reserved_qty", "delivered_qty", "voucher_type", "voucher_no"],
 	)
 	total = Decimal("0")
