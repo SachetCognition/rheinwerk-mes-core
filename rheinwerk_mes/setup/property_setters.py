@@ -1,10 +1,12 @@
 """Property Setters owned by `rheinwerk_mes` (never anchor-schema edits).
 
-Two W0 concerns live here:
+Three W0 concerns live here:
 
 * the audit trail (URS-W0-015) — `track_changes` is asserted on every canonical
   master-data anchor, so the Frappe `Version` log records user, timestamp and
   the old→new value of each changed field;
+* the shelf-life column (URS-W0-016) — the batch expiry belongs on the list view,
+  where the plant reads it, rendered in the site date format (DD.MM.YYYY);
 * a helper that stamps every Property Setter with the owning module, which is
   what the `fixtures` hook in `hooks.py` filters on.
 """
@@ -15,6 +17,8 @@ import frappe
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
 MANUFACTURING_CORE = "Manufacturing Core"
+
+GENEALOGY = "Genealogy"
 
 AUDITED_DOCTYPES = ("Item", "Workstation", "BOM", "Routing", "Work Order", "Warehouse")
 
@@ -40,6 +44,19 @@ def set_property(
 	)
 	frappe.db.set_value("Property Setter", setter.name, "module", module)
 	return setter.name
+
+
+def install_shelf_life_column() -> list[str]:
+	"""Put the batch expiry on the Batch list view (URS-W0-016 AC-1).
+
+	Shelf life decides what may be consumed, so it is read from the list — not only from
+	the form. The value itself is rendered by the site date format, so it reads 31.12.2026.
+	"""
+	if not frappe.db.exists("DocType", "Batch"):
+		return []
+	set_property("Batch", "expiry_date", "in_list_view", "1", "Check", module=GENEALOGY)
+	frappe.clear_cache()
+	return ["Batch.expiry_date"]
 
 
 def install_audit_trail() -> list[str]:

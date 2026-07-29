@@ -1,0 +1,88 @@
+/* Rheinwerk MES design baseline (rheinwerk-mes-design-SKILL.md).
+ *
+ * W0 delivers the two conformance rules the foundation screens are measured on
+ * (URS-W0-016): identifiers render in mono, and a status is never colour-only —
+ * every pill carries icon + label + colour.
+ *
+ * Everything here is expressed against the markup the desk already emits, so the
+ * anchor list views and forms conform without being forked.
+ */
+
+/* Identifiers — batch numbers, item codes, order numbers — are always mono and
+ * tabular so codes align down a column and read back safely over a plant radio.
+ * The desk stamps every list cell and every form control with its `data-fieldname`,
+ * so identifiers are addressed by field name: a W1+ screen inherits the rule for
+ * free by using the same field names. */
+.list-row-col:is(
+		[data-fieldname="name"],
+		[data-fieldname="item_code"],
+		[data-fieldname="item"],
+		[data-fieldname="batch_id"],
+		[data-fieldname="batch_no"],
+		[data-fieldname="serial_no"],
+		[data-fieldname="bom_no"],
+		[data-fieldname="production_item"],
+		[data-fieldname="work_order"],
+		[data-fieldname="production_line"]
+	),
+.frappe-control:is(
+		[data-fieldname="item_code"],
+		[data-fieldname="batch_id"],
+		[data-fieldname="bom_no"],
+		[data-fieldname="production_item"],
+		[data-fieldname="work_order"],
+		[data-fieldname="production_line"]
+	)
+	:is(.control-value, input.form-control) {
+	font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+	font-variant-numeric: tabular-nums;
+	letter-spacing: 0;
+}
+
+/* Numerals stay tabular, so kg quantities line up down a column. */
+.list-row-col,
+.datatable,
+.report-summary {
+	font-variant-numeric: tabular-nums;
+}
+
+/* Status is never colour-only. The desk renders a status through its badge
+ * (`.es-badge`, legacy `.indicator-pill`), which carries colour + label but no icon,
+ * so the icon is added here per semantic theme — one glyph per colour. That keeps
+ * every list view, form header and dashboard colour-blind safe and print safe. */
+.es-badge::before,
+.indicator-pill:not(.no-indicator-dot)::before {
+	content: "○";
+	background: none;
+	border-radius: 0;
+	height: auto;
+	width: auto;
+	margin-right: 0.375rem;
+	font-style: normal;
+	line-height: 1;
+}
+
+.es-badge:is([data-theme="blue"], [data-theme="cyan"], [data-theme="light-blue"])::before,
+.indicator-pill:is(.blue, .cyan, .light-blue):not(.no-indicator-dot)::before {
+	content: "◔";
+}
+
+.es-badge[data-theme="green"]::before,
+.indicator-pill.green:not(.no-indicator-dot)::before {
+	content: "●";
+}
+
+.es-badge:is([data-theme="amber"], [data-theme="orange"], [data-theme="yellow"])::before,
+.indicator-pill:is(.amber, .orange, .yellow):not(.no-indicator-dot)::before {
+	content: "▲";
+}
+
+.es-badge[data-theme="red"]::before,
+.indicator-pill:is(.red, .pink):not(.no-indicator-dot)::before {
+	content: "■";
+}
+
+.es-badge:is([data-theme="violet"], [data-theme="purple"])::before,
+.indicator-pill:is(.violet, .purple):not(.no-indicator-dot)::before {
+	content: "◆";
+}

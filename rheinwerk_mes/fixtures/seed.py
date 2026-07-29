@@ -7,6 +7,7 @@ from the same data:
 * company "Rheinwerk Chemie GmbH" (abbr RWC), German locale defaults
 * UoMs kg / sack / pail with item-level conversions
 * items RW-CHM-0001 … RW-CHM-0003
+* batches BATCH-A-0001 (expiry 31.12.2026) and BATCH-A-0002 (expiry 30.06.2026)
 * warehouses "RM Lager Nord" (FEFO) and "FG Lager Süd" (FIFO)
 * plant-area divisions and production line LINE-1
 * work centres LINE-1/MIX-01 and LINE-1/FILL-01
@@ -28,6 +29,7 @@ from __future__ import annotations
 import frappe
 from frappe.model.naming import NamingSeries
 
+from rheinwerk_mes.setup.locale import install_locale
 from rheinwerk_mes.setup.naming import WORK_ORDER_SERIES
 
 COMPANY = "Rheinwerk Chemie GmbH"
@@ -66,6 +68,23 @@ ITEMS = (
 		"has_batch_no": 1,
 		"has_expiry_date": 1,
 		"shelf_life_in_days": 540,
+	},
+)
+
+# Harness batches (docs/test/TST-W0-foundation.md §1). The expiries are the fixture dates
+# the W0 screens must render as DD.MM.YYYY (URS-W0-016 AC-1).
+BATCHES = (
+	{
+		"batch_id": "BATCH-A-0001",
+		"item": "RW-CHM-0001",
+		"manufacturing_date": "2025-12-31",
+		"expiry_date": "2026-12-31",
+	},
+	{
+		"batch_id": "BATCH-A-0002",
+		"item": "RW-CHM-0002",
+		"manufacturing_date": "2026-01-01",
+		"expiry_date": "2026-06-30",
 	},
 )
 
@@ -239,7 +258,8 @@ def _complete_setup_wizard() -> None:
 
 	setup_complete(
 		{
-			"language": "English",
+			# German-first (URS-W0-016): the wizard sets the site language too.
+			"language": "German",
 			"country": "Germany",
 			"timezone": "Europe/Berlin",
 			"currency": "EUR",
@@ -270,11 +290,7 @@ def seed_company() -> str:
 			}
 		).insert(ignore_permissions=True)
 	frappe.db.set_single_value("Global Defaults", "default_company", COMPANY)
-	system_settings = frappe.get_single("System Settings")
-	system_settings.date_format = "dd.mm.yyyy"
-	system_settings.country = "Germany"
-	system_settings.time_zone = "Europe/Berlin"
-	system_settings.save(ignore_permissions=True)
+	install_locale()
 	return COMPANY
 
 
@@ -323,6 +339,30 @@ def seed_items() -> list[str]:
 			doc.append("uoms", {"uom": spec["pack_uom"], "conversion_factor": spec["pack_factor"]})
 		doc.insert(ignore_permissions=True)
 		seeded.append(doc.name)
+	return seeded
+
+
+def seed_batches() -> list[str]:
+	"""Harness batches carrying the fixture shelf-life dates (URS-W0-016 AC-1).
+
+	Batch quantities arrive with the W2 stock fixtures; W0 needs the identity, the
+	expiry date and the kg stock UoM inherited from the item.
+	"""
+	seeded = []
+	for spec in BATCHES:
+		if not frappe.db.exists("Batch", spec["batch_id"]):
+			frappe.get_doc(
+				{
+					"doctype": "Batch",
+					"batch_id": spec["batch_id"],
+					"item": spec["item"],
+					"manufacturing_date": spec["manufacturing_date"],
+					"expiry_date": spec["expiry_date"],
+				}
+			).insert(ignore_permissions=True)
+		else:
+			_backfill("Batch", spec["batch_id"], {"expiry_date": spec["expiry_date"]})
+		seeded.append(spec["batch_id"])
 	return seeded
 
 
@@ -560,6 +600,7 @@ def seed_all() -> dict:
 	seed_uoms()
 	seed_item_groups()
 	summary["items"] = seed_items()
+	summary["batches"] = seed_batches()
 	summary["warehouses"] = seed_warehouses()
 	summary["divisions"] = seed_divisions()
 	summary["production_lines"] = seed_production_lines()

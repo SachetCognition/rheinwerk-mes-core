@@ -14,6 +14,10 @@ app_license = "Proprietary"
 
 required_apps = ["erpnext"]
 
+# Design baseline (rheinwerk-mes-design-SKILL.md, URS-W0-016): mono identifiers,
+# tabular numerals and status pills that carry an icon, on every desk page.
+app_include_css = "/assets/rheinwerk_mes/css/rheinwerk_mes.css"
+
 # Fixtures exported with the app: custom fields, property setters, workflows and
 # roles that extend anchor DocTypes without forking them.
 fixtures = [
