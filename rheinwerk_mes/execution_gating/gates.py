@@ -35,6 +35,7 @@ from rheinwerk_mes.execution_gating.contracts import (
 	evaluate_order_completion,
 	missing_fields,
 )
+from rheinwerk_mes.recipe_isa88 import governance
 
 ACCEPTED = "Accepted"
 IN_PROGRESS = "In Progress"
@@ -157,8 +158,6 @@ def recipe_accepted_gate(context: Any) -> None:
 	recipe = context.doc.get("bom_no")
 	if not recipe:
 		return  # the acceptance gate already refuses a missing recipe reference
-
-	from rheinwerk_mes.recipe_isa88 import governance
 
 	state = governance.gov_state(recipe)
 	if state == governance.ACCEPTED:
